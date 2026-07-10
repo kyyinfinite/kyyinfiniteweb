@@ -7,28 +7,24 @@ import AssetDetail from './components/AssetDetail.jsx';
 import SnippetsHub from './components/SnippetsHub.jsx';
 import SnippetDetail from './components/SnippetDetail.jsx';
 import Marketplace from './components/Marketplace.jsx';
-import ChangelogsPage from './pages/ChangelogsPage.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import ChangelogsPage from './pages/ChangelogsPage.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ServerError from './pages/ServerError.jsx';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 transition-colors duration-300">
+    <div className="min-h-screen bg-neutral dark:bg-text-charcoal text-text-charcoal dark:text-white transition-colors duration-300">
       <Navbar />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/showcase" element={<ShowcaseHub />} />
         <Route path="/showcase/:id" element={<AssetDetail />} />
+        <Route path="/products/:id/changelogs" element={<ChangelogsPage />} />
         <Route path="/snippets" element={<SnippetsHub />} />
         <Route path="/snippets/:id" element={<SnippetDetail />} />
         <Route path="/marketplace" element={<Marketplace />} />
-
-        {/* === NEW: Changelog & Download per produk === */}
-        <Route path="/changelogs/latest" element={<ChangelogsPage />} />
-        <Route path="/changelogs/:slug" element={<ChangelogsPage />} />
-
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/500" element={<ServerError />} />

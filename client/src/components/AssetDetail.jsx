@@ -2,7 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
-import { IconDownload, IconPlugin, IconScript, IconArrowRight } from '../lib/icons.jsx';
+import {
+  IconDownload,
+  IconPlugin,
+  IconScript,
+  IconWhatsApp,
+  IconArrowRight,
+  IconHistory,
+} from '../lib/icons.jsx';
+
+function pickCategoryIcon(asset) {
+  if (asset.category === 'whatsapp-bot') return IconWhatsApp;
+  if (asset.category === 'snippet') return IconScript;
+  if (asset.category === 'plugin') return IconPlugin;
+  return asset.assetType === 'plugin' ? IconPlugin : IconScript;
+}
 
 export default function AssetDetail() {
   const { id } = useParams();
@@ -62,12 +76,15 @@ export default function AssetDetail() {
     );
   }
 
-  const Icon = asset.assetType === 'plugin' ? IconPlugin : IconScript;
+  const Icon = pickCategoryIcon(asset);
+  const displayVersion = asset.currentVersion || asset.version;
+  const displayCategory = asset.category || asset.assetType;
+  const displayName = asset.name || asset.title;
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-16">
       <Link to="/showcase" className="text-text-muted hover:text-accent-teal text-sm inline-flex items-center gap-2 mb-8">
-        <IconArrowRight className="w-4 h-4 rotate-180" /> Back to Showcase
+        <IconArrowRight className="w-4 h-4 rotate-180" /> Back to Marketplace
       </Link>
 
       <motion.div
@@ -82,9 +99,9 @@ export default function AssetDetail() {
               <Icon className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-text-charcoal dark:text-white">{asset.title}</h1>
+              <h1 className="text-2xl font-semibold text-text-charcoal dark:text-white">{displayName}</h1>
               <p className="text-text-light text-sm mt-1">
-                {asset.assetType} - v{asset.version} - {asset.downloadCount} downloads
+                {displayCategory} - v{displayVersion} - {asset.downloadCount} downloads
               </p>
             </div>
           </div>
@@ -105,15 +122,24 @@ export default function AssetDetail() {
           </div>
         )}
 
-        <motion.button
-          whileHover={{ scale: 1.02, y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="btn-primary w-full md:w-auto flex items-center justify-center gap-2 mt-10"
-        >
-          <IconDownload className="w-4 h-4" /> {isDownloading ? 'Preparing download.' : 'Download now'}
-        </motion.button>
+        <div className="flex flex-col sm:flex-row gap-3 mt-10">
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            <IconDownload className="w-4 h-4" /> {isDownloading ? 'Preparing download.' : 'Download latest version'}
+          </motion.button>
+
+          <Link
+            to={`/products/${asset._id}/changelogs`}
+            className="btn-outline w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            <IconHistory className="w-4 h-4" /> View changelog & older versions
+          </Link>
+        </div>
       </motion.div>
     </main>
   );

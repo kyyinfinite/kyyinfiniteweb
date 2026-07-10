@@ -5,9 +5,9 @@ import { IconMoon, IconSun } from '../lib/icons.jsx';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home', end: true },
-  { to: '/showcase', label: 'Showcase' },
+  { to: '/showcase', label: 'Marketplace' },
   { to: '/snippets', label: 'Snippets' },
-  { to: '/marketplace', label: 'Marketplace' },
+  { to: '/marketplace', label: 'Servers' },
 ];
 
 const menuVariants = {

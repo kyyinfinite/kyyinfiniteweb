@@ -9,17 +9,21 @@ const {
   updateAsset,
   deleteAsset,
   downloadAsset,
+  getAssetChangelog,
 } = require('../controllers/storageController');
 
 const router = express.Router();
 
+// Public routes
 router.get('/', listAssets);
 router.post('/:id/download', downloadAsset);
+router.get('/:id/changelogs', getAssetChangelog);
+router.get('/:id', getAssetById);
 
+// Admin-only routes
 router.post('/upload-url', adminAuthMiddleware, generateSignedUploadUrl);
 router.post('/', adminAuthMiddleware, createAsset);
 router.get('/admin/all', adminAuthMiddleware, listAssetsAdmin);
-router.get('/:id', getAssetById);
 router.put('/:id', adminAuthMiddleware, updateAsset);
 router.delete('/:id', adminAuthMiddleware, deleteAsset);
 

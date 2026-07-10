@@ -1,141 +1,206 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function useNetworkLoading({ isLoadingData, baseDurationMs = 1200 } = {}) {
+/**
+ * useNetworkLoading
+ * -----------------
+ * Real-time network-aware loading progress hook built on top of the
+ * Network Information API (`navigator.connection`).
+ *
+ * The hook produces an artificially-paced progress value (0 -> 90) that
+ * creeps slower when the user is on a slow connection (high `rtt`,
+ * low `downlink`). The final 90 -> 100 jump is intentionally held back
+ * until the caller flips `loadingData` to `false`, signalling that the
+ * real backend fetch has resolved.
+ *
+ * Returned shape:
+ * {
+ *   progress,         // 0..100 integer
+ *   phase,            // 'idle' | 'fetching' | 'finalizing' | 'complete'
+ *   statusText,       // monospaced status string for the loader UI
+ *   effectiveType,    // 'slow-2g' | '2g' | '3g' | '4g' | 'unknown'
+ *   rtt,              // ms latency estimate
+ *   downlink,         // Mbps estimate
+ *   start(),          // begin a new loading cycle
+ *   complete(),       // mark the data fetch as finished (causes the 90->100 jump)
+ *   reset(),          // reset progress back to 0
+ * }
+ *
+ * Usage:
+ *   const loader = useNetworkLoading();
+ *   loader.start();
+ *   try { const data = await api.getAsset(id); } finally { loader.complete(); }
+ */
+
+const MIN_TICK_MS = 60;       // never update faster than this
+const MAX_TICK_MS = 700;      // never update slower than this
+const SLOW_RTT_MS = 400;      // rtt above this is considered "slow"
+const SLOW_DOWNLINK = 1.5;    // downlink (Mbps) below this is considered "slow"
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function classifyConnection(connection) {
+  if (!connection) return { effectiveType: 'unknown', rtt: 0, downlink: 0 };
+  return {
+    effectiveType: connection.effectiveType || 'unknown',
+    rtt: Number(connection.rtt) || 0,
+    downlink: Number(connection.downlink) || 0,
+  };
+}
+
+export default function useNetworkLoading() {
   const [progress, setProgress] = useState(0);
-  const [networkLabel, setNetworkLabel] = useState('unknown');
-  const [multiplier, setMultiplier] = useState(1);
+  const [phase, setPhase] = useState('idle');
+  const [netInfo, setNetInfo] = useState(() => classifyConnection(typeof navigator !== 'undefined' ? navigator.connection : null));
 
-  // Refs agar interval callback selalu membaca nilai terbaru tanpa restart timer.
-  const isLoadingRef = useRef(Boolean(isLoadingData));
-  const rafRef = useRef(null);
-  const startRef = useRef(0);
-  const finishedRef = useRef(false);
+  const intervalRef = useRef(null);
+  const progressRef = useRef(0);
+  const phaseRef = useRef('idle');
+  const loadingDataRef = useRef(true);
+  const lastTickRef = useRef(0);
 
-  // Keep ref in sync with prop
+  // ---- Live network info subscription ----
   useEffect(() => {
-    isLoadingRef.current = Boolean(isLoadingData);
-  }, [isLoadingData]);
-
-  /**
-   * Hitung multiplier berdasarkan rtt (latency, ms) & downlink (Mbps).
-   * Logika:
-   *  - rtt <= 50ms  & downlink >= 5 Mbps => fast    (multiplier 0.6)
-   *  - rtt <= 200ms & downlink >= 1.5    => medium  (multiplier 1.2)
-   *  - di atasnya                          => slow    (multiplier 2.4)
-   * multiplier kecil = progress lebih cepat. multiplier besar = progress
-   * sengaja diperlambat agar UX lebih jujur di koneksi lambat.
-   */
-  function readConnection() {
-    if (typeof navigator === 'undefined' || !navigator.connection) {
-      return { multiplier: 1, label: 'unknown' };
-    }
+    if (typeof navigator === 'undefined' || !navigator.connection) return undefined;
     const conn = navigator.connection;
-    const rtt = typeof conn.rtt === 'number' ? conn.rtt : 100;
-    const downlink = typeof conn.downlink === 'number' ? conn.downlink : 5;
-    const effectiveType = conn.effectiveType || '';
-
-    // Override kasus 3G / 2G eksplisit
-    if (effectiveType === '2g' || effectiveType === 'slow-2g') {
-      return { multiplier: 3.2, label: 'slow' };
-    }
-    if (effectiveType === '3g') {
-      return { multiplier: 2.0, label: 'slow' };
-    }
-
-    if (rtt <= 50 && downlink >= 5) return { multiplier: 0.6, label: 'fast' };
-    if (rtt <= 200 && downlink >= 1.5) return { multiplier: 1.2, label: 'medium' };
-    return { multiplier: 2.4, label: 'slow' };
-  }
-
-  // Update label & multiplier tiap kali koneksi berubah
-  useEffect(() => {
-    const apply = () => {
-      const { multiplier: m, label } = readConnection();
-      setMultiplier(m);
-      setNetworkLabel(label);
-    };
-    apply();
-
-    if (typeof navigator !== 'undefined' && navigator.connection) {
-      navigator.connection.addEventListener('change', apply);
-      return () => navigator.connection.removeEventListener('change', apply);
-    }
-    return undefined;
+    const handle = () => setNetInfo(classifyConnection(conn));
+    handle();
+    conn.addEventListener?.('change', handle);
+    return () => conn.removeEventListener?.('change', handle);
   }, []);
 
-  // Main progress engine
-  useEffect(() => {
-    // Reset state ketika mulai loading
-    if (isLoadingData) {
-      finishedRef.current = false;
-      startRef.current = performance.now();
-      setProgress(0);
-    }
+  /**
+   * Compute the per-tick parameters based on the user's current network.
+   * Slow networks (high rtt / low downlink) produce slower, longer pauses
+   * between increments to make the loader feel "honest" about the lag.
+   */
+  function computeTickParams() {
+    const { rtt, downlink, effectiveType } = netInfo;
+    const isSlow =
+      rtt >= SLOW_RTT_MS ||
+      downlink > 0 && downlink <= SLOW_DOWNLINK ||
+      effectiveType === 'slow-2g' ||
+      effectiveType === '2g';
 
-    const step = (now) => {
-      const elapsed = now - startRef.current;
-      // Durasi efektif ke 90% = baseDuration * multiplier
-      const targetDuration = baseDurationMs * multiplier;
-      const ratio = Math.min(elapsed / targetDuration, 1);
-      // Easing ease-out cubic supaya awal cepat lalu melambat
-      const eased = 1 - Math.pow(1 - ratio, 3);
-      const target = Math.round(eased * 90);
+    // Multiplier: 1.0 on fast networks, up to 3.5x slower on bad ones.
+    const multiplier = isSlow
+      ? clamp(1 + rtt / 250, 1.8, 3.5)
+      : clamp(1 - downlink / 20, 0.6, 1.0);
 
-      // Cek apakah backend fetching sudah selesai
-      if (!isLoadingRef.current) {
-        // Jika fetching selesai sebelum progress mencapai 90, langsung lompat
-        setProgress((prev) => Math.max(prev, target));
-        // Lompat ke 100%
-        setProgress(100);
-        finishedRef.current = true;
-        // Beri delay visual lalu reset
-        setTimeout(() => setProgress(0), 600);
-        return; // stop loop
-      }
-
-      // Cap di 90% — menunggu backend selesai
-      if (target >= 90) {
-        setProgress(90);
-        // Tetap poll — begitu isLoadingRef false, cabang di atas akan menyala
-        rafRef.current = requestAnimationFrame(step);
-        return;
-      }
-
-      setProgress(target);
-      rafRef.current = requestAnimationFrame(step);
-    };
-
-    if (isLoadingData) {
-      rafRef.current = requestAnimationFrame(step);
-    } else if (!finishedRef.current) {
-      // Fetching selesai sebelum effect ini sempat start — langsung selesai
-      setProgress(100);
-      finishedRef.current = true;
-      setTimeout(() => setProgress(0), 600);
-    }
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingData, multiplier, baseDurationMs]);
-
-  // Status text monospaced sinkron dengan progress
-  let statusText;
-  if (progress === 0) {
-    statusText = 'IDLE / AWAITING HANDSHAKE';
-  } else if (progress < 30) {
-    statusText = 'INITIALIZING STREAM…';
-  } else if (progress < 60) {
-    statusText = 'FETCHING ASSET MANIFEST…';
-  } else if (progress < 90) {
-    statusText = 'DECRYPTING PAYLOAD…';
-  } else if (progress < 100) {
-    statusText = 'HOLDING AT 90% — AWAITING BACKEND ACK';
-  } else {
-    statusText = 'STREAM COMPLETE';
+    const tickInterval = clamp(MIN_TICK_MS * multiplier, MIN_TICK_MS, MAX_TICK_MS);
+    // Per-tick increment shrinks as progress climbs (typical asymptote behaviour).
+    const baseIncrement = isSlow ? 1.5 : 4;
+    return { tickInterval, baseIncrement, isSlow, multiplier };
   }
 
-  return { progress, statusText, multiplier, networkLabel };
+  function clearTimer() {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }
+
+  function setPhaseSafe(next) {
+    phaseRef.current = next;
+    setPhase(next);
+  }
+
+  function tick() {
+    const now = Date.now();
+    if (now - lastTickRef.current < 30) return; // debounce
+    lastTickRef.current = now;
+
+    const { tickInterval, baseIncrement, isSlow } = computeTickParams();
+
+    setProgress((current) => {
+      let next = current;
+
+      if (phaseRef.current === 'fetching') {
+        // Asymptotic creep towards 90 — never cross it until data resolves.
+        if (next < 90) {
+          const remaining = 90 - next;
+          const delta = Math.max(0.5, baseIncrement * (remaining / 90));
+          next = clamp(next + delta, 0, 90);
+        }
+      } else if (phaseRef.current === 'finalizing') {
+        // Backend has confirmed the fetch — sprint from 90 to 100.
+        next = clamp(next + (isSlow ? 4 : 12), 0, 100);
+        if (next >= 100) {
+          setPhaseSafe('complete');
+          clearTimer();
+        }
+      }
+
+      progressRef.current = next;
+      return next;
+    });
+
+    // Reschedule with the freshly computed interval so slow networks
+    // keep the long pause and fast networks keep ticking smoothly.
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(tick, tickInterval);
+    }
+  }
+
+  function start() {
+    clearTimer();
+    progressRef.current = 0;
+    loadingDataRef.current = true;
+    setProgress(0);
+    setPhaseSafe('fetching');
+    const { tickInterval } = computeTickParams();
+    intervalRef.current = setInterval(tick, tickInterval);
+  }
+
+  function complete() {
+    if (phaseRef.current === 'complete') return;
+    loadingDataRef.current = false;
+    setPhaseSafe('finalizing');
+    // Kick an immediate tick so the jump is visible without waiting for the next interval.
+    tick();
+  }
+
+  function reset() {
+    clearTimer();
+    progressRef.current = 0;
+    loadingDataRef.current = true;
+    setProgress(0);
+    setPhaseSafe('idle');
+  }
+
+  // Cleanup on unmount
+  useEffect(() => clearTimer, []);
+
+  const statusText = (() => {
+    switch (phase) {
+      case 'idle':
+        return 'Awaiting handshake';
+      case 'fetching': {
+        if (progress < 30) return 'Resolving asset manifest';
+        if (progress < 60) return 'Streaming project asset';
+        if (progress < 90) return 'Verifying package integrity';
+        return 'Stabilizing on slow link';
+      }
+      case 'finalizing':
+        return 'Sealing download pipeline';
+      case 'complete':
+        return 'Asset ready';
+      default:
+        return '';
+    }
+  })();
+
+  return {
+    progress: Math.round(progress),
+    phase,
+    statusText,
+    effectiveType: netInfo.effectiveType,
+    rtt: netInfo.rtt,
+    downlink: netInfo.downlink,
+    start,
+    complete,
+    reset,
+  };
 }

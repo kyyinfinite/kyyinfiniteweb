@@ -1,224 +1,153 @@
-/**
- * ProjectAsset Model
- * ---------------------------------------------------------------------------
- * Represents a digital product sold / distributed through the Kyyinfinite
- * marketplace. Categories include:
- *   - whatsapp-bot   : Script bot WhatsApp siap pakai
- *   - snippet        : Code snippets reusable
- *   - plugin         : Game plugins (TheoTown, Minecraft, dll)
- *
- * Each asset embeds an array of `changelogs` sub-documents so the entire
- * release history of a product lives on a single document. The latest entry
- * (sorted by releaseDate desc) is treated as the `currentVersion`.
- *
- * Schema ini sengaja dibuat modular: jika kedepan ingin menambahkan field
- * pricing, licensing, atau tags, cukup tambahkan pada block fields di bawah.
- */
 const mongoose = require('mongoose');
 
-const { Schema } = mongoose;
-
-const ChangelogSchema = new Schema(
+/**
+ * Sub-document schema for an individual release entry.
+ * Each changelog entry represents one historical version of the parent asset.
+ */
+const ChangelogEntrySchema = new mongoose.Schema(
   {
-    version: {
-      type: String,
-      required: [true, 'Changelog version is required'],
-      trim: true,
-      // e.g. "1.2.0", "v2.0.1-beta"
-    },
-    releaseDate: {
-      type: Date,
-      default: Date.now,
-    },
-    notes: {
-      type: [String],
-      default: [],
-      // Array of bullet-point strings describing changes for this version
-    },
-    fileUrl: {
-      type: String,
-      default: '',
-      // Direct download URL (Firebase Storage / S3 / CDN) for THIS version's
-      // archive (.zip / .rar). Boleh kosong jika file lama sudah tidak disediakan.
-    },
+    version: { type: String, required: true, trim: true },
+    releaseDate: { type: Date, default: Date.now },
+    notes: { type: [String], default: [] },
+    fileUrl: { type: String, trim: true },
   },
-  { _id: true, timestamps: false }
+  { _id: true }
 );
 
-const ProjectAssetSchema = new Schema(
+const ProjectAssetSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, 'Product name is required'],
-      trim: true,
-      index: true,
-    },
+    /**
+     * Display name of the asset, e.g. "Aurora WhatsApp Bot".
+     */
+    name: { type: String, required: true, trim: true, index: true },
 
-    slug: {
-      type: String,
-      required: [true, 'Product slug is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      // Slug dipakai untuk routing React Router: /changelogs/:slug
-    },
+    /**
+     * Legacy alias kept for backwards-compatibility with existing controllers
+     * that still reference `title`. Auto-synced from `name` via pre-validate hook.
+     */
+    title: { type: String, trim: true },
 
+    /**
+     * Short marketing description shown on cards and the changelog hero.
+     */
+    description: { type: String, default: '' },
+
+    /**
+     * High-level product category. The blueprint expects three primary
+     * verticals: WhatsApp bot scripts, reusable code snippets, and game plugins.
+     */
     category: {
       type: String,
-      enum: {
-        values: ['whatsapp-bot', 'snippet', 'plugin'],
-        message: '{VALUE} is not a valid category',
-      },
-      required: [true, 'Category is required'],
+      enum: ['whatsapp-bot', 'snippet', 'plugin'],
+      required: true,
       index: true,
     },
 
-    shortDescription: {
-      type: String,
-      default: '',
-      trim: true,
-      maxlength: 180,
-    },
+    /**
+     * Legacy `assetType` field — kept for backwards compatibility with older
+     * controllers. The pre-validate hook below keeps it in sync with `category`.
+     */
+    assetType: { type: String, enum: ['plugin', 'script', 'whatsapp-bot', 'snippet'] },
 
-    longDescription: {
-      type: String,
-      default: '',
-    },
+    /**
+     * Semantic version of the most recently published release.
+     * Acts as the canonical "currentVersion" referenced by the changelog hero.
+     */
+    currentVersion: { type: String, default: '1.0.0' },
 
-    // Latest published version (denormalized for fast listing queries).
-    // Updated automatically by the controller whenever a new changelog
-    // entry is appended.
-    currentVersion: {
-      type: String,
-      default: '',
-      trim: true,
-    },
+    /**
+     * Legacy `version` field — kept in sync with `currentVersion` so existing
+     * controllers (showcase cards, asset detail, download counter) keep working.
+     */
+    version: { type: String, default: '1.0.0' },
 
-    // Primary download URL for the latest version. Convenience field so the
-    // Landing / Marketplace grid doesn't need to dive into the changelogs
-    // array just to surface a "Download" button.
-    downloadUrl: {
-      type: String,
-      default: '',
-    },
+    /**
+     * Primary download URL for the LATEST build. This is what the big
+     * "Download Latest Version" button on ChangelogsPage points to.
+     */
+    downloadUrl: { type: String, default: '' },
 
-    // Optional cover image / thumbnail URL
-    coverImageUrl: {
-      type: String,
-      default: '',
-    },
+    /**
+     * Legacy Firebase CDN URL — kept so older controllers continue to resolve.
+     * Pre-validate hook mirrors `downloadUrl` into this field automatically.
+     */
+    firebaseCdnUrl: { type: String, default: '' },
+    firebaseStoragePath: { type: String, default: '' },
 
-    // Tech stack tags untuk filter & search
-    tags: {
-      type: [String],
-      default: [],
-    },
-
-    // Game / platform target (e.g. "TheoTown", "Minecraft Java 1.20",
-    // "WhatsApp BAILEYS"). Hanya relevan untuk kategori plugin & bot.
-    platform: {
-      type: String,
-      default: '',
-      trim: true,
-    },
-
-    // Embed seluruh riwayat rilis produk pada satu dokumen.
-    // urutan paling akhir dianggap paling baru (sort by releaseDate desc).
+    /**
+     * Embedded release history. The newest entry SHOULD mirror `currentVersion`.
+     * The ChangelogsPage UI iterates this array to render the Git-style timeline.
+     */
     changelogs: {
-      type: [ChangelogSchema],
+      type: [ChangelogEntrySchema],
       default: [],
+      validate: {
+        validator: (entries) => Array.isArray(entries),
+        message: 'changelogs must be an array',
+      },
     },
 
-    // Soft-publish flag: produk draft tidak muncul di listing public.
-    isPublished: {
-      type: Boolean,
-      default: true,
-      index: true,
-    },
+    downloadCount: { type: Number, default: 0, min: 0 },
+    tags: { type: [String], default: [], index: true },
+    isPublished: { type: Boolean, default: true, index: true },
   },
-  {
-    timestamps: true, // createdAt, updatedAt
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
+  { timestamps: true }
 );
 
-// --- Virtuals ---------------------------------------------------------------
-
 /**
- * Hitung jumlah total rilis (panjang changelogs). Dipakai di UI Listing.
+ * Pre-validate hook that keeps legacy fields (`title`, `version`, `assetType`,
+ * `firebaseCdnUrl`) in sync with the new blueprint fields so existing
+ * controllers/routes/admin dashboard continue to work without changes.
  */
-ProjectAssetSchema.virtual('releaseCount').get(function () {
-  return Array.isArray(this.changelogs) ? this.changelogs.length : 0;
-});
+ProjectAssetSchema.pre('validate', function preValidateSync(next) {
+  if (this.name && !this.title) this.title = this.name;
+  if (this.title && !this.name) this.name = this.title;
 
-/**
- * Ambil changelog terbaru (releaseDate tertinggi) sebagai objek.
- * Dipakai oleh ChangelogsPage hero section.
- */
-ProjectAssetSchema.virtual('latestChangelog').get(function () {
-  if (!Array.isArray(this.changelogs) || this.changelogs.length === 0) {
-    return null;
+  if (this.currentVersion && !this.version) this.version = this.currentVersion;
+  if (this.version && !this.currentVersion) this.currentVersion = this.version;
+
+  if (this.downloadUrl && !this.firebaseCdnUrl) this.firebaseCdnUrl = this.downloadUrl;
+  if (this.firebaseCdnUrl && !this.downloadUrl) this.downloadUrl = this.firebaseCdnUrl;
+
+  // Map the new `category` value onto the legacy `assetType` enum.
+  if (this.category) {
+    if (this.category === 'whatsapp-bot') this.assetType = 'whatsapp-bot';
+    else if (this.category === 'snippet') this.assetType = 'snippet';
+    else if (this.category === 'plugin') this.assetType = 'plugin';
+  } else if (this.assetType) {
+    if (this.assetType === 'whatsapp-bot') this.category = 'whatsapp-bot';
+    else if (this.assetType === 'snippet') this.category = 'snippet';
+    else if (this.assetType === 'plugin' || this.assetType === 'script') this.category = 'plugin';
   }
-  return [...this.changelogs].sort(
-    (a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)
-  )[0];
-});
 
-// --- Hooks ------------------------------------------------------------------
-
-/**
- * Auto-sync `currentVersion` & `downloadUrl` whenever the document is saved,
- * supaya tidak perlu manual di controller. Sumber kebenaran tetap array
- * `changelogs` — field denormalized hanya untuk performa query listing.
- */
-ProjectAssetSchema.pre('validate', function preSaveSync(next) {
-  if (Array.isArray(this.changelogs) && this.changelogs.length > 0) {
-    const sorted = [...this.changelogs].sort(
-      (a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)
-    );
-    const latest = sorted[0];
-    if (latest && (!this.currentVersion || this.currentVersion !== latest.version)) {
-      this.currentVersion = latest.version;
-    }
-    if (latest && latest.fileUrl && this.downloadUrl !== latest.fileUrl) {
-      this.downloadUrl = latest.fileUrl;
-    }
-  }
   next();
 });
 
-// --- Statics ----------------------------------------------------------------
-
 /**
- * Helper: cari satu produk published berdasarkan slug, sudah include seluruh
- * changelogs diurutkan dari terbaru ke terlama. Dipakai oleh route
- * GET /api/assets/:slug -> ChangelogsPage.
+ * Helper used by the storage controller when an admin publishes a new version.
+ * It unshifts a new entry to the front of the changelogs array and updates
+ * `currentVersion` / `downloadUrl` atomically.
  */
-ProjectAssetSchema.statics.findPublishedBySlug = function findPublishedBySlug(slug) {
-  return this.findOne({ slug, isPublished: true })
-    .lean({ virtuals: true })
-    .then((doc) => {
-      if (!doc) return null;
-      if (Array.isArray(doc.changelogs)) {
-        doc.changelogs.sort(
-          (a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)
-        );
-      }
-      return doc;
-    });
+ProjectAssetSchema.statics.publishVersion = async function publishVersion(
+  assetId,
+  { version, notes, fileUrl, releaseDate }
+) {
+  const update = {
+    $inc: { __v: 1 },
+    $set: { currentVersion: version },
+    $unshift: {
+      changelogs: {
+        version,
+        releaseDate: releaseDate || new Date(),
+        notes: Array.isArray(notes) ? notes : [],
+        fileUrl: fileUrl || '',
+      },
+    },
+  };
+  if (fileUrl) update.$set.downloadUrl = fileUrl;
+  return this.findByIdAndUpdate(assetId, update, { new: true });
 };
 
-/**
- * Helper: listing ringan untuk Landing / Marketplace. Hanya field yang
- * dibutuhkan card grid (tanpa seluruh body changelogs).
- */
-ProjectAssetSchema.statics.listPublished = function listPublished(filter = {}) {
-  return this.find({ isPublished: true, ...filter })
-    .select('name slug category shortDescription currentVersion downloadUrl coverImageUrl platform tags updatedAt')
-    .sort({ updatedAt: -1 })
-    .lean({ virtuals: true });
-};
+ProjectAssetSchema.index({ name: 'text', description: 'text', tags: 'text' });
 
-module.exports = mongoose.model('ProjectAsset', ProjectAssetSchema);
-module.exports.ChangelogSchema = ChangelogSchema;
+module.exports = mongoose.models.ProjectAsset || mongoose.model('ProjectAsset', ProjectAssetSchema);

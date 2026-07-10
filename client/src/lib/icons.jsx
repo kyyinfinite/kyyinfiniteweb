@@ -158,3 +158,125 @@ export function IconLock({ className = 'w-5 h-5' }) {
     </svg>
   );
 }
+
+/* =========================================================
+ *  Marketplace-specific icons (added for the blueprint revamp)
+ *  Pure inline SVG, no emoji. All inherit `base` stroke style.
+ * ========================================================= */
+
+export function IconWhatsApp({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3L3 21z" />
+      <path d="M9 9.5c.2 2.5 3.2 5.3 5.5 5.5l1.3-1.4a.6.6 0 0 1 .7-.1l1.8.7a.5.5 0 0 1 .3.6l-.3 1.6a.8.8 0 0 1-.8.6c-3.6.1-8.4-4.6-8.5-8.3a.8.8 0 0 1 .6-.8l1.6-.3a.5.5 0 0 1 .6.3l.7 1.8a.6.6 0 0 1-.1.7L9 9.5z" />
+    </svg>
+  );
+}
+
+export function IconCode({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M8 7l-5 5 5 5" />
+      <path d="M16 7l5 5-5 5" />
+      <path d="M13.5 4.5l-3 15" />
+    </svg>
+  );
+}
+
+export function IconGame({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="2" y="8" width="20" height="9" rx="4.5" />
+      <path d="M7 12.5v0" />
+      <path d="M5.5 12.5h3" />
+      <path d="M7 11v3" />
+      <circle cx="15.5" cy="11.5" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="14" r="0.8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconHistory({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v4h4" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
+export function IconTag({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M3 12l8-8h7a3 3 0 0 1 3 3v7l-8 8a2 2 0 0 1-3 0l-6-6a2 2 0 0 1 0-3z" />
+      <circle cx="15" cy="9" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconCalendar({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3" y="4" width="18" height="17" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M8 2v4" />
+      <path d="M16 2v4" />
+    </svg>
+  );
+}
+
+export function IconBolt({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" />
+    </svg>
+  );
+}
+
+export function IconShield({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M12 3l8 3v6c0 4.5-3 7.5-8 9-5-1.5-8-4.5-8-9V6l8-3z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  );
+}
+
+export function IconChevronLeft({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  );
+}
+
+export function IconClock({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
+export function IconSignal({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M3 20h2v-4H3z" />
+      <path d="M8 20h2v-9H8z" />
+      <path d="M13 20h2v-13h-2z" />
+      <path d="M18 20h2V4h-2z" />
+    </svg>
+  );
+}
+
+export function IconPackage({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M21 8l-9-5-9 5 9 5 9-5z" />
+      <path d="M3 8v8l9 5 9-5V8" />
+      <path d="M12 13v8" />
+    </svg>
+  );
+}

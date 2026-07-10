@@ -3,350 +3,236 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   IconArrowRight,
-  IconPlugin,
-  IconScript,
-  IconServer,
-  IconDownload,
-  IconShieldCheck,
+  IconWhatsApp,
+  IconCode,
+  IconGame,
   IconBolt,
+  IconShield,
+  IconDownload,
 } from '../lib/icons.jsx';
 
 /**
- * Landing (Marketplace Hero)
- * ---------------------------------------------------------------------------
- * Halaman depan Kyyinfinite setelah transformasi murni menjadi Marketplace &
- * Project Sharing Platform.
+ * Marketplace category cards.
+ * Each card routes the visitor directly into the Showcase filtered by category,
+ * which is the canonical entry-point for browsing product downloads.
  *
- * Struktur:
- *   1. Hero — value proposition + dual CTA (Browse / Latest Releases)
- *   2. Category Grid — kartu navigasi instan ke 3 kategori produk:
- *      WhatsApp Bots / Snippet Code / Game Plugins (SVG murni, no emoji)
- *   3. Feature Strip — 3 pilar produk (Premium Automation / Versioned
- *      Releases / No Login Required)
- *   4. CTA Band — ajakan langsung ke halaman changelog terbaru
- *
- * Tema: Cyberpunk Dark Modern (#09090b base, zinc-800 surface, cyan/sky/indigo
- * accent). Tidak menggunakan emoji sama sekali.
+ * No emojis — every visual is a pure inline SVG.
  */
-
-const categories = [
+const CATEGORY_CARDS = [
   {
-    to: '/marketplace?category=whatsapp-bot',
-    icon: IconServer,
-    name: 'WhatsApp Bots',
-    blurb: 'Script otomasi Baileys & ESM, siap deploy ke VPS atau panel Pterodactyl.',
-    accent: 'cyan',
-    stat: '24 builds',
+    key: 'whatsapp-bot',
+    Icon: IconWhatsApp,
+    title: 'WhatsApp Bots',
+    description:
+      'Production-grade automation scripts: auto-reply, multi-device sessions, group managers, and AI-powered conversation flows.',
+    accent: 'from-accent-teal/20 to-accent-teal/0',
+    href: '/showcase?category=whatsapp-bot',
+    badge: 'Most Popular',
   },
   {
-    to: '/marketplace?category=snippet',
-    icon: IconScript,
-    name: 'Snippet Code',
-    blurb: 'Modul reusable Node.js, helper browser, dan utilitas dev-produksi.',
-    accent: 'sky',
-    stat: '138 snippets',
+    key: 'snippet',
+    Icon: IconCode,
+    title: 'Snippet Code',
+    description:
+      'Reusable, copy-paste modules for Node.js, React, and Express. Drop them straight into your own project without reinventing the wheel.',
+    accent: 'from-accent-teal-light/20 to-accent-teal-light/0',
+    href: '/snippets',
+    badge: 'Free Forever',
   },
   {
-    to: '/marketplace?category=plugin',
-    icon: IconPlugin,
-    name: 'Game Plugins',
-    blurb: 'Plugin TheoTown dan Minecraft, lengkap dengan changelog per versi.',
-    accent: 'indigo',
-    stat: '17 plugins',
+    key: 'plugin',
+    Icon: IconGame,
+    title: 'Game Plugins',
+    description:
+      'Custom plugins for TheoTown, Minecraft, and beyond — map generators, economy systems, and gameplay overhauls ready to deploy.',
+    accent: 'from-accent-teal-dark/20 to-accent-teal-dark/0',
+    href: '/showcase?category=plugin',
+    badge: 'Curated',
   },
 ];
 
-const ACCENT_MAP = {
-  cyan: {
-    ring: 'group-hover:border-cyan-400/60',
-    glow: 'group-hover:shadow-[0_0_40px_-12px_rgba(34,211,238,0.55)]',
-    chip: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/30',
-    iconBg: 'bg-cyan-400/10 text-cyan-300 group-hover:bg-cyan-400/20',
-  },
-  sky: {
-    ring: 'group-hover:border-sky-400/60',
-    glow: 'group-hover:shadow-[0_0_40px_-12px_rgba(56,189,248,0.55)]',
-    chip: 'text-sky-300 bg-sky-400/10 border-sky-400/30',
-    iconBg: 'bg-sky-400/10 text-sky-300 group-hover:bg-sky-400/20',
-  },
-  indigo: {
-    ring: 'group-hover:border-indigo-400/60',
-    glow: 'group-hover:shadow-[0_0_40px_-12px_rgba(129,140,248,0.55)]',
-    chip: 'text-indigo-300 bg-indigo-400/10 border-indigo-400/30',
-    iconBg: 'bg-indigo-400/10 text-indigo-300 group-hover:bg-indigo-400/20',
-  },
-};
-
-const pillars = [
-  {
-    icon: IconBolt,
-    title: 'Premium Automation Scripts',
-    description:
-      'Bot WhatsApp dan plugin yang ditulis dengan standar production-grade: error handling, modular commands, dan dokumentasi lengkap. Bukan script copas biasa.',
-  },
-  {
-    icon: IconDownload,
-    title: 'Versioned Releases',
-    description:
-      'Setiap produk punya changelog Git-style. Anda bisa download versi lawas, lihat breaking changes, dan upgrade di waktu yang Anda pilih.',
-  },
-  {
-    icon: IconShieldCheck,
-    title: 'No Login Required',
-    description:
-      'Browse, download, dan deploy tanpa bikin akun. Semua asset publik di-serve langsung dari CDN dengan tracking download real-time.',
-  },
+const VALUE_PILLS = [
+  { Icon: IconBolt, label: 'Instant download' },
+  { Icon: IconShield, label: 'Versioned & tracked' },
+  { Icon: IconDownload, label: 'No login required' },
 ];
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 
 export default function Landing() {
   return (
-    <main className="relative bg-[#09090b] text-zinc-100 overflow-hidden">
-      {/* Background ambient glows */}
+    <main className="relative overflow-hidden">
+      {/* Ambient teal glow orbs — kept on-brand with the existing palette */}
       <motion.div
-        className="pointer-events-none absolute -top-40 -left-40 w-[32rem] h-[32rem] rounded-full bg-cyan-500/15 blur-3xl"
+        className="pointer-events-none absolute -top-32 -left-32 w-96 h-96 rounded-full bg-accent-teal/25 blur-3xl"
         animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="pointer-events-none absolute top-40 -right-40 w-[28rem] h-[28rem] rounded-full bg-accent-teal-light/20 blur-3xl"
+        animate={{ x: [0, -20, 0], y: [0, -30, 0] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
       />
-      <motion.div
-        className="pointer-events-none absolute top-32 -right-40 w-[34rem] h-[34rem] rounded-full bg-indigo-500/15 blur-3xl"
-        animate={{ x: [0, -20, 0], y: [0, -30, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      {/* Grid overlay */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
 
-      {/* ============================================================
-          1. HERO SECTION
-         ============================================================ */}
+      {/* ============== MARKETPLACE HERO ============== */}
       <motion.section
-        className="relative max-w-6xl mx-auto px-6 pt-28 pb-20 text-center"
+        className="relative max-w-6xl mx-auto px-6 pt-24 pb-12 text-center"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <motion.div
+        <motion.p
           variants={itemVariants}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-700/60 bg-zinc-900/60 backdrop-blur text-[11px] font-mono tracking-[0.18em] uppercase text-cyan-300 mb-6"
+          className="text-accent-teal font-medium tracking-[0.25em] uppercase text-[11px] mb-5"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          kyyinfinite.my.id / marketplace
-        </motion.div>
+          kyyinfinite.my.id - Digital Asset Marketplace
+        </motion.p>
 
         <motion.h1
           variants={itemVariants}
-          className="text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight"
+          className="text-4xl md:text-6xl font-semibold text-text-charcoal dark:text-white leading-[1.1] tracking-tight"
         >
-          Premium Automation Scripts
+          Premium scripts, snippets &amp; plugins.
           <br />
-          <span className="relative inline-block bg-gradient-to-r from-cyan-300 via-sky-300 to-indigo-300 bg-clip-text text-transparent">
-            & Game Plugins Marketplace
+          <span className="relative inline-block text-accent-teal">
+            Ship faster, automate everything.
             <motion.span
-              className="absolute left-0 -bottom-2 h-px w-full bg-gradient-to-r from-cyan-400/0 via-cyan-400/60 to-indigo-400/0"
+              className="absolute left-0 -bottom-1 h-1 rounded-full bg-accent-teal/40 w-full origin-left"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 1, delay: 0.6, ease: 'easeOut' }}
+              transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
             />
           </span>
         </motion.h1>
 
         <motion.p
           variants={itemVariants}
-          className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-zinc-400 leading-relaxed"
+          className="mt-6 text-text-muted max-w-2xl mx-auto text-base md:text-lg leading-relaxed"
         >
-          Download script bot WhatsApp, code snippet reusable, dan plugin
-          TheoTown / Minecraft. Setiap rilis dipaket dengan changelog
-          Git-style, siap di-deploy tanpa akun.
+          A curated marketplace for high-quality digital products. Download the latest version of
+          every WhatsApp bot, code snippet, and game plugin instantly — with full release history,
+          changelogs, and per-version rollbacks.
         </motion.p>
 
+        {/* Value pills */}
         <motion.div
           variants={itemVariants}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+          className="mt-8 flex flex-wrap items-center justify-center gap-3"
         >
-          <Link to="/marketplace">
-            <motion.span
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 text-zinc-950 font-semibold shadow-[0_0_30px_-8px_rgba(34,211,238,0.6)] hover:shadow-[0_0_40px_-6px_rgba(34,211,238,0.8)] transition-shadow"
+          {VALUE_PILLS.map((pill) => (
+            <span
+              key={pill.label}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border-soft dark:border-white/10 bg-white/60 dark:bg-white/5 text-xs font-medium text-text-muted"
             >
-              Browse Marketplace
-              <IconArrowRight className="w-4 h-4" />
-            </motion.span>
-          </Link>
-          <Link to="/changelogs/latest">
-            <motion.span
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-700 bg-zinc-900/60 text-zinc-200 hover:border-cyan-400/60 hover:text-cyan-300 transition-colors font-medium"
-            >
-              <IconDownload className="w-4 h-4" />
-              Latest Releases
-            </motion.span>
-          </Link>
-        </motion.div>
-
-        {/* Hero metric strip */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto"
-        >
-          {[
-            { label: 'Total Assets', value: '179+' },
-            { label: 'Downloads Served', value: '12.4K' },
-            { label: 'Active Versions', value: '420+' },
-            { label: 'Avg Release Cycle', value: '7 days' },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-zinc-800 bg-zinc-900/50 backdrop-blur px-4 py-3 text-left"
-            >
-              <p className="text-xl md:text-2xl font-semibold text-zinc-100 tabular-nums">
-                {stat.value}
-              </p>
-              <p className="text-[11px] tracking-wider uppercase text-zinc-500 mt-1">
-                {stat.label}
-              </p>
-            </div>
+              <pill.Icon className="w-3.5 h-3.5 text-accent-teal" />
+              {pill.label}
+            </span>
           ))}
         </motion.div>
-      </motion.section>
 
-      {/* ============================================================
-          2. CATEGORY GRID — instant navigation cards (SVG only)
-         ============================================================ */}
-      <motion.section
-        className="relative max-w-6xl mx-auto px-6 py-16"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={containerVariants}
-      >
-        <motion.div variants={itemVariants} className="mb-10 flex items-end justify-between flex-wrap gap-4">
-          <div>
-            <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-cyan-300/80 mb-2">
-              // 01 — Product Categories
-            </p>
-            <h2 className="text-2xl md:text-3xl font-semibold text-zinc-100">
-              Pilih kategori produk digital
-            </h2>
-          </div>
-          <Link
-            to="/marketplace"
-            className="text-sm text-zinc-400 hover:text-cyan-300 transition-colors inline-flex items-center gap-1.5"
-          >
-            Lihat semua
-            <IconArrowRight className="w-3.5 h-3.5" />
+        {/* Primary CTA */}
+        <motion.div variants={itemVariants} className="mt-10 flex items-center justify-center gap-4">
+          <Link to="/showcase">
+            <motion.span
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              Browse Marketplace <IconArrowRight className="w-4 h-4" />
+            </motion.span>
+          </Link>
+          <Link to="/snippets">
+            <motion.span
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              className="btn-outline inline-block"
+            >
+              Open Snippet Library
+            </motion.span>
           </Link>
         </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {categories.map((cat) => {
-            const accent = ACCENT_MAP[cat.accent];
-            return (
-              <motion.div key={cat.name} variants={itemVariants}>
-                <Link to={cat.to} className="group block h-full">
-                  <div
-                    className={`relative h-full p-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur transition-all duration-300 ${accent.ring} ${accent.glow}`}
-                  >
-                    {/* Decorative corner mark */}
-                    <div className="absolute top-3 right-3 text-zinc-700 group-hover:text-cyan-400/60 transition-colors">
-                      <IconArrowRight className="w-4 h-4 -rotate-45" />
-                    </div>
-
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors ${accent.iconBg}`}
-                    >
-                      <cat.icon className="w-6 h-6" />
-                    </div>
-
-                    <h3 className="text-lg font-semibold text-zinc-100 mb-2">
-                      {cat.name}
-                    </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed mb-5">
-                      {cat.blurb}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-md border text-[10px] font-mono tracking-wider uppercase ${accent.chip}`}
-                      >
-                        {cat.stat}
-                      </span>
-                      <span className="text-xs text-zinc-500 group-hover:text-zinc-300 transition-colors">
-                        Browse →
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
       </motion.section>
 
-      {/* ============================================================
-          3. PILLAR STRIP
-         ============================================================ */}
+      {/* ============== CATEGORY NAVIGATION GRID ============== */}
       <motion.section
-        className="relative max-w-6xl mx-auto px-6 py-16"
+        className="relative max-w-6xl mx-auto px-6 pb-16"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.3 }}
         variants={containerVariants}
       >
-        <motion.p
-          variants={itemVariants}
-          className="text-[11px] font-mono tracking-[0.2em] uppercase text-cyan-300/80 mb-2"
-        >
-          // 02 — Why Kyyinfinite
-        </motion.p>
-        <motion.h2
-          variants={itemVariants}
-          className="text-2xl md:text-3xl font-semibold text-zinc-100 mb-10"
-        >
-          Dibangun untuk developer & power user
-        </motion.h2>
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-text-charcoal dark:text-white">
+              Pick a category
+            </h2>
+            <p className="text-text-muted text-sm mt-1.5">
+              Three product verticals. Every release tracked, versioned, and downloadable.
+            </p>
+          </div>
+          <Link
+            to="/showcase"
+            className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium text-accent-teal hover:text-accent-teal-dark"
+          >
+            View all <IconArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {pillars.map((p) => (
-            <motion.div
-              key={p.title}
-              variants={itemVariants}
-              className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40 backdrop-blur"
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 bg-cyan-400/10 text-cyan-300">
-                <p.icon className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-semibold text-zinc-100 mb-2">
-                {p.title}
-              </h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">
-                {p.description}
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {CATEGORY_CARDS.map((card) => (
+            <motion.div key={card.key} variants={itemVariants} whileHover={{ y: -6 }}>
+              <Link
+                to={card.href}
+                className="card-surface relative overflow-hidden p-6 flex flex-col h-full group"
+              >
+                {/* Gradient wash on hover */}
+                <div
+                  className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                />
+
+                <div className="relative flex items-start justify-between mb-5">
+                  <motion.div
+                    whileHover={{ rotate: 6, scale: 1.08 }}
+                    className="w-12 h-12 rounded-xl bg-accent-teal-glow flex items-center justify-center text-accent-teal-dark"
+                  >
+                    <card.Icon className="w-6 h-6" />
+                  </motion.div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full bg-accent-teal-glow text-accent-teal-dark">
+                    {card.badge}
+                  </span>
+                </div>
+
+                <h3 className="relative text-lg font-semibold text-text-charcoal dark:text-white mb-2">
+                  {card.title}
+                </h3>
+                <p className="relative text-text-muted text-sm leading-relaxed flex-1">
+                  {card.description}
+                </p>
+
+                <div className="relative mt-6 flex items-center gap-2 text-accent-teal text-sm font-medium">
+                  Explore releases
+                  <motion.span
+                    className="inline-flex"
+                    whileHover={{ x: 4 }}
+                  >
+                    <IconArrowRight className="w-4 h-4" />
+                  </motion.span>
+                </div>
+              </Link>
             </motion.div>
           ))}
         </div>
       </motion.section>
 
-      {/* ============================================================
-          4. CTA BAND
-         ============================================================ */}
+      {/* ============== FEATURE STRIP ============== */}
       <motion.section
         className="relative max-w-6xl mx-auto px-6 pb-28"
         initial="hidden"
@@ -356,39 +242,26 @@ export default function Landing() {
       >
         <motion.div
           variants={itemVariants}
-          className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900/80 to-cyan-950/40 px-8 py-12 md:px-14 md:py-16"
+          className="card-surface p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
         >
-          <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{
-              backgroundImage:
-                'radial-gradient(circle at 20% 20%, rgba(34,211,238,0.15), transparent 40%), radial-gradient(circle at 80% 80%, rgba(129,140,248,0.15), transparent 40%)',
-            }}
-          />
-          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div>
-              <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-cyan-300/80 mb-2">
-                // 03 — Ready to deploy?
-              </p>
-              <h2 className="text-2xl md:text-4xl font-semibold text-zinc-100 max-w-xl">
-                Mulai dari changelog terbaru. Tanpa registrasi.
-              </h2>
-              <p className="text-zinc-400 mt-3 max-w-lg">
-                Setiap halaman produk menyertakan timeline rilis lengkap dan
-                tombol download langsung untuk setiap versi.
-              </p>
-            </div>
-            <Link to="/changelogs/latest">
-              <motion.span
-                whileHover={{ scale: 1.04, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-400 text-zinc-950 font-semibold shadow-[0_0_30px_-8px_rgba(34,211,238,0.6)]"
-              >
-                Open Changelog Hub
-                <IconArrowRight className="w-4 h-4" />
-              </motion.span>
-            </Link>
+          <div className="max-w-xl">
+            <h3 className="text-xl md:text-2xl font-semibold text-text-charcoal dark:text-white mb-2">
+              Every release is a downloadable artifact.
+            </h3>
+            <p className="text-text-muted text-sm leading-relaxed">
+              Browse the changelog of any product to download older builds, compare release notes,
+              and roll back to a version that worked for your stack. No account, no friction.
+            </p>
           </div>
+          <Link to="/showcase">
+            <motion.span
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              className="btn-primary inline-flex items-center gap-2 whitespace-nowrap"
+            >
+              Open Marketplace <IconArrowRight className="w-4 h-4" />
+            </motion.span>
+          </Link>
         </motion.div>
       </motion.section>
     </main>
