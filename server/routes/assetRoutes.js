@@ -4,6 +4,7 @@ const {
   generateSignedUploadUrl,
   createAsset,
   listAssets,
+  getAssetById,
   listAssetsAdmin,
   updateAsset,
   deleteAsset,
@@ -18,6 +19,7 @@ router.post('/:id/download', downloadAsset);
 router.post('/upload-url', adminAuthMiddleware, generateSignedUploadUrl);
 router.post('/', adminAuthMiddleware, createAsset);
 router.get('/admin/all', adminAuthMiddleware, listAssetsAdmin);
+router.get('/:id', getAssetById);
 router.put('/:id', adminAuthMiddleware, updateAsset);
 router.delete('/:id', adminAuthMiddleware, deleteAsset);
 

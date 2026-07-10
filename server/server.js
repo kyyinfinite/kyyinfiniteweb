@@ -7,6 +7,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const productRoutes = require('./routes/productRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const changelogRoutes = require('./routes/changelogRoutes');
+const snippetRoutes = require('./routes/snippetRoutes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/changelog', changelogRoutes);
+app.use('/api/snippets', snippetRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

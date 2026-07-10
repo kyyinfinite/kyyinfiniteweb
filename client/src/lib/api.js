@@ -44,3 +44,15 @@ export const api = {
 
 api.listChangelog = () => request('/changelog');
 api.createChangelog = (token, body) => request('/changelog', { method: 'POST', body, token });
+
+api.listSnippets = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return request(`/snippets${query ? `?${query}` : ''}`);
+};
+api.getSnippet = (id) => request(`/snippets/${id}`);
+api.listSnippetsAdmin = (token) => request('/snippets/admin/all', { token });
+api.createSnippet = (token, body) => request('/snippets', { method: 'POST', body, token });
+api.updateSnippet = (token, id, body) => request(`/snippets/${id}`, { method: 'PUT', body, token });
+api.deleteSnippet = (token, id) => request(`/snippets/${id}`, { method: 'DELETE', token });
+
+api.getAsset = (id) => request(`/assets/${id}`);

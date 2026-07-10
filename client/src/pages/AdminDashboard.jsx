@@ -11,11 +11,13 @@ import {
   IconUpload,
   IconServer,
   IconDownload,
+  IconScript,
 } from '../lib/icons.jsx';
 
 const TABS = [
   { key: 'metrics', label: 'Metrics', icon: IconChart },
   { key: 'assets', label: 'Asset Manager', icon: IconPlugin },
+  { key: 'snippets', label: 'Snippets', icon: IconScript },
   { key: 'changelog', label: 'Changelog', icon: IconUpload },
   { key: 'orders', label: 'Orders and Tickets', icon: IconTicket },
 ];
@@ -62,6 +64,7 @@ export default function AdminDashboard() {
 
       {activeTab === 'metrics' && <MetricsPanel idToken={idToken} refreshToken={refreshToken} />}
       {activeTab === 'assets' && <AssetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
+      {activeTab === 'snippets' && <SnippetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
       {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
       {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
     </main>
@@ -329,6 +332,131 @@ function AssetManagerPanel({ idToken, refreshToken }) {
             </div>
             <button
               onClick={() => handleDelete(asset._id)}
+              className="text-red-500 hover:text-red-600 text-sm font-medium"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SnippetManagerPanel({ idToken, refreshToken }) {
+  const [snippets, setSnippets] = useState([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [language, setLanguage] = useState('javascript');
+  const [code, setCode] = useState('');
+  const [tags, setTags] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function loadSnippets() {
+    const token = (await refreshToken()) || idToken;
+    const data = await api.listSnippetsAdmin(token);
+    setSnippets(data);
+  }
+
+  useEffect(() => {
+    loadSnippets().catch((error) => setErrorMessage(error.message));
+  }, []);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setIsSaving(true);
+    setErrorMessage('');
+    try {
+      const token = (await refreshToken()) || idToken;
+      await api.createSnippet(token, {
+        title,
+        description,
+        language,
+        code,
+        tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+      });
+      setTitle('');
+      setDescription('');
+      setCode('');
+      setTags('');
+      await loadSnippets();
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    const token = (await refreshToken()) || idToken;
+    await api.deleteSnippet(token, id);
+    await loadSnippets();
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
+        <h2 className="text-text-charcoal dark:text-white font-semibold mb-5">Publish Snippet</h2>
+
+        <label className="text-sm text-text-muted mb-2 block">Title</label>
+        <input
+          required
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          className="w-full rounded-xl border border-border-soft dark:border-white/10 bg-transparent px-4 py-2.5 text-text-charcoal dark:text-white mb-4 focus:outline-none focus:ring-2 focus:ring-accent-teal"
+        />
+
+        <label className="text-sm text-text-muted mb-2 block">Description</label>
+        <textarea
+          required
+          rows={2}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          className="w-full rounded-xl border border-border-soft dark:border-white/10 bg-transparent px-4 py-2.5 text-text-charcoal dark:text-white mb-4 focus:outline-none focus:ring-2 focus:ring-accent-teal"
+        />
+
+        <label className="text-sm text-text-muted mb-2 block">Language</label>
+        <input
+          required
+          value={language}
+          onChange={(event) => setLanguage(event.target.value)}
+          placeholder="javascript"
+          className="w-full rounded-xl border border-border-soft dark:border-white/10 bg-transparent px-4 py-2.5 text-text-charcoal dark:text-white mb-4 focus:outline-none focus:ring-2 focus:ring-accent-teal"
+        />
+
+        <label className="text-sm text-text-muted mb-2 block">Code</label>
+        <textarea
+          required
+          rows={8}
+          value={code}
+          onChange={(event) => setCode(event.target.value)}
+          className="w-full rounded-xl border border-border-soft dark:border-white/10 bg-transparent px-4 py-2.5 text-text-charcoal dark:text-white mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-accent-teal"
+        />
+
+        <label className="text-sm text-text-muted mb-2 block">Tags (comma separated)</label>
+        <input
+          value={tags}
+          onChange={(event) => setTags(event.target.value)}
+          className="w-full rounded-xl border border-border-soft dark:border-white/10 bg-transparent px-4 py-2.5 text-text-charcoal dark:text-white mb-4 focus:outline-none focus:ring-2 focus:ring-accent-teal"
+        />
+
+        {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+
+        <button type="submit" disabled={isSaving} className="btn-primary w-full">
+          {isSaving ? 'Publishing.' : 'Publish snippet'}
+        </button>
+      </form>
+
+      <div className="lg:col-span-3 space-y-4">
+        {snippets.map((snippet) => (
+          <div key={snippet._id} className="card-surface p-5 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-text-charcoal dark:text-white font-medium">{snippet.title}</p>
+              <p className="text-text-light text-xs mt-1 uppercase">{snippet.language}</p>
+            </div>
+            <button
+              onClick={() => handleDelete(snippet._id)}
               className="text-red-500 hover:text-red-600 text-sm font-medium"
             >
               Delete

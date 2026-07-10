@@ -2,6 +2,18 @@ const { v4: uuidv4 } = require('uuid');
 const { getBucket } = require('../config/firebase');
 const ProjectAsset = require('../models/ProjectAsset');
 
+async function getAssetById(req, res) {
+  try {
+    const asset = await ProjectAsset.findById(req.params.id).lean();
+    if (!asset || !asset.isPublished) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+    return res.status(200).json(asset);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to load asset', error: error.message });
+  }
+}
+
 async function generateSignedUploadUrl(req, res) {
   try {
     const { fileName, contentType, assetType } = req.body;
@@ -138,6 +150,7 @@ module.exports = {
   generateSignedUploadUrl,
   createAsset,
   listAssets,
+  getAssetById,
   listAssetsAdmin,
   updateAsset,
   deleteAsset,
