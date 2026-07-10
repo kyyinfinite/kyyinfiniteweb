@@ -34,16 +34,16 @@ export default function SnippetsHub() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-16">
       <div className="mb-10">
-        <h1 className="text-3xl font-semibold text-text-charcoal dark:text-white">Code Snippets</h1>
-        <p className="text-text-muted mt-2">Reusable pieces of code from the KyyInfinite ecosystem.</p>
+        <h1 className="text-3xl font-semibold text-zinc-50 ">Code Snippets</h1>
+        <p className="text-zinc-400 mt-2">Reusable pieces of code from the KyyInfinite ecosystem.</p>
       </div>
 
-      {errorMessage && <p className="text-red-500 mb-6">{errorMessage}</p>}
+      {errorMessage && <p className="text-red-400 mb-6">{errorMessage}</p>}
 
       {isLoading ? (
-        <p className="text-text-muted">Loading snippets.</p>
+        <p className="text-zinc-400">Loading snippets.</p>
       ) : snippets.length === 0 ? (
-        <p className="text-text-muted">No snippets published yet.</p>
+        <p className="text-zinc-400">No snippets published yet.</p>
       ) : (
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -55,16 +55,16 @@ export default function SnippetsHub() {
             <motion.div key={snippet._id} variants={itemVariants} whileHover={{ y: -4 }} className="card-surface overflow-hidden flex flex-col">
               <div className="p-6 pb-0 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-accent-teal-glow flex items-center justify-center text-accent-teal-dark">
+                  <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
                     <IconScript className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-text-charcoal dark:text-white font-semibold">{snippet.title}</h3>
-                    <span className="text-xs text-text-light uppercase">{snippet.language}</span>
+                    <h3 className="text-zinc-50  font-semibold">{snippet.title}</h3>
+                    <span className="text-xs text-zinc-600 uppercase">{snippet.language}</span>
                   </div>
                 </div>
               </div>
-              <p className="text-text-muted text-sm px-6 pt-4 pb-2 leading-relaxed">{snippet.description}</p>
+              <p className="text-zinc-400 text-sm px-6 pt-4 pb-2 leading-relaxed">{snippet.description}</p>
               <div className="text-xs">
                 <SyntaxHighlighter
                   language={snippet.language}
@@ -76,7 +76,7 @@ export default function SnippetsHub() {
               </div>
               <Link
                 to={`/snippets/${snippet._id}`}
-                className="flex items-center justify-between px-6 py-4 text-accent-teal text-sm font-medium border-t border-border-soft dark:border-white/10"
+                className="flex items-center justify-between px-6 py-4 text-cyan-400 text-sm font-medium border-t border-zinc-800 "
               >
                 View full snippet <IconArrowRight className="w-4 h-4" />
               </Link>

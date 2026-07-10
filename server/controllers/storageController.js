@@ -2,37 +2,16 @@ const { v4: uuidv4 } = require('uuid');
 const { getBucket } = require('../config/firebase');
 const ProjectAsset = require('../models/ProjectAsset');
 
-/**
- * GET /api/assets/:id
- * Returns the full asset document including the embedded `changelogs` array.
- */
-async function getAssetById(req, res) {
-  try {
-    const asset = await ProjectAsset.findById(req.params.id).lean();
-    if (!asset || !asset.isPublished) {
-      return res.status(404).json({ message: 'Asset not found' });
-    }
-    return res.status(200).json(asset);
-  } catch (error) {
-    return res.status(500).json({ message: 'Failed to load asset', error: error.message });
-  }
-}
-
-/**
- * POST /api/assets/upload-url
- * Generate a Firebase-signed upload URL for a new asset file.
- */
 async function generateSignedUploadUrl(req, res) {
   try {
-    const { fileName, contentType, assetType, category } = req.body;
+    const { fileName, contentType, category } = req.body;
 
-    if (!fileName || !contentType) {
-      return res.status(400).json({ message: 'fileName and contentType are required' });
+    if (!fileName || !contentType || !category) {
+      return res.status(400).json({ message: 'fileName, contentType and category are required' });
     }
 
-    const typeKey = category || assetType || 'misc';
     const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `assets/${typeKey}/${uuidv4()}-${safeName}`;
+    const storagePath = `assets/${category}/${uuidv4()}-${safeName}`;
     const bucket = getBucket();
     const file = bucket.file(storagePath);
 
@@ -53,49 +32,32 @@ async function generateSignedUploadUrl(req, res) {
   }
 }
 
-/**
- * POST /api/assets
- * Create a new marketplace asset. Accepts both the new blueprint fields
- * (name, category, currentVersion, downloadUrl, changelogs) and the legacy
- * fields (title, assetType, version, firebaseCdnUrl) for backwards compatibility.
- */
 async function createAsset(req, res) {
   try {
-    const {
-      name,
-      title,
-      description,
-      category,
-      assetType,
-      currentVersion,
-      version,
-      downloadUrl,
-      firebaseCdnUrl,
-      firebaseStoragePath,
-      tags,
-      changelogs,
-    } = req.body;
+    const { name, description, category, currentVersion, downloadUrl, firebaseStoragePath, tags, releaseNotes } = req.body;
 
-    if (!name && !title) {
-      return res.status(400).json({ message: 'name (or title) is required' });
+    if (!name || !description || !category || !downloadUrl || !firebaseStoragePath) {
+      return res.status(400).json({ message: 'Missing required asset fields' });
     }
-    if (!category && !assetType) {
-      return res.status(400).json({ message: 'category (or assetType) is required' });
-    }
+
+    const version = currentVersion || '1.0.0';
 
     const asset = await ProjectAsset.create({
-      name: name || title,
-      title: title || name,
+      name,
       description,
       category,
-      assetType,
-      currentVersion: currentVersion || version || '1.0.0',
-      version: version || currentVersion || '1.0.0',
-      downloadUrl: downloadUrl || firebaseCdnUrl || '',
-      firebaseCdnUrl: firebaseCdnUrl || downloadUrl || '',
-      firebaseStoragePath: firebaseStoragePath || '',
+      currentVersion: version,
+      downloadUrl,
+      firebaseStoragePath,
       tags: Array.isArray(tags) ? tags : [],
-      changelogs: Array.isArray(changelogs) ? changelogs : [],
+      changelogs: [
+        {
+          version,
+          releaseDate: new Date(),
+          notes: Array.isArray(releaseNotes) ? releaseNotes : ['Initial release'],
+          fileUrl: downloadUrl,
+        },
+      ],
     });
 
     return res.status(201).json(asset);
@@ -104,21 +66,12 @@ async function createAsset(req, res) {
   }
 }
 
-/**
- * GET /api/assets
- * Public list endpoint. Supports filtering by the new `category` query param
- * (whatsapp-bot | snippet | plugin) and falls back to the legacy `assetType`
- * filter for older clients. Also supports `search` (text) and `category` from
- * the Landing page category cards.
- */
 async function listAssets(req, res) {
   try {
-    const { assetType, category, search } = req.query;
+    const { category, search } = req.query;
     const query = { isPublished: true };
 
     if (category) query.category = category;
-    else if (assetType) query.assetType = assetType;
-
     if (search) query.$text = { $search: search };
 
     const assets = await ProjectAsset.find(query).sort({ createdAt: -1 }).lean();
@@ -128,10 +81,30 @@ async function listAssets(req, res) {
   }
 }
 
-/**
- * GET /api/assets/admin/all
- * Admin-only list of every asset (including unpublished).
- */
+async function getAssetById(req, res) {
+  try {
+    const asset = await ProjectAsset.findById(req.params.id).lean();
+    if (!asset || !asset.isPublished) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+    return res.status(200).json(asset);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to load asset', error: error.message });
+  }
+}
+
+async function getAssetBySlug(req, res) {
+  try {
+    const asset = await ProjectAsset.findOne({ slug: req.params.slug, isPublished: true }).lean();
+    if (!asset) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+    return res.status(200).json(asset);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to load asset', error: error.message });
+  }
+}
+
 async function listAssetsAdmin(req, res) {
   try {
     const assets = await ProjectAsset.find({}).sort({ createdAt: -1 }).lean();
@@ -141,53 +114,22 @@ async function listAssetsAdmin(req, res) {
   }
 }
 
-/**
- * PUT /api/assets/:id
- * Update an asset. Accepts the new blueprint fields and keeps legacy fields
- * in sync via the schema's pre-validate hook. Also supports pushing a new
- * changelog entry via `{ pushChangelog: { version, notes, fileUrl, releaseDate } }`.
- */
 async function updateAsset(req, res) {
   try {
     const { id } = req.params;
-    const { pushChangelog, ...updates } = req.body;
+    const updates = req.body;
+    const asset = await ProjectAsset.findByIdAndUpdate(id, updates, { new: true });
 
-    const asset = await ProjectAsset.findById(id);
     if (!asset) {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
-    // Apply scalar updates
-    Object.keys(updates).forEach((key) => {
-      asset.set(key, updates[key]);
-    });
-
-    // Optionally push a new changelog entry (release a new version)
-    if (pushChangelog && pushChangelog.version) {
-      asset.changelogs.unshift({
-        version: pushChangelog.version,
-        releaseDate: pushChangelog.releaseDate || Date.now(),
-        notes: Array.isArray(pushChangelog.notes) ? pushChangelog.notes : [],
-        fileUrl: pushChangelog.fileUrl || '',
-      });
-      asset.currentVersion = pushChangelog.version;
-      asset.version = pushChangelog.version;
-      if (pushChangelog.fileUrl) {
-        asset.downloadUrl = pushChangelog.fileUrl;
-        asset.firebaseCdnUrl = pushChangelog.fileUrl;
-      }
-    }
-
-    await asset.save();
-    return res.status(200).json(asset.toObject());
+    return res.status(200).json(asset);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to update asset', error: error.message });
   }
 }
 
-/**
- * DELETE /api/assets/:id
- */
 async function deleteAsset(req, res) {
   try {
     const { id } = req.params;
@@ -197,27 +139,16 @@ async function deleteAsset(req, res) {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
-    if (asset.firebaseStoragePath) {
-      try {
-        const bucket = getBucket();
-        await bucket.file(asset.firebaseStoragePath).delete({ ignoreNotFound: true });
-      } catch {
-        /* best-effort cleanup */
-      }
-    }
-
+    const bucket = getBucket();
+    await bucket.file(asset.firebaseStoragePath).delete({ ignoreNotFound: true });
     await asset.deleteOne();
+
     return res.status(200).json({ message: 'Asset deleted' });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to delete asset', error: error.message });
   }
 }
 
-/**
- * POST /api/assets/:id/download
- * Increments the download counter and returns the canonical download URL
- * for the latest version. Used by the ChangelogsPage hero button.
- */
 async function downloadAsset(req, res) {
   try {
     const { id } = req.params;
@@ -231,42 +162,66 @@ async function downloadAsset(req, res) {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
-    const latestFileUrl =
-      (asset.changelogs && asset.changelogs[0] && asset.changelogs[0].fileUrl) ||
-      asset.downloadUrl ||
-      asset.firebaseCdnUrl;
-
-    return res.status(200).json({
-      downloadUrl: latestFileUrl,
-      downloadCount: asset.downloadCount,
-      version: asset.currentVersion || asset.version,
-    });
+    return res.status(200).json({ downloadUrl: asset.downloadUrl, downloadCount: asset.downloadCount });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to process download', error: error.message });
   }
 }
 
-/**
- * GET /api/assets/:id/changelogs
- * Returns just the embedded changelog array for the requested asset.
- * Convenient for clients that only need the release timeline.
- */
-async function getAssetChangelog(req, res) {
+async function addChangelogEntry(req, res) {
   try {
-    const asset = await ProjectAsset.findById(req.params.id).select('changelogs name currentVersion').lean();
-    if (!asset || !asset.isPublished) {
+    const { id } = req.params;
+    const { version, notes, fileUrl, makeCurrentVersion } = req.body;
+
+    if (!version || !fileUrl) {
+      return res.status(400).json({ message: 'version and fileUrl are required' });
+    }
+
+    const asset = await ProjectAsset.findById(id);
+    if (!asset) {
       return res.status(404).json({ message: 'Asset not found' });
     }
-    const entries = Array.isArray(asset.changelogs)
-      ? [...asset.changelogs].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0))
-      : [];
-    return res.status(200).json({
-      name: asset.name,
-      currentVersion: asset.currentVersion,
-      changelogs: entries,
+
+    asset.changelogs.unshift({
+      version,
+      releaseDate: new Date(),
+      notes: Array.isArray(notes) ? notes : [],
+      fileUrl,
     });
+
+    if (makeCurrentVersion !== false) {
+      asset.currentVersion = version;
+      asset.downloadUrl = fileUrl;
+    }
+
+    await asset.save();
+    return res.status(201).json(asset);
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to load changelog', error: error.message });
+    return res.status(500).json({ message: 'Failed to add changelog entry', error: error.message });
+  }
+}
+
+async function downloadChangelogVersion(req, res) {
+  try {
+    const { id, changelogId } = req.params;
+    const asset = await ProjectAsset.findByIdAndUpdate(
+      id,
+      { $inc: { downloadCount: 1 } },
+      { new: true }
+    );
+
+    if (!asset) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+
+    const entry = asset.changelogs.id(changelogId);
+    if (!entry) {
+      return res.status(404).json({ message: 'Changelog entry not found' });
+    }
+
+    return res.status(200).json({ downloadUrl: entry.fileUrl });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to process download', error: error.message });
   }
 }
 
@@ -275,9 +230,11 @@ module.exports = {
   createAsset,
   listAssets,
   getAssetById,
+  getAssetBySlug,
   listAssetsAdmin,
   updateAsset,
   deleteAsset,
   downloadAsset,
-  getAssetChangelog,
+  addChangelogEntry,
+  downloadChangelogVersion,
 };

@@ -8,20 +8,31 @@ html {
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  background-color: #09090b;
+}
+
+.font-mono-ui {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
 
 .card-surface {
-  @apply bg-white dark:bg-[#2C3E50] border border-border-soft dark:border-white/10 rounded-2xl shadow-card transition-all duration-300 ease-spring;
+  @apply bg-zinc-900 border border-zinc-800 rounded-2xl shadow-card transition-all duration-300 ease-spring;
 }
 
 .card-surface:hover {
-  @apply shadow-card-hover -translate-y-1;
+  @apply border-cyan-500/40 shadow-glow-cyan -translate-y-1;
 }
 
 .btn-primary {
-  @apply bg-accent-teal hover:bg-accent-teal-dark text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
+  @apply bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring shadow-glow-cyan;
 }
 
 .btn-outline {
-  @apply border border-accent-teal text-accent-teal hover:bg-accent-teal hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
+  @apply border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
+}
+
+.grid-overlay {
+  background-image: linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

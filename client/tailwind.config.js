@@ -18,6 +18,8 @@ export default {
       boxShadow: {
         card: '0 4px 24px rgba(44, 62, 80, 0.06)',
         'card-hover': '0 12px 40px rgba(44, 62, 80, 0.12)',
+        'glow-cyan': '0 0 24px rgba(34, 211, 238, 0.35)',
+        'glow-cyan-lg': '0 0 48px rgba(34, 211, 238, 0.25)',
       },
       transitionTimingFunction: {
         spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',

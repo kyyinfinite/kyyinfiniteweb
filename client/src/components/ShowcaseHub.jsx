@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
-import { IconDownload, IconWhatsApp, IconCode, IconGame, IconHistory } from '../lib/icons.jsx';
+import { IconDownload, IconWhatsapp, IconTerminal, IconGamepad } from '../lib/icons.jsx';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -14,48 +14,32 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-const CATEGORY_META = {
-  'whatsapp-bot': { label: 'WhatsApp Bots', Icon: IconWhatsApp },
-  snippet: { label: 'Snippets', Icon: IconCode },
-  plugin: { label: 'Game Plugins', Icon: IconGame },
-  all: { label: 'All', Icon: IconDownload },
+const CATEGORY_ICON = {
+  'whatsapp-bot': IconWhatsapp,
+  snippet: IconTerminal,
+  plugin: IconGamepad,
 };
 
-function pickCategoryIcon(asset) {
-  if (asset.category === 'whatsapp-bot') return IconWhatsApp;
-  if (asset.category === 'snippet') return IconCode;
-  if (asset.category === 'plugin') return IconGame;
-  if (asset.assetType === 'script') return IconCode;
-  if (asset.assetType === 'plugin') return IconGame;
-  return IconCode;
-}
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'whatsapp-bot', label: 'WhatsApp Bots' },
+  { key: 'snippet', label: 'Snippets' },
+  { key: 'plugin', label: 'Game Plugins' },
+];
 
 export default function ShowcaseHub() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialFilter = searchParams.get('category') || 'all';
-  const [filter, setFilter] = useState(initialFilter);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Keep the URL query string in sync with the active filter so deep-links
-  // from the Landing page category cards keep working.
-  useEffect(() => {
-    if (filter === 'all') {
-      searchParams.delete('category');
-    } else {
-      searchParams.set('category', filter);
-    }
-    setSearchParams(searchParams, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  const filter = searchParams.get('category') || 'all';
 
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
-    const params = filter !== 'all' ? { category: filter } : {};
     api
-      .listAssets(params)
+      .listAssets(filter !== 'all' ? { category: filter } : {})
       .then((data) => {
         if (isMounted) setAssets(data);
       })
@@ -70,15 +54,13 @@ export default function ShowcaseHub() {
     };
   }, [filter]);
 
-  const filters = useMemo(
-    () => [
-      { key: 'all', label: 'All' },
-      { key: 'whatsapp-bot', label: 'WhatsApp Bots' },
-      { key: 'snippet', label: 'Snippets' },
-      { key: 'plugin', label: 'Game Plugins' },
-    ],
-    []
-  );
+  function setFilter(key) {
+    if (key === 'all') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ category: key });
+    }
+  }
 
   async function handleDownload(event, asset) {
     event.preventDefault();
@@ -103,23 +85,21 @@ export default function ShowcaseHub() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-16">
+    <main className="max-w-6xl mx-auto px-6 py-16 bg-zinc-950 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
         <div>
-          <h1 className="text-3xl font-semibold text-text-charcoal dark:text-white">Marketplace</h1>
-          <p className="text-text-muted mt-2">
-            Browse every published asset, then open its changelog page for downloads and release history.
-          </p>
+          <h1 className="text-3xl font-semibold text-zinc-50">Products</h1>
+          <p className="text-zinc-400 mt-2">WhatsApp bots, code snippets, and game plugins, ready to download.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {filters.map((item) => (
+          {FILTERS.map((item) => (
             <button
               key={item.key}
               onClick={() => setFilter(item.key)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 filter === item.key
-                  ? 'bg-accent-teal text-white'
-                  : 'border border-border-soft dark:border-white/10 text-text-muted hover:text-accent-teal'
+                  ? 'bg-cyan-500 text-zinc-950 shadow-glow-cyan'
+                  : 'border border-zinc-800 text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/40'
               }`}
             >
               {item.label}
@@ -128,12 +108,12 @@ export default function ShowcaseHub() {
         </div>
       </div>
 
-      {errorMessage && <p className="text-red-500 mb-6">{errorMessage}</p>}
+      {errorMessage && <p className="text-red-400 mb-6 font-mono-ui text-sm">{errorMessage}</p>}
 
       {isLoading ? (
-        <p className="text-text-muted">Loading assets.</p>
+        <p className="text-zinc-500 font-mono-ui text-sm">Loading products.</p>
       ) : assets.length === 0 ? (
-        <p className="text-text-muted">No assets published yet in this category.</p>
+        <p className="text-zinc-500">No products published yet in this category.</p>
       ) : (
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -142,39 +122,26 @@ export default function ShowcaseHub() {
           variants={containerVariants}
         >
           {assets.map((asset) => {
-            const Icon = pickCategoryIcon(asset);
-            const displayVersion = asset.currentVersion || asset.version;
+            const Icon = CATEGORY_ICON[asset.category] || IconTerminal;
             return (
               <motion.div key={asset._id} variants={itemVariants} whileHover={{ y: -6 }}>
-                <Link
-                  to={`/products/${asset._id}/changelogs`}
-                  className="card-surface p-6 flex flex-col h-full group"
-                >
+                <Link to={`/product/${asset.slug}`} className="card-surface p-6 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-accent-teal-glow flex items-center justify-center text-accent-teal-dark">
+                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-xs font-mono text-text-light">v{displayVersion}</span>
+                    <span className="text-xs text-zinc-600 font-mono-ui">v{asset.currentVersion}</span>
                   </div>
-                  <h3 className="text-text-charcoal dark:text-white font-semibold mb-2">
-                    {asset.name || asset.title}
-                  </h3>
-                  <p className="text-text-muted text-sm leading-relaxed flex-1 line-clamp-3">
-                    {asset.description}
-                  </p>
+                  <h3 className="text-zinc-50 font-semibold mb-2">{asset.name}</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed flex-1">{asset.description}</p>
                   <div className="flex items-center justify-between mt-6">
-                    <span className="text-xs text-text-light">{asset.downloadCount} downloads</span>
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center gap-1 text-xs text-accent-teal">
-                        <IconHistory className="w-3.5 h-3.5" /> Changelog
-                      </span>
-                      <button
-                        onClick={(event) => handleDownload(event, asset)}
-                        className="flex items-center gap-2 text-accent-teal hover:text-accent-teal-dark text-sm font-medium"
-                      >
-                        <IconDownload className="w-4 h-4" /> Latest
-                      </button>
-                    </div>
+                    <span className="text-xs text-zinc-600">{asset.downloadCount} downloads</span>
+                    <button
+                      onClick={(event) => handleDownload(event, asset)}
+                      className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 text-sm font-medium"
+                    >
+                      <IconDownload className="w-4 h-4" /> Download
+                    </button>
                   </div>
                 </Link>
               </motion.div>

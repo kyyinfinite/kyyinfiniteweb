@@ -31,21 +31,21 @@ export default function SnippetDetail() {
   }
 
   if (isLoading) {
-    return <p className="max-w-4xl mx-auto px-6 py-24 text-text-muted text-center">Loading snippet.</p>;
+    return <p className="max-w-4xl mx-auto px-6 py-24 text-zinc-400 text-center">Loading snippet.</p>;
   }
 
   if (errorMessage || !snippet) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <p className="text-red-500 mb-4">{errorMessage || 'Snippet not found.'}</p>
-        <Link to="/snippets" className="text-accent-teal text-sm">Back to Snippets</Link>
+        <p className="text-red-400 mb-4">{errorMessage || 'Snippet not found.'}</p>
+        <Link to="/snippets" className="text-cyan-400 text-sm">Back to Snippets</Link>
       </div>
     );
   }
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
-      <Link to="/snippets" className="text-text-muted hover:text-accent-teal text-sm inline-flex items-center gap-2 mb-8">
+      <Link to="/snippets" className="text-zinc-400 hover:text-cyan-400 text-sm inline-flex items-center gap-2 mb-8">
         <IconArrowRight className="w-4 h-4 rotate-180" /> Back to Snippets
       </Link>
 
@@ -57,15 +57,15 @@ export default function SnippetDetail() {
       >
         <div className="p-8 pb-4">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-semibold text-text-charcoal dark:text-white">{snippet.title}</h1>
-            <span className="text-xs text-text-light uppercase">{snippet.language}</span>
+            <h1 className="text-2xl font-semibold text-zinc-50 ">{snippet.title}</h1>
+            <span className="text-xs text-zinc-600 uppercase">{snippet.language}</span>
           </div>
-          <p className="text-text-muted leading-relaxed">{snippet.description}</p>
+          <p className="text-zinc-400 leading-relaxed">{snippet.description}</p>
 
           {snippet.tags && snippet.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {snippet.tags.map((tag) => (
-                <span key={tag} className="text-xs px-3 py-1 rounded-full bg-accent-teal-glow text-accent-teal-dark">
+                <span key={tag} className="text-xs px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400">
                   {tag}
                 </span>
               ))}
@@ -76,7 +76,7 @@ export default function SnippetDetail() {
         <div className="relative">
           <button
             onClick={handleCopy}
-            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-text-charcoal/80 text-white hover:bg-text-charcoal transition-colors duration-200"
+            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors duration-200"
           >
             {isCopied ? (
               <>
