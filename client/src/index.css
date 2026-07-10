@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.card-surface {
+  @apply bg-white dark:bg-[#2C3E50] border border-border-soft dark:border-white/10 rounded-2xl shadow-card transition-all duration-300 ease-spring;
+}
+
+.card-surface:hover {
+  @apply shadow-card-hover -translate-y-1;
+}
+
+.btn-primary {
+  @apply bg-accent-teal hover:bg-accent-teal-dark text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
+}
+
+.btn-outline {
+  @apply border border-accent-teal text-accent-teal hover:bg-accent-teal hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
+}
