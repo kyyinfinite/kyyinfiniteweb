@@ -9,6 +9,8 @@ import SnippetDetail from './components/SnippetDetail.jsx';
 import Marketplace from './components/Marketplace.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import NotFound from './pages/NotFound.jsx';
+import ServerError from './pages/ServerError.jsx';
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/500" element={<ServerError />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
