@@ -14,16 +14,17 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*' }));
 app.use(express.json({ limit: '2mb' }));
 
-let dbConnected = false;
 app.use(async (req, res, next) => {
   try {
-    if (!dbConnected) {
-      await connectDB();
-      dbConnected = true;
-    }
+    await connectDB();
     next();
   } catch (error) {
-    res.status(500).json({ message: 'Database connection failed', error: error.message });
+    console.error('Request blocked, database unavailable:', error.message);
+    res.status(500).json({
+      message: 'Database connection failed',
+      error: error.message,
+      hint: 'Check MONGODB_URI is set correctly in Vercel Project Settings and that your MongoDB Atlas Network Access allows 0.0.0.0/0',
+    });
   }
 });
 
@@ -46,7 +47,6 @@ if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   connectDB()
     .then(() => {
-      dbConnected = true;
       app.listen(PORT, () => console.log(`KyyInfinite API running on port ${PORT}`));
     })
     .catch((error) => {

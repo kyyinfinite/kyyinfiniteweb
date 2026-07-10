@@ -56,3 +56,10 @@ api.updateSnippet = (token, id, body) => request(`/snippets/${id}`, { method: 'P
 api.deleteSnippet = (token, id) => request(`/snippets/${id}`, { method: 'DELETE', token });
 
 api.getAsset = (id) => request(`/assets/${id}`);
+
+api.assetBySlug = (slug) => {
+  if (!slug) return Promise.reject(new Error('Slug is required'));
+  return request(`/assets/${encodeURIComponent(slug)}`);
+};
+
+api.latestAsset = () => request('/assets/latest/one');
