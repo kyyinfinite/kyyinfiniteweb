@@ -23,7 +23,7 @@ const TABS = [
 ];
 
 export default function AdminDashboard() {
- const { adminUser, idToken, isLoading, logout, refreshToken } = useAdmin();
+ const { adminUser, idToken, isLoading, logout, refreshToken, refreshAdminUser, sendVerificationEmail } = useAdmin();
  const [activeTab, setActiveTab] = useState('metrics');
 
  if (isLoading) {
@@ -32,6 +32,10 @@ export default function AdminDashboard() {
 
  if (!adminUser) {
  return <Navigate to="/admin/login" replace />;
+ }
+
+ if (!adminUser.emailVerified) {
+ return <VerifyEmailGate adminUser={adminUser} logout={logout} refreshAdminUser={refreshAdminUser} sendVerificationEmail={sendVerificationEmail} />;
  }
 
  return (
@@ -67,6 +71,73 @@ export default function AdminDashboard() {
  {activeTab === 'snippets' && <SnippetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
+ </main>
+ );
+}
+
+function VerifyEmailGate({ adminUser, logout, refreshAdminUser, sendVerificationEmail }) {
+ const [status, setStatus] = useState('idle');
+ const [errorMessage, setErrorMessage] = useState('');
+ const [isChecking, setIsChecking] = useState(false);
+
+ async function handleSendEmail() {
+ setStatus('sending');
+ setErrorMessage('');
+ try {
+ await sendVerificationEmail();
+ setStatus('sent');
+ } catch (error) {
+ setErrorMessage(error.message);
+ setStatus('idle');
+ }
+ }
+
+ async function handleCheckVerified() {
+ setIsChecking(true);
+ setErrorMessage('');
+ try {
+ await refreshAdminUser();
+ } catch (error) {
+ setErrorMessage(error.message);
+ } finally {
+ setIsChecking(false);
+ }
+ }
+
+ return (
+ <main className="min-h-[70vh] flex items-center justify-center px-6">
+ <div className="card-surface w-full max-w-sm p-8 text-center">
+ <h1 className="text-xl font-semibold text-zinc-50 mb-2">Verify your email</h1>
+ <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+ {adminUser.email} is signed in, but Firebase hasn't verified this email yet. Send a
+ verification link, click it from your inbox, then come back and continue.
+ </p>
+
+ {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {status === 'sent' && (
+ <p className="text-cyan-400 text-sm mb-4">Verification email sent. Check your inbox.</p>
+ )}
+
+ <button
+ onClick={handleSendEmail}
+ disabled={status === 'sending'}
+ className="btn-primary w-full mb-3"
+ >
+ {status === 'sending' ? 'Sending.' : 'Send verification email'}
+ </button>
+
+ <button
+ onClick={handleCheckVerified}
+ disabled={isChecking}
+ className="btn-outline w-full mb-3"
+ >
+ {isChecking ? 'Checking.' : "I've verified, continue"}
+ </button>
+
+ <button onClick={logout} className="text-zinc-500 hover:text-zinc-300 text-sm">
+ Sign out
+ </button>
+ </div>
  </main>
  );
 }

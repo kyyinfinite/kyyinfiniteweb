@@ -3,6 +3,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { firebaseAuth } from '../firebase.js';
 
@@ -55,7 +56,22 @@ export function AdminProvider({ children }) {
     return null;
   }
 
-  const value = { adminUser, idToken, isLoading, login, logout, refreshToken };
+  async function refreshAdminUser() {
+    if (!firebaseAuth || !firebaseAuth.currentUser) return;
+    await firebaseAuth.currentUser.reload();
+    setAdminUser(firebaseAuth.currentUser);
+    const token = await firebaseAuth.currentUser.getIdToken(true);
+    setIdToken(token);
+  }
+
+  async function sendVerificationEmail() {
+    if (!firebaseAuth || !firebaseAuth.currentUser) {
+      throw new Error('No signed-in admin user to verify.');
+    }
+    await sendEmailVerification(firebaseAuth.currentUser);
+  }
+
+  const value = { adminUser, idToken, isLoading, login, logout, refreshToken, refreshAdminUser, sendVerificationEmail };
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 }
