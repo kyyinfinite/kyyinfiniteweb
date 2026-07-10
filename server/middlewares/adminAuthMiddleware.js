@@ -12,7 +12,17 @@ async function adminAuthMiddleware(req, res, next) {
       return res.status(401).json({ message: 'Missing authentication token' });
     }
 
-    const decodedToken = await getAuthAdmin().verifyIdToken(token, true);
+    let decodedToken;
+    try {
+      decodedToken = await getAuthAdmin().verifyIdToken(token, true);
+    } catch (verifyError) {
+      console.error('Firebase token verification failed:', verifyError.message);
+      return res.status(401).json({
+        message: 'Invalid or expired authentication token',
+        error: verifyError.message,
+        hint: 'Usually means FIREBASE_PROJECT_ID/FIREBASE_CLIENT_EMAIL/FIREBASE_PRIVATE_KEY on Vercel belong to a different Firebase project than the one used by VITE_FIREBASE_* on the client, or the private key was pasted with broken formatting.',
+      });
+    }
 
     if (!decodedToken.email || decodedToken.email !== ALLOWED_ADMIN_EMAIL) {
       return res.status(403).json({ message: 'This account is not authorized as admin' });
@@ -34,7 +44,8 @@ async function adminAuthMiddleware(req, res, next) {
     req.admin = adminRecord;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid or expired authentication token' });
+    console.error('adminAuthMiddleware unexpected error:', error.message);
+    return res.status(401).json({ message: 'Invalid or expired authentication token', error: error.message });
   }
 }
 

@@ -13,7 +13,8 @@ async function request(path, { method = 'GET', body, token } = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error((data && data.message) || 'Request failed');
+    const parts = [data && data.message, data && data.error, data && data.hint].filter(Boolean);
+    throw new Error(parts.length ? parts.join(' — ') : 'Request failed');
   }
 
   return data;
