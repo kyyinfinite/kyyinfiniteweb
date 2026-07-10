@@ -11,7 +11,23 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-export const firebaseAuth = getAuth(firebaseApp);
-export const firebaseStorage = getStorage(firebaseApp);
+const isConfigValid = Boolean(
+  firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId && firebaseConfig.appId
+);
+
+let firebaseApp = null;
+let firebaseAuth = null;
+let firebaseStorage = null;
+
+if (isConfigValid) {
+  firebaseApp = initializeApp(firebaseConfig);
+  firebaseAuth = getAuth(firebaseApp);
+  firebaseStorage = getStorage(firebaseApp);
+} else {
+  console.error(
+    'KyyInfinite: Firebase config is missing or incomplete. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID and VITE_FIREBASE_APP_ID in your environment.'
+  );
+}
+
+export { firebaseAuth, firebaseStorage, isConfigValid };
 export default firebaseApp;

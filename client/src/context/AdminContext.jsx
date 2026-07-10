@@ -14,6 +14,11 @@ export function AdminProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!firebaseAuth) {
+      setIsLoading(false);
+      return undefined;
+    }
+
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user) {
         const token = await user.getIdToken();
@@ -30,15 +35,19 @@ export function AdminProvider({ children }) {
   }, []);
 
   async function login(email, password) {
+    if (!firebaseAuth) {
+      throw new Error('Firebase is not configured. Check your VITE_FIREBASE_* environment variables.');
+    }
     await signInWithEmailAndPassword(firebaseAuth, email, password);
   }
 
   async function logout() {
+    if (!firebaseAuth) return;
     await signOut(firebaseAuth);
   }
 
   async function refreshToken() {
-    if (firebaseAuth.currentUser) {
+    if (firebaseAuth && firebaseAuth.currentUser) {
       const token = await firebaseAuth.currentUser.getIdToken(true);
       setIdToken(token);
       return token;
