@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { useAdmin } from '../context/AdminContext.jsx';
-import { firebaseStorage } from '../firebase.js';
-import { api } from '../lib/api.js';
+import { api, cancelActiveUpload } from '../lib/api.js';
 import {
  IconChart,
  IconPlugin,
@@ -205,9 +203,9 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  const [expandedAssetId, setExpandedAssetId] = useState(null);
  const [newVersion, setNewVersion] = useState('');
  const [newNotes, setNewNotes] = useState('');
- const [newFileUrl, setNewFileUrl] = useState('');
+ const [newFile, setNewFile] = useState(null);
+ const [newVersionProgress, setNewVersionProgress] = useState(0);
  const [isSavingChangelog, setIsSavingChangelog] = useState(false);
- const uploadTaskRef = useRef(null);
 
  async function loadAssets() {
  const token = (await refreshToken()) || idToken;
@@ -219,7 +217,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  loadAssets().catch((error) => setErrorMessage(error.message));
  }, []);
 
- async function handleDirectFirebaseUpload(event) {
+ async function handleUpload(event) {
  event.preventDefault();
  if (!file) {
  setErrorMessage('Please select a file to upload');
@@ -229,46 +227,21 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  setIsUploading(true);
  setUploadProgress(0);
 
- const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
- const storagePath = `assets/${category}/${Date.now()}-${safeName}`;
- const storageRef = ref(firebaseStorage, storagePath);
- const uploadTask = uploadBytesResumable(storageRef, file);
- uploadTaskRef.current = uploadTask;
-
- let lastProgressAt = Date.now();
- const stallCheckInterval = setInterval(() => {
- if (Date.now() - lastProgressAt > 20000) {
- clearInterval(stallCheckInterval);
- uploadTask.cancel();
- }
- }, 2000);
-
  try {
- await new Promise((resolve, reject) => {
- uploadTask.on(
- 'state_changed',
- (snapshot) => {
- lastProgressAt = Date.now();
- setUploadProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
- },
- (error) => reject(error),
- resolve
- );
- });
-
- const publicUrl = await getDownloadURL(storageRef);
  const token = (await refreshToken()) || idToken;
+ const formData = new FormData();
+ formData.append('file', file);
+ formData.append('name', name);
+ formData.append('description', description);
+ formData.append('currentVersion', currentVersion);
+ formData.append('category', category);
+ formData.append(
+ 'tags',
+ JSON.stringify(tags.split(',').map((tag) => tag.trim()).filter(Boolean))
+ );
+ formData.append('releaseNotes', JSON.stringify(['Initial release']));
 
- await api.createAsset(token, {
- name,
- description,
- currentVersion,
- category,
- downloadUrl: publicUrl,
- firebaseStoragePath: storagePath,
- tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
- releaseNotes: ['Initial release'],
- });
+ await api.createAssetWithFile(token, formData, setUploadProgress);
 
  setName('');
  setDescription('');
@@ -278,26 +251,14 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  setUploadProgress(0);
  await loadAssets();
  } catch (error) {
- if (error && error.code === 'storage/canceled') {
- setErrorMessage(
- 'Upload stalled for 20s with no progress and was cancelled. This usually means Firebase Storage CORS is not configured for this domain, or Storage security rules are blocking the write. Check the browser console network tab for the exact request that failed.'
- );
- } else if (error && error.code === 'storage/unauthorized') {
- setErrorMessage('Firebase Storage rejected this upload: check your Storage security rules allow writes for authenticated admin users.');
- } else {
  setErrorMessage(error.message || 'Upload failed');
- }
  } finally {
- clearInterval(stallCheckInterval);
- uploadTaskRef.current = null;
  setIsUploading(false);
  }
  }
 
  function handleCancelUpload() {
- if (uploadTaskRef.current) {
- uploadTaskRef.current.cancel();
- }
+ cancelActiveUpload();
  }
 
  async function handleDelete(id) {
@@ -308,17 +269,29 @@ function AssetManagerPanel({ idToken, refreshToken }) {
 
  async function handleAddChangelog(event, assetId) {
  event.preventDefault();
+ if (!newFile) {
+ setErrorMessage('Please select a file for the new version');
+ return;
+ }
  setIsSavingChangelog(true);
+ setNewVersionProgress(0);
+ setErrorMessage('');
  try {
  const token = (await refreshToken()) || idToken;
- await api.addChangelogEntry(token, assetId, {
- version: newVersion,
- fileUrl: newFileUrl,
- notes: newNotes.split('\n').map((line) => line.trim()).filter(Boolean),
- });
+ const formData = new FormData();
+ formData.append('file', newFile);
+ formData.append('version', newVersion);
+ formData.append(
+ 'notes',
+ JSON.stringify(newNotes.split('\n').map((line) => line.trim()).filter(Boolean))
+ );
+
+ await api.addChangelogEntryWithFile(token, assetId, formData, setNewVersionProgress);
+
  setNewVersion('');
  setNewNotes('');
- setNewFileUrl('');
+ setNewFile(null);
+ setNewVersionProgress(0);
  setExpandedAssetId(null);
  await loadAssets();
  } catch (error) {
@@ -330,7 +303,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
 
  return (
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
- <form onSubmit={handleDirectFirebaseUpload} className="card-surface p-6 lg:col-span-2 h-fit">
+ <form onSubmit={handleUpload} className="card-surface p-6 lg:col-span-2 h-fit">
  <h2 className="text-zinc-50 font-semibold mb-5">Publish New Product</h2>
 
  <label className="text-sm text-zinc-400 mb-2 block">Name</label>
@@ -449,11 +422,10 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  className="rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
  />
  <input
+ type="file"
  required
- placeholder="New file download URL"
- value={newFileUrl}
- onChange={(event) => setNewFileUrl(event.target.value)}
- className="rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ onChange={(event) => setNewFile(event.target.files?.[0] || null)}
+ className="text-xs text-zinc-400 self-center"
  />
  </div>
  <textarea
@@ -463,6 +435,14 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  onChange={(event) => setNewNotes(event.target.value)}
  className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
  />
+ {isSavingChangelog && (
+ <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-3">
+ <div
+ className="h-full bg-cyan-400 shadow-glow-cyan transition-all duration-300"
+ style={{ width: `${newVersionProgress}%` }}
+ />
+ </div>
+ )}
  <button type="submit" disabled={isSavingChangelog} className="btn-primary text-sm">
  {isSavingChangelog ? 'Publishing.' : 'Publish version'}
  </button>
@@ -476,6 +456,39 @@ function AssetManagerPanel({ idToken, refreshToken }) {
 }
 
 
+const EXTENSION_LANGUAGE_MAP = {
+ js: 'javascript',
+ jsx: 'jsx',
+ ts: 'typescript',
+ tsx: 'tsx',
+ py: 'python',
+ java: 'java',
+ rb: 'ruby',
+ go: 'go',
+ rs: 'rust',
+ php: 'php',
+ c: 'c',
+ h: 'c',
+ cpp: 'cpp',
+ cs: 'csharp',
+ sh: 'bash',
+ bash: 'bash',
+ json: 'json',
+ yml: 'yaml',
+ yaml: 'yaml',
+ md: 'markdown',
+ html: 'markup',
+ css: 'css',
+ sql: 'sql',
+ kt: 'kotlin',
+ swift: 'swift',
+};
+
+function guessLanguageFromFilename(filename) {
+ const extension = filename.split('.').pop().toLowerCase();
+ return EXTENSION_LANGUAGE_MAP[extension] || 'text';
+}
+
 function SnippetManagerPanel({ idToken, refreshToken }) {
  const [snippets, setSnippets] = useState([]);
  const [title, setTitle] = useState('');
@@ -485,6 +498,7 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  const [tags, setTags] = useState('');
  const [errorMessage, setErrorMessage] = useState('');
  const [isSaving, setIsSaving] = useState(false);
+ const [isReadingFile, setIsReadingFile] = useState(false);
 
  async function loadSnippets() {
  const token = (await refreshToken()) || idToken;
@@ -495,6 +509,30 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  useEffect(() => {
  loadSnippets().catch((error) => setErrorMessage(error.message));
  }, []);
+
+ function handleFileChosen(event) {
+ const chosenFile = event.target.files?.[0];
+ if (!chosenFile) return;
+
+ setIsReadingFile(true);
+ setErrorMessage('');
+
+ const reader = new FileReader();
+ reader.onload = () => {
+ setCode(String(reader.result || ''));
+ setLanguage(guessLanguageFromFilename(chosenFile.name));
+ if (!title) {
+ setTitle(chosenFile.name.replace(/\.[^.]+$/, ''));
+ }
+ setIsReadingFile(false);
+ };
+ reader.onerror = () => {
+ setErrorMessage('Could not read that file as text');
+ setIsReadingFile(false);
+ };
+ reader.readAsText(chosenFile);
+ event.target.value = '';
+ }
 
  async function handleSubmit(event) {
  event.preventDefault();
@@ -531,6 +569,14 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
  <h2 className="text-zinc-50 font-semibold mb-5">Publish Snippet</h2>
+
+ <label className="text-sm text-zinc-400 mb-2 block">Load from file (optional)</label>
+ <input
+ type="file"
+ onChange={handleFileChosen}
+ className="w-full text-xs text-zinc-400 mb-4"
+ />
+ {isReadingFile && <p className="text-xs text-cyan-400 mb-4">Reading file.</p>}
 
  <label className="text-sm text-zinc-400 mb-2 block">Title</label>
  <input

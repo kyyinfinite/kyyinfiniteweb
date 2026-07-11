@@ -6,6 +6,7 @@ const ChangelogEntrySchema = new mongoose.Schema(
     releaseDate: { type: Date, default: Date.now },
     notes: { type: [String], default: [] },
     fileUrl: { type: String, required: true },
+    storagePath: { type: String },
   },
   { _id: true, timestamps: false }
 );
@@ -23,7 +24,7 @@ const ProjectAssetSchema = new mongoose.Schema(
     },
     currentVersion: { type: String, required: true, default: '1.0.0' },
     downloadUrl: { type: String, required: true },
-    firebaseStoragePath: { type: String, required: true },
+    storagePath: { type: String, required: true },
     downloadCount: { type: Number, default: 0, min: 0 },
     tags: { type: [String], default: [], index: true },
     changelogs: { type: [ChangelogEntrySchema], default: [] },

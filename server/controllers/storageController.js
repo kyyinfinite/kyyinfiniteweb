@@ -1,61 +1,48 @@
 const { v4: uuidv4 } = require('uuid');
-const { getBucket } = require('../config/firebase');
 const ProjectAsset = require('../models/ProjectAsset');
+const { uploadFileToGithub, deleteFileFromGithub } = require('../services/githubStorageService');
 
-async function generateSignedUploadUrl(req, res) {
-  try {
-    const { fileName, contentType, category } = req.body;
-
-    if (!fileName || !contentType || !category) {
-      return res.status(400).json({ message: 'fileName, contentType and category are required' });
-    }
-
-    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `assets/${category}/${uuidv4()}-${safeName}`;
-    const bucket = getBucket();
-    const file = bucket.file(storagePath);
-
-    const [signedUrl] = await file.getSignedUrl({
-      version: 'v4',
-      action: 'write',
-      expires: Date.now() + 15 * 60 * 1000,
-      contentType,
-    });
-
-    return res.status(200).json({
-      signedUrl,
-      storagePath,
-      publicUrl: `https://storage.googleapis.com/${bucket.name}/${storagePath}`,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Failed to generate signed upload URL', error: error.message });
-  }
+function buildStoragePath(category, originalName) {
+  const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
+  return `assets/${category}/${uuidv4()}-${safeName}`;
 }
 
 async function createAsset(req, res) {
   try {
-    const { name, description, category, currentVersion, downloadUrl, firebaseStoragePath, tags, releaseNotes } = req.body;
+    const { name, description, category, currentVersion, tags, releaseNotes } = req.body;
 
-    if (!name || !description || !category || !downloadUrl || !firebaseStoragePath) {
-      return res.status(400).json({ message: 'Missing required asset fields' });
+    if (!name || !description || !category || !req.file) {
+      return res.status(400).json({ message: 'name, description, category and a file are required' });
     }
 
     const version = currentVersion || '1.0.0';
+    const storagePath = buildStoragePath(category, req.file.originalname);
+
+    const uploaded = await uploadFileToGithub(
+      storagePath,
+      req.file.buffer,
+      `Add ${name} v${version}`
+    );
+
+    const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : Array.isArray(tags) ? tags : [];
+    const parsedNotes =
+      typeof releaseNotes === 'string' ? JSON.parse(releaseNotes) : Array.isArray(releaseNotes) ? releaseNotes : ['Initial release'];
 
     const asset = await ProjectAsset.create({
       name,
       description,
       category,
       currentVersion: version,
-      downloadUrl,
-      firebaseStoragePath,
-      tags: Array.isArray(tags) ? tags : [],
+      downloadUrl: uploaded.downloadUrl,
+      storagePath: uploaded.storagePath,
+      tags: parsedTags,
       changelogs: [
         {
           version,
           releaseDate: new Date(),
-          notes: Array.isArray(releaseNotes) ? releaseNotes : ['Initial release'],
-          fileUrl: downloadUrl,
+          notes: parsedNotes,
+          fileUrl: uploaded.downloadUrl,
+          storagePath: uploaded.storagePath,
         },
       ],
     });
@@ -139,8 +126,7 @@ async function deleteAsset(req, res) {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
-    const bucket = getBucket();
-    await bucket.file(asset.firebaseStoragePath).delete({ ignoreNotFound: true });
+    await deleteFileFromGithub(asset.storagePath).catch(() => null);
     await asset.deleteOne();
 
     return res.status(200).json({ message: 'Asset deleted' });
@@ -171,10 +157,10 @@ async function downloadAsset(req, res) {
 async function addChangelogEntry(req, res) {
   try {
     const { id } = req.params;
-    const { version, notes, fileUrl, makeCurrentVersion } = req.body;
+    const { version, notes, makeCurrentVersion } = req.body;
 
-    if (!version || !fileUrl) {
-      return res.status(400).json({ message: 'version and fileUrl are required' });
+    if (!version || !req.file) {
+      return res.status(400).json({ message: 'version and a file are required' });
     }
 
     const asset = await ProjectAsset.findById(id);
@@ -182,16 +168,23 @@ async function addChangelogEntry(req, res) {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
+    const storagePath = buildStoragePath(asset.category, req.file.originalname);
+    const uploaded = await uploadFileToGithub(storagePath, req.file.buffer, `Add ${asset.name} v${version}`);
+
+    const parsedNotes = typeof notes === 'string' ? JSON.parse(notes) : Array.isArray(notes) ? notes : [];
+
     asset.changelogs.unshift({
       version,
       releaseDate: new Date(),
-      notes: Array.isArray(notes) ? notes : [],
-      fileUrl,
+      notes: parsedNotes,
+      fileUrl: uploaded.downloadUrl,
+      storagePath: uploaded.storagePath,
     });
 
-    if (makeCurrentVersion !== false) {
+    if (makeCurrentVersion !== 'false') {
       asset.currentVersion = version;
-      asset.downloadUrl = fileUrl;
+      asset.downloadUrl = uploaded.downloadUrl;
+      asset.storagePath = uploaded.storagePath;
     }
 
     await asset.save();
@@ -226,7 +219,6 @@ async function downloadChangelogVersion(req, res) {
 }
 
 module.exports = {
-  generateSignedUploadUrl,
   createAsset,
   listAssets,
   getAssetById,
