@@ -27,11 +27,11 @@ function CodeBlock({ inline, className, children, ...props }) {
   );
 }
 
-export default function MarkdownRenderer({ content }) {
+export default function MarkdownRenderer({ content, className = '' }) {
   if (!content) return null;
 
   return (
-    <div className="markdown-body kyy-markdown">
+    <div className={`markdown-body kyy-markdown ${className}`}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: CodeBlock }}>
         {content}
       </ReactMarkdown>

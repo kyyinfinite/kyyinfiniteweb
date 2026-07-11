@@ -43,6 +43,14 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.kyy-markdown--attached {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
 .kyy-markdown pre {
   background: transparent !important;
   padding: 0 !important;

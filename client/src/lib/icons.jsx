@@ -182,10 +182,22 @@ export function IconGamepad({ className = 'w-5 h-5' }) {
   );
 }
 
-export function IconChevronDown({ className = 'w-4 h-4' }) {
+export function IconFile({ className = 'w-4 h-4' }) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...base}>
-      <path d="M6 9l6 6 6-6" />
+      <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+      <path d="M14 3v5h5" />
+      <path d="M9 13h6" />
+      <path d="M9 17h6" />
+    </svg>
+  );
+}
+
+export function IconClock({ className = 'w-4 h-4' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
     </svg>
   );
 }
