@@ -36,7 +36,7 @@ const itemVariants = {
 
 export default function Landing() {
   return (
-    <main className="relative overflow-hidden bg-zinc-950">
+    <main className="relative overflow-hidden">
       <div className="absolute inset-0 grid-overlay opacity-30 pointer-events-none" />
       <motion.div
         className="pointer-events-none absolute -top-32 -left-32 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl"

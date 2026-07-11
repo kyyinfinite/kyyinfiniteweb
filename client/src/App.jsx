@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
+import BottomNav from './components/BottomNav.jsx';
 import Landing from './components/Landing.jsx';
 import ShowcaseHub from './components/ShowcaseHub.jsx';
 import SnippetsHub from './components/SnippetsHub.jsx';
@@ -14,7 +15,7 @@ import ServerError from './pages/ServerError.jsx';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 transition-colors duration-300">
+    <div className="min-h-screen text-zinc-100 transition-colors duration-300 pb-20 md:pb-0">
       <Navbar />
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/500" element={<ServerError />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <BottomNav />
     </div>
   );
 }

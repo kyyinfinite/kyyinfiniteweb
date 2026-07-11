@@ -1,44 +1,73 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNetworkLoading } from '../hooks/useNetworkLoading.js';
 
-function getStatusText(progress, isNetworkSlow) {
-  if (progress < 25) return 'INITIALIZING CONNECTION';
-  if (progress < 55) return isNetworkSlow ? 'FETCHING DATA / DEGRADED LINK' : 'FETCHING DATA';
-  if (progress < 90) return 'SYNCING PAYLOAD';
-  if (progress < 100) return 'FINALIZING';
-  return 'READY';
+const LOG_STEPS = [
+  { at: 0, prefix: '$', text: "const progress = createLoader('kyyinfinite/cdn');" },
+  { at: 14, prefix: '$', text: 'await progress.connect();' },
+  { at: 30, prefix: '>', text: "const manifest = await fetch('/product.json');" },
+  { at: 48, prefix: '$', text: 'npm install --production --silent' },
+  { at: 66, prefix: '>', text: 'const payload = await resolveAssets(manifest);' },
+  { at: 84, prefix: '$', text: 'await verify(payload.integrity);' },
+  { at: 100, prefix: '#', text: 'ready ✓' },
+];
+
+function buildAsciiBar(progress, width = 22) {
+  const clamped = Math.min(Math.max(progress, 0), 100);
+  const filled = Math.round((clamped / 100) * width);
+  return `[${'#'.repeat(filled)}${'-'.repeat(width - filled)}] ${Math.round(clamped)}%`;
 }
 
-export default function NetworkLoader({ loadingData, label = 'LOADING PRODUCT DATA' }) {
+export default function NetworkLoader({ loadingData, label = 'kyyinfinite@cdn' }) {
   const { progress, isNetworkSlow, effectiveType } = useNetworkLoading(loadingData);
-  const statusText = getStatusText(progress, isNetworkSlow);
+
+  const visibleLines = useMemo(() => LOG_STEPS.filter((step) => progress >= step.at), [progress]);
+  const isDone = progress >= 100;
 
   return (
-    <div className="w-full max-w-md mx-auto py-16 px-6 text-center">
-      <p className="font-mono-ui text-xs tracking-widest text-cyan-400 mb-3">{label}</p>
+    <div className="w-full max-w-lg mx-auto py-16 px-6">
+      <div className="rounded-xl border border-white/10 glass-panel shadow-glow-cyan overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/20">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+          <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+          <span className="ml-3 text-xs text-zinc-500 font-mono-ui">{label} — zsh</span>
+        </div>
 
-      <div className="relative h-2 rounded-full bg-zinc-800 overflow-hidden">
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-full bg-cyan-400 shadow-glow-cyan"
-          animate={{ width: `${progress}%` }}
-          transition={{ ease: 'easeOut', duration: 0.2 }}
-        />
-        <motion.div
-          className="absolute inset-y-0 w-8 bg-cyan-200/40 blur-sm"
-          animate={{ left: [`${Math.max(progress - 8, 0)}%`, `${progress}%`] }}
-          transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        <div className="p-4 font-mono-ui text-xs leading-relaxed min-h-[190px]">
+          <AnimatePresence>
+            {visibleLines.map((step) => (
+              <motion.p
+                key={step.text}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className={step.prefix === '#' ? 'text-cyan-400 mt-1' : 'text-zinc-400'}
+              >
+                <span className="text-cyan-500 mr-1.5">{step.prefix}</span>
+                {step.text}
+              </motion.p>
+            ))}
+          </AnimatePresence>
+
+          <p className="text-cyan-400 mt-3 flex items-center">
+            {buildAsciiBar(progress)}
+            {!isDone && (
+              <motion.span
+                className="inline-block w-1.5 h-3 bg-cyan-400 ml-2"
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.7, repeat: Infinity, repeatType: 'reverse' }}
+              />
+            )}
+          </p>
+
+          {isNetworkSlow && (
+            <p className="text-yellow-500 mt-2 text-[11px]">
+              warning: degraded link detected ({effectiveType})
+            </p>
+          )}
+        </div>
       </div>
-
-      <div className="flex items-center justify-between mt-3 font-mono-ui text-[11px] text-zinc-500">
-        <span>{statusText}</span>
-        <span>{Math.min(Math.round(progress), 100)}%</span>
-      </div>
-
-      <p className="font-mono-ui text-[10px] text-zinc-600 mt-2 uppercase">
-        Link: {effectiveType} {isNetworkSlow ? '// throttled render' : ''}
-      </p>
     </div>
   );
 }

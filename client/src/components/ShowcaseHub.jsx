@@ -103,7 +103,7 @@ export default function ShowcaseHub() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-16 bg-zinc-950 min-h-screen">
+    <main className="max-w-6xl mx-auto px-6 py-16 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
         <div>
           <h1 className="text-3xl font-semibold text-zinc-50">Products</h1>
