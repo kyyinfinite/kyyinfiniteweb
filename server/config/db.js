@@ -23,8 +23,21 @@ async function connectDB() {
         connectTimeoutMS: 8000,
         maxPoolSize: 5,
       })
-      .then((connection) => {
+      .then(async (connection) => {
         console.log('MongoDB connected');
+        try {
+          const Snippet = require('../models/Snippet');
+          const existingIndexes = await Snippet.collection.indexes();
+          const staleTextIndexes = existingIndexes.filter((index) => index.textIndexVersion);
+          for (const index of staleTextIndexes) {
+            await Snippet.collection.dropIndex(index.name);
+            console.log('Dropped stale text index:', index.name);
+          }
+          await Snippet.syncIndexes();
+          console.log('Snippet indexes synced');
+        } catch (syncError) {
+          console.error('Failed to sync Snippet indexes:', syncError.message);
+        }
         return connection;
       })
       .catch((error) => {
