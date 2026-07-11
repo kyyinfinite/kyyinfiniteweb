@@ -19,6 +19,20 @@ const CATEGORY_ICON = {
   plugin: IconPlugin,
 };
 
+function toPlainExcerpt(markdown, maxLength = 150) {
+  if (!markdown) return '';
+  const plain = markdown
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[.*?\]\(.*?\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_~>#]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return plain.length > maxLength ? `${plain.slice(0, maxLength).trim()}...` : plain;
+}
+
 const FILTERS = [
   { key: 'all', label: 'All' },
   { key: 'whatsapp-bot', label: 'WhatsApp Bots' },
@@ -137,7 +151,12 @@ export default function ShowcaseHub() {
                     <span className="text-xs text-zinc-600 font-mono-ui">v{asset.currentVersion}</span>
                   </div>
                   <h3 className="text-zinc-50 font-semibold mb-2">{asset.name}</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed flex-1">{asset.description}</p>
+                  <p
+                    className="text-zinc-400 text-sm leading-relaxed flex-1"
+                    style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                  >
+                    {toPlainExcerpt(asset.description)}
+                  </p>
                   <div className="flex items-center justify-between mt-6">
                     <span className="text-xs text-zinc-600">{asset.downloadCount} downloads</span>
                     <button
