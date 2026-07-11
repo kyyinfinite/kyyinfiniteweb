@@ -38,14 +38,14 @@ export default function SnippetDetail() {
     return (
       <div className="max-w-4xl mx-auto px-6 py-24 text-center">
         <p className="text-red-400 mb-4">{errorMessage || 'Snippet not found.'}</p>
-        <Link to="/snippets" className="text-cyan-400 text-sm">Back to Snippets</Link>
+        <Link to="/snippets" className="text-brand-light text-sm">Back to Snippets</Link>
       </div>
     );
   }
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
-      <Link to="/snippets" className="text-zinc-400 hover:text-cyan-400 text-sm inline-flex items-center gap-2 mb-8">
+      <Link to="/snippets" className="text-zinc-400 hover:text-brand-light text-sm inline-flex items-center gap-2 mb-8">
         <IconArrowRight className="w-4 h-4 rotate-180" /> Back to Snippets
       </Link>
 
@@ -65,7 +65,7 @@ export default function SnippetDetail() {
           {snippet.tags && snippet.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {snippet.tags.map((tag) => (
-                <span key={tag} className="text-xs px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400">
+                <span key={tag} className="text-xs px-3 py-1 rounded-full bg-brand/10 text-brand-light">
                   {tag}
                 </span>
               ))}

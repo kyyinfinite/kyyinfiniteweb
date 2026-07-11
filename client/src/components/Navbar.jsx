@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { IconServer } from '../lib/icons.jsx';
+import Logo from './Logo.jsx';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home', end: true },
@@ -12,14 +13,15 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const linkClass = ({ isActive }) =>
     `text-sm font-medium transition-colors duration-200 ${
-      isActive ? 'text-cyan-400' : 'text-zinc-400 hover:text-cyan-400'
+      isActive ? 'text-brand-light' : 'text-zinc-400 hover:text-brand-light'
     }`;
 
   return (
     <header className="sticky top-0 z-40 glass-nav border-b border-white/5">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="text-lg font-semibold text-zinc-50 font-mono-ui">
-          Kyy<span className="text-cyan-400">Infinite</span>
+        <Link to="/" className="flex items-center gap-2.5 text-lg font-semibold text-zinc-50 font-display">
+          <Logo size={30} />
+          Kyy<span className="text-brand-light">Infinite</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -32,7 +34,7 @@ export default function Navbar() {
 
         <Link
           to="/marketplace"
-          className="hidden md:flex w-9 h-9 items-center justify-center rounded-full border border-white/10 text-zinc-400 hover:text-indigo-400 hover:border-indigo-500/40 transition-colors duration-200"
+          className="hidden md:flex w-9 h-9 items-center justify-center rounded-full border border-white/10 text-zinc-400 hover:text-brand-light hover:border-brand/40 transition-colors duration-200"
           aria-label="Hosting marketplace"
         >
           <IconServer className="w-4 h-4" />

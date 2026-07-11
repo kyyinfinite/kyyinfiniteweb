@@ -38,7 +38,7 @@ function IconSignal({ className = 'w-3.5 h-3.5' }) {
 }
 
 const NETWORK_BADGE = {
-  fast: { text: '4G+ / FAST', color: 'text-cyan-300 border-cyan-400/40 bg-cyan-400/5' },
+  fast: { text: '4G+ / FAST', color: 'text-cyan-300 border-brand-light/40 bg-brand-light/5' },
   medium: { text: '4G / MEDIUM', color: 'text-sky-300 border-sky-400/40 bg-sky-400/5' },
   slow: { text: '3G / SLOW', color: 'text-amber-300 border-amber-400/40 bg-amber-400/5' },
   unknown: { text: 'NET / UNKNOWN', color: 'text-zinc-400 border-zinc-500/40 bg-zinc-500/5' },

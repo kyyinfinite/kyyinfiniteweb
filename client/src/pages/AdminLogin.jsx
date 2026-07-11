@@ -31,7 +31,7 @@ export default function AdminLogin() {
   return (
     <main className="min-h-[70vh] flex items-center justify-center px-6">
       <form onSubmit={handleSubmit} className="card-surface w-full max-w-sm p-8">
-        <div className="w-11 h-11 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-6">
+        <div className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center text-brand-light mb-6">
           <IconLock className="w-5 h-5" />
         </div>
         <h1 className="text-xl font-semibold text-zinc-50 mb-1">Admin Access</h1>
@@ -51,7 +51,7 @@ export default function AdminLogin() {
           disabled={!isConfigValid}
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-40 disabled:cursor-not-allowed"
         />
 
         <label className="text-sm text-zinc-400 mb-2 block">Password</label>
@@ -61,7 +61,7 @@ export default function AdminLogin() {
           disabled={!isConfigValid}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-6 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-6 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-40 disabled:cursor-not-allowed"
         />
 
         {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}

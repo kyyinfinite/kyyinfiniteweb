@@ -5,6 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api } from '../lib/api.js';
 import { IconScript, IconArrowRight } from '../lib/icons.jsx';
+import { SkeletonGrid, EmptyState } from './Skeleton.jsx';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,9 +42,9 @@ export default function SnippetsHub() {
       {errorMessage && <p className="text-red-400 mb-6">{errorMessage}</p>}
 
       {isLoading ? (
-        <p className="text-zinc-400">Loading snippets.</p>
+        <SkeletonGrid count={4} columns="lg:grid-cols-2" />
       ) : snippets.length === 0 ? (
-        <p className="text-zinc-400">No snippets published yet.</p>
+        <EmptyState title="Belum ada snippet dipublikasikan" />
       ) : (
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -55,7 +56,7 @@ export default function SnippetsHub() {
             <motion.div key={snippet._id} variants={itemVariants} whileHover={{ y: -4 }} className="card-surface overflow-hidden flex flex-col">
               <div className="p-6 pb-0 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                  <div className="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand-light">
                     <IconScript className="w-4 h-4" />
                   </div>
                   <div>
@@ -76,7 +77,7 @@ export default function SnippetsHub() {
               </div>
               <Link
                 to={`/snippets/${snippet._id}`}
-                className="flex items-center justify-between px-6 py-4 text-cyan-400 text-sm font-medium border-t border-zinc-800 "
+                className="flex items-center justify-between px-6 py-4 text-brand-light text-sm font-medium border-t border-zinc-800 "
               >
                 View full snippet <IconArrowRight className="w-4 h-4" />
               </Link>

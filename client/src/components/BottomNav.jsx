@@ -36,11 +36,11 @@ export default function BottomNav() {
                 {isActive && (
                   <motion.span
                     layoutId="bottom-nav-glow"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-cyan-400 rounded-full shadow-glow-cyan"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-brand-light rounded-full shadow-glow-brand"
                   />
                 )}
-                <tab.icon className={`w-5 h-5 ${isActive ? 'text-cyan-400' : 'text-zinc-500'}`} />
-                <span className={`text-[10px] font-medium ${isActive ? 'text-cyan-400' : 'text-zinc-500'}`}>
+                <tab.icon className={`w-5 h-5 ${isActive ? 'text-brand-light' : 'text-zinc-500'}`} />
+                <span className={`text-[10px] font-medium ${isActive ? 'text-brand-light' : 'text-zinc-500'}`}>
                   {tab.label}
                 </span>
               </>

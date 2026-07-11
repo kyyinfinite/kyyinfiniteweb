@@ -26,7 +26,7 @@ export default function NetworkLoader({ loadingData, label = 'kyyinfinite@cdn' }
 
   return (
     <div className="w-full max-w-lg mx-auto py-16 px-6">
-      <div className="rounded-xl border border-white/10 glass-panel shadow-glow-cyan overflow-hidden">
+      <div className="rounded-xl border border-white/10 glass-panel shadow-glow-brand overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/20">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
           <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
@@ -42,19 +42,19 @@ export default function NetworkLoader({ loadingData, label = 'kyyinfinite@cdn' }
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className={step.prefix === '#' ? 'text-cyan-400 mt-1' : 'text-zinc-400'}
+                className={step.prefix === '#' ? 'text-brand-light mt-1' : 'text-zinc-400'}
               >
-                <span className="text-cyan-500 mr-1.5">{step.prefix}</span>
+                <span className="text-brand mr-1.5">{step.prefix}</span>
                 {step.text}
               </motion.p>
             ))}
           </AnimatePresence>
 
-          <p className="text-cyan-400 mt-3 flex items-center">
+          <p className="text-brand-light mt-3 flex items-center">
             {buildAsciiBar(progress)}
             {!isDone && (
               <motion.span
-                className="inline-block w-1.5 h-3 bg-cyan-400 ml-2"
+                className="inline-block w-1.5 h-3 bg-brand-light ml-2"
                 animate={{ opacity: [1, 0] }}
                 transition={{ duration: 0.7, repeat: Infinity, repeatType: 'reverse' }}
               />

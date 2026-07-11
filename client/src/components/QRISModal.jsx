@@ -65,7 +65,7 @@ export default function QRISModal({ product, onClose }) {
  required
  value={guestEmail}
  onChange={(event) => setGuestEmail(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-6 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-6 focus:outline-none focus:ring-2 focus:ring-brand"
  placeholder="you@example.com"
  />
  {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
@@ -93,7 +93,7 @@ export default function QRISModal({ product, onClose }) {
 
  {stage === 'completed' && (
  <div className="text-center">
- <div className="w-14 h-14 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto mb-4">
+ <div className="w-14 h-14 rounded-full bg-brand/10 text-brand-light flex items-center justify-center mx-auto mb-4">
  <IconCheck className="w-6 h-6" />
  </div>
  <h2 className="text-xl font-semibold text-zinc-50 mb-2">Server provisioned</h2>

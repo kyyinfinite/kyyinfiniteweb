@@ -8,13 +8,18 @@ html {
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #09090b;
+  background-color: #08090d;
   background-image:
-    radial-gradient(circle at 15% -10%, rgba(34, 211, 238, 0.14), transparent 42%),
-    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.12), transparent 38%),
-    radial-gradient(circle at 50% 100%, rgba(34, 211, 238, 0.06), transparent 45%);
+    radial-gradient(circle at 15% -10%, rgba(59, 130, 246, 0.16), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1), transparent 38%),
+    radial-gradient(circle at 50% 100%, rgba(34, 211, 238, 0.05), transparent 45%);
   background-attachment: fixed;
   min-height: 100vh;
+}
+
+.font-display {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .glass-panel {
@@ -45,23 +50,31 @@ body {
 }
 
 .card-surface:hover {
-  border-color: rgba(34, 211, 238, 0.4);
-  box-shadow: 0 0 24px rgba(34, 211, 238, 0.2);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.2);
   transform: translateY(-4px);
 }
 
 .btn-primary {
-  @apply bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring shadow-glow-cyan;
+  @apply bg-brand hover:bg-brand-light text-zinc-950 font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring shadow-glow-brand;
 }
 
 .btn-outline {
-  @apply border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
+  @apply border border-brand/50 text-brand-light hover:bg-brand/10 font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
 }
 
 .grid-overlay {
-  background-image: linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(59,130,246,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.07) 1px, transparent 1px);
   background-size: 40px 40px;
+}
+
+.terminal-mockup {
+  background: rgba(11, 18, 32, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(59, 130, 246, 0.08);
 }
 
 .kyy-markdown {

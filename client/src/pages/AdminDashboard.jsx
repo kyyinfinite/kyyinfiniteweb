@@ -57,8 +57,8 @@ export default function AdminDashboard() {
  onClick={() => setActiveTab(tab.key)}
  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
  activeTab === tab.key
- ? 'bg-cyan-500 text-white'
- : 'border border-zinc-800 text-zinc-400 hover:text-cyan-400'
+ ? 'bg-brand text-white'
+ : 'border border-zinc-800 text-zinc-400 hover:text-brand-light'
  }`}
  >
  <tab.icon className="w-4 h-4" /> {tab.label}
@@ -116,7 +116,7 @@ function VerifyEmailGate({ adminUser, logout, refreshAdminUser, sendVerification
 
  {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
  {status === 'sent' && (
- <p className="text-cyan-400 text-sm mb-4">Verification email sent. Check your inbox.</p>
+ <p className="text-brand-light text-sm mb-4">Verification email sent. Check your inbox.</p>
  )}
 
  <button
@@ -179,7 +179,7 @@ function MetricsPanel({ idToken, refreshToken }) {
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
  {cards.map((card) => (
  <div key={card.label} className="card-surface p-6">
- <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-4">
+ <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center text-brand-light mb-4">
  <card.icon className="w-5 h-5" />
  </div>
  <p className="text-zinc-400 text-sm">{card.label}</p>
@@ -313,7 +313,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  required
  value={name}
  onChange={(event) => setName(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <div className="flex items-center justify-between mb-2">
@@ -322,14 +322,14 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <button
  type="button"
  onClick={() => setDescriptionTab('write')}
- className={`px-2.5 py-1 rounded-md ${descriptionTab === 'write' ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-500'}`}
+ className={`px-2.5 py-1 rounded-md ${descriptionTab === 'write' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
  >
  Write
  </button>
  <button
  type="button"
  onClick={() => setDescriptionTab('preview')}
- className={`px-2.5 py-1 rounded-md ${descriptionTab === 'preview' ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-500'}`}
+ className={`px-2.5 py-1 rounded-md ${descriptionTab === 'preview' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
  >
  Preview
  </button>
@@ -342,7 +342,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  value={description}
  onChange={(event) => setDescription(event.target.value)}
  placeholder="Supports full Markdown: headings, lists, tables, fenced code blocks."
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand"
  />
  ) : (
  <div className="mb-4">
@@ -360,7 +360,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <input
  value={currentVersion}
  onChange={(event) => setCurrentVersion(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  <div>
@@ -368,7 +368,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <select
  value={category}
  onChange={(event) => setCategory(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  >
  <option value="whatsapp-bot">WhatsApp Bot</option>
  <option value="plugin">Plugin</option>
@@ -380,7 +380,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <input
  value={tags}
  onChange={(event) => setTags(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">File</label>
@@ -395,7 +395,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <div className="mb-4">
  <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
  <div
- className="h-full bg-cyan-400 shadow-glow-cyan transition-all duration-300"
+ className="h-full bg-brand-light shadow-glow-brand transition-all duration-300"
  style={{ width: `${uploadProgress}%` }}
  />
  </div>
@@ -428,7 +428,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <div className="flex items-center gap-4">
  <button
  onClick={() => setExpandedAssetId(expandedAssetId === asset._id ? null : asset._id)}
- className="text-cyan-400 hover:text-cyan-300 text-sm font-medium"
+ className="text-brand-light hover:text-cyan-300 text-sm font-medium"
  >
  {expandedAssetId === asset._id ? 'Close' : 'Add version'}
  </button>
@@ -449,7 +449,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  placeholder="New version, e.g. 1.1.0"
  value={newVersion}
  onChange={(event) => setNewVersion(event.target.value)}
- className="rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  <input
  type="file"
@@ -463,12 +463,12 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  placeholder="Release notes, one per line"
  value={newNotes}
  onChange={(event) => setNewNotes(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-3 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  {isSavingChangelog && (
  <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-3">
  <div
- className="h-full bg-cyan-400 shadow-glow-cyan transition-all duration-300"
+ className="h-full bg-brand-light shadow-glow-brand transition-all duration-300"
  style={{ width: `${newVersionProgress}%` }}
  />
  </div>
@@ -606,14 +606,14 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  onChange={handleFileChosen}
  className="w-full text-xs text-zinc-400 mb-4"
  />
- {isReadingFile && <p className="text-xs text-cyan-400 mb-4">Reading file.</p>}
+ {isReadingFile && <p className="text-xs text-brand-light mb-4">Reading file.</p>}
 
  <label className="text-sm text-zinc-400 mb-2 block">Title</label>
  <input
  required
  value={title}
  onChange={(event) => setTitle(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Description</label>
@@ -622,7 +622,7 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  rows={2}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Language</label>
@@ -631,7 +631,7 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  value={language}
  onChange={(event) => setLanguage(event.target.value)}
  placeholder="javascript"
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Code</label>
@@ -640,14 +640,14 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  rows={8}
  value={code}
  onChange={(event) => setCode(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Tags (comma separated)</label>
  <input
  value={tags}
  onChange={(event) => setTags(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
@@ -748,7 +748,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  required
  value={name}
  onChange={(event) => setName(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Description</label>
@@ -757,7 +757,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  rows={2}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Price (IDR)</label>
@@ -767,7 +767,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  min="0"
  value={price}
  onChange={(event) => setPrice(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <div className="grid grid-cols-3 gap-3 mb-4">
@@ -779,7 +779,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  min="0"
  value={cpuLimit}
  onChange={(event) => setCpuLimit(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  <div>
@@ -790,7 +790,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  min="0"
  value={ramLimit}
  onChange={(event) => setRamLimit(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  <div>
@@ -801,7 +801,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  min="0"
  value={diskLimit}
  onChange={(event) => setDiskLimit(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  </div>
@@ -815,7 +815,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  type="number"
  value={eggId}
  onChange={(event) => setEggId(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  <div>
@@ -825,7 +825,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  type="number"
  value={nestId}
  onChange={(event) => setNestId(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  <div>
@@ -835,7 +835,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  type="number"
  value={locationId}
  onChange={(event) => setLocationId(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
  />
  </div>
  </div>
@@ -862,7 +862,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  <button
  onClick={() => handleToggleActive(product)}
  className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
- product.isActive ? 'bg-cyan-500/10 text-cyan-400' : 'bg-zinc-800 text-zinc-500'
+ product.isActive ? 'bg-brand/10 text-brand-light' : 'bg-zinc-800 text-zinc-500'
  }`}
  >
  {product.isActive ? 'Active' : 'Inactive'}
@@ -916,7 +916,7 @@ function ChangelogPanel({ idToken, refreshToken }) {
  required
  value={title}
  onChange={(event) => setTitle(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Description</label>
@@ -925,7 +925,7 @@ function ChangelogPanel({ idToken, refreshToken }) {
  rows={3}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Version</label>
@@ -933,14 +933,14 @@ function ChangelogPanel({ idToken, refreshToken }) {
  required
  value={version}
  onChange={(event) => setVersion(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  <label className="text-sm text-zinc-400 mb-2 block">Link URL</label>
  <input
  value={linkUrl}
  onChange={(event) => setLinkUrl(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
  />
 
  {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
@@ -957,7 +957,7 @@ function ChangelogPanel({ idToken, refreshToken }) {
  </div>
  <p className="text-zinc-400 text-sm">{entry.description}</p>
  {entry.linkUrl && (
- <a href={entry.linkUrl} className="text-cyan-400 text-sm mt-2 inline-block">
+ <a href={entry.linkUrl} className="text-brand-light text-sm mt-2 inline-block">
  View details
  </a>
  )}
@@ -1024,7 +1024,7 @@ function OrdersPanel({ idToken, refreshToken }) {
  <span
  className={`text-xs px-2 py-1 rounded-full ${
  order.paymentStatus === 'completed'
- ? 'bg-cyan-500/10 text-cyan-400'
+ ? 'bg-brand/10 text-brand-light'
  : order.paymentStatus === 'failed'
  ? 'bg-red-500/10 text-red-400'
  : 'bg-yellow-500/10 text-yellow-400'
@@ -1061,7 +1061,7 @@ function OrdersPanel({ idToken, refreshToken }) {
  <td className="px-5 py-3">
  <span
  className={`text-xs px-2 py-1 rounded-full ${
- panel.status === 'active' ? 'bg-cyan-500/10 text-cyan-400' : 'bg-red-500/10 text-red-400'
+ panel.status === 'active' ? 'bg-brand/10 text-brand-light' : 'bg-red-500/10 text-red-400'
  }`}
  >
  {panel.status}

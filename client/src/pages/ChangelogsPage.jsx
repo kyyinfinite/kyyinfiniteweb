@@ -103,7 +103,7 @@ export default function ChangelogsPage() {
     return (
       <div className="max-w-3xl mx-auto px-6 py-24 text-center">
         <p className="text-red-400 mb-4 font-mono-ui text-sm">{errorMessage || 'Product not found.'}</p>
-        <Link to="/showcase" className="text-cyan-400 text-sm">Back to Products</Link>
+        <Link to="/showcase" className="text-brand-light text-sm">Back to Products</Link>
       </div>
     );
   }
@@ -117,25 +117,25 @@ export default function ChangelogsPage() {
         <div className="absolute inset-0 grid-overlay opacity-20 pointer-events-none" />
 
         <div className="relative max-w-5xl mx-auto px-6 pt-10 pb-6">
-          <Link to="/showcase" className="text-zinc-500 hover:text-cyan-400 text-sm inline-flex items-center gap-2 mb-6">
+          <Link to="/showcase" className="text-zinc-500 hover:text-brand-light text-sm inline-flex items-center gap-2 mb-6">
             <IconArrowRight className="w-4 h-4 rotate-180" /> Back to Products
           </Link>
 
           <p className="font-mono-ui text-xs text-zinc-500 mb-3">
-            kyyinfinite / <span className="text-cyan-400">{asset.category}</span> / {asset.slug}
+            kyyinfinite / <span className="text-brand-light">{asset.category}</span> / {asset.slug}
           </p>
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div className="min-w-0">
               <h1 className="text-3xl md:text-4xl font-bold text-zinc-50 flex items-center gap-3 flex-wrap">
-                <span className="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <span className="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand-light">
                   <Icon className="w-5 h-5" />
                 </span>
                 {asset.name}
               </h1>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-4 text-sm text-zinc-500">
-                <span className="text-cyan-400 font-mono-ui">v{asset.currentVersion}</span>
+                <span className="text-brand-light font-mono-ui">v{asset.currentVersion}</span>
                 <span>·</span>
                 <span className="flex items-center gap-1.5">
                   <IconDownload className="w-3.5 h-3.5" /> {asset.downloadCount} downloads
@@ -155,7 +155,7 @@ export default function ChangelogsPage() {
                   {asset.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                      className="text-xs px-3 py-1 rounded-full bg-brand/10 text-brand-light border border-brand/20"
                     >
                       {tag}
                     </span>
@@ -190,7 +190,7 @@ export default function ChangelogsPage() {
                 {activeTab === tab.key && (
                   <motion.span
                     layoutId="tab-underline"
-                    className="absolute left-0 right-0 -bottom-px h-0.5 bg-cyan-400 rounded-full shadow-glow-cyan"
+                    className="absolute left-0 right-0 -bottom-px h-0.5 bg-brand-light rounded-full shadow-glow-brand"
                   />
                 )}
               </button>
@@ -242,10 +242,10 @@ export default function ChangelogsPage() {
                   transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="relative mb-10 last:mb-0"
                 >
-                  <span className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-zinc-950 border-2 border-cyan-400 shadow-glow-cyan" />
+                  <span className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-zinc-950 border-2 border-brand-light shadow-glow-brand" />
 
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <span className="font-mono-ui text-sm text-cyan-400">v{entry.version}</span>
+                    <span className="font-mono-ui text-sm text-brand-light">v{entry.version}</span>
                     <span className="text-xs text-zinc-500">{formatDate(entry.releaseDate)}</span>
                   </div>
 
@@ -253,7 +253,7 @@ export default function ChangelogsPage() {
                     <ul className="space-y-1.5 mb-3">
                       {entry.notes.map((note, noteIndex) => (
                         <li key={noteIndex} className="text-sm text-zinc-400 flex gap-2">
-                          <span className="text-cyan-500">-</span>
+                          <span className="text-brand">-</span>
                           <span>{note}</span>
                         </li>
                       ))}
@@ -262,7 +262,7 @@ export default function ChangelogsPage() {
 
                   <button
                     onClick={() => handleDownloadVersion(entry._id)}
-                    className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-cyan-400 transition-colors duration-200"
+                    className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-brand-light transition-colors duration-200"
                   >
                     <IconDownload className="w-3.5 h-3.5" /> Download this version
                   </button>

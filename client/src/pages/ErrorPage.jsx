@@ -7,12 +7,12 @@ export default function ErrorPage({ code = 'Error', title, message, showRetry = 
  return (
  <main className="relative min-h-[75vh] flex items-center justify-center px-6 overflow-hidden">
  <motion.div
- className="pointer-events-none absolute -top-24 -left-24 w-80 h-80 rounded-full bg-cyan-500/20 blur-3xl"
+ className="pointer-events-none absolute -top-24 -left-24 w-80 h-80 rounded-full bg-brand/20 blur-3xl"
  animate={{ x: [0, 20, 0], y: [0, 15, 0] }}
  transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
  />
  <motion.div
- className="pointer-events-none absolute bottom-0 -right-24 w-80 h-80 rounded-full bg-cyan-500-light/20 blur-3xl"
+ className="pointer-events-none absolute bottom-0 -right-24 w-80 h-80 rounded-full bg-brand-light/20 blur-3xl"
  animate={{ x: [0, -20, 0], y: [0, -15, 0] }}
  transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
  />
@@ -22,7 +22,7 @@ export default function ErrorPage({ code = 'Error', title, message, showRetry = 
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.5, ease: 'easeOut' }}
- className="text-7xl font-semibold text-cyan-400"
+ className="text-7xl font-semibold text-brand-light"
  >
  {code}
  </motion.p>
