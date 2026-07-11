@@ -2,19 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
-import { IconDownload, IconWhatsapp, IconTerminal, IconGamepad, IconArrowRight } from '../lib/icons.jsx';
+import { IconDownload, IconWhatsapp, IconTerminal, IconPlugin, IconArrowRight } from '../lib/icons.jsx';
 import NetworkLoader from './NetworkLoader.jsx';
+import MarkdownRenderer from '../components/MarkdownRenderer.jsx';
 
 const CATEGORY_ICON = {
   'whatsapp-bot': IconWhatsapp,
-  snippet: IconTerminal,
-  plugin: IconGamepad,
+  plugin: IconPlugin,
 };
 
 const CATEGORY_LABEL = {
   'whatsapp-bot': 'WhatsApp Bot',
-  snippet: 'Code Snippet',
-  plugin: 'Game Plugin',
+  plugin: 'Plugin',
 };
 
 function formatDate(value) {
@@ -123,7 +122,9 @@ export default function ChangelogsPage() {
           </div>
         </div>
 
-        <p className="relative text-zinc-400 leading-relaxed">{asset.description}</p>
+        <div className="relative mt-4">
+          <MarkdownRenderer content={asset.description} />
+        </div>
 
         {asset.tags && asset.tags.length > 0 && (
           <div className="relative flex flex-wrap gap-2 mt-6">

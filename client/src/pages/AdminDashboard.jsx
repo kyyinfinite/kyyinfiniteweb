@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext.jsx';
 import { api, cancelActiveUpload } from '../lib/api.js';
+import MarkdownRenderer from '../components/MarkdownRenderer.jsx';
 import {
  IconChart,
  IconPlugin,
@@ -193,6 +194,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  const [assets, setAssets] = useState([]);
  const [name, setName] = useState('');
  const [description, setDescription] = useState('');
+ const [descriptionTab, setDescriptionTab] = useState('write');
  const [currentVersion, setCurrentVersion] = useState('1.0.0');
  const [category, setCategory] = useState('whatsapp-bot');
  const [tags, setTags] = useState('');
@@ -314,14 +316,43 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Description</label>
+ <div className="flex items-center justify-between mb-2">
+ <label className="text-sm text-zinc-400 block">Description (Markdown supported)</label>
+ <div className="flex gap-1 text-xs">
+ <button
+ type="button"
+ onClick={() => setDescriptionTab('write')}
+ className={`px-2.5 py-1 rounded-md ${descriptionTab === 'write' ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-500'}`}
+ >
+ Write
+ </button>
+ <button
+ type="button"
+ onClick={() => setDescriptionTab('preview')}
+ className={`px-2.5 py-1 rounded-md ${descriptionTab === 'preview' ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-500'}`}
+ >
+ Preview
+ </button>
+ </div>
+ </div>
+ {descriptionTab === 'write' ? (
  <textarea
  required
- rows={3}
+ rows={5}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ placeholder="Supports full Markdown: headings, lists, tables, fenced code blocks."
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500"
  />
+ ) : (
+ <div className="mb-4">
+ {description ? (
+ <MarkdownRenderer content={description} />
+ ) : (
+ <p className="text-zinc-600 text-sm px-4 py-6 border border-zinc-800 rounded-xl">Nothing to preview yet.</p>
+ )}
+ </div>
+ )}
 
  <div className="grid grid-cols-2 gap-4 mb-4">
  <div>
@@ -340,8 +371,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
  >
  <option value="whatsapp-bot">WhatsApp Bot</option>
- <option value="snippet">Snippet</option>
- <option value="plugin">Game Plugin</option>
+ <option value="plugin">Plugin</option>
  </select>
  </div>
  </div>

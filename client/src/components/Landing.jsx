@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { IconArrowRight, IconWhatsapp, IconTerminal, IconGamepad, IconDownload, IconServer } from '../lib/icons.jsx';
+import { IconArrowRight, IconWhatsapp, IconTerminal, IconPlugin, IconDownload, IconServer } from '../lib/icons.jsx';
 
 const categories = [
   {
@@ -14,12 +14,12 @@ const categories = [
     icon: IconTerminal,
     title: 'Code Snippets',
     description: 'Battle-tested utility snippets and reusable modules across the stack.',
-    to: '/showcase?category=snippet',
+    to: '/snippets',
   },
   {
-    icon: IconGamepad,
-    title: 'Game Plugins',
-    description: 'TheoTown and Minecraft plugins engineered for stability at scale.',
+    icon: IconPlugin,
+    title: 'Plugins & Libraries',
+    description: 'Custom libraries and plugins built for real projects, from npm packages to bot modules.',
     to: '/showcase?category=plugin',
   },
 ];
@@ -75,8 +75,8 @@ export default function Landing() {
           variants={itemVariants}
           className="mt-6 text-zinc-400 max-w-2xl mx-auto text-base md:text-lg"
         >
-          WhatsApp automation scripts, reusable code snippets, and game plugins for TheoTown and
-          Minecraft. Download instantly, no account required.
+          WhatsApp automation scripts, reusable code snippets, and custom libraries and plugins
+          built for real projects. Download instantly, no account required.
         </motion.p>
 
         <motion.div variants={itemVariants} className="mt-10 flex items-center justify-center gap-4">

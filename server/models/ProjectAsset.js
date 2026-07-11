@@ -18,7 +18,7 @@ const ProjectAssetSchema = new mongoose.Schema(
     description: { type: String, required: true },
     category: {
       type: String,
-      enum: ['whatsapp-bot', 'snippet', 'plugin'],
+      enum: ['whatsapp-bot', 'plugin'],
       required: true,
       index: true,
     },

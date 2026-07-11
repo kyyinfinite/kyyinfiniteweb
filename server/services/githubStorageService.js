@@ -21,6 +21,21 @@ async function uploadFileToGithub(path, buffer, commitMessage) {
   const data = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(
+        `GitHub rejected the token (Bad credentials). The GITHUB_TOKEN is missing, expired, revoked, or was pasted with extra whitespace/quotes. Regenerate it and update the Vercel env var, then redeploy.`
+      );
+    }
+    if (response.status === 404) {
+      throw new Error(
+        `GitHub returned 404 for ${config.owner}/${config.repo}. Either the repo name/owner is wrong, or the token doesn't have access to this specific repository.`
+      );
+    }
+    if (response.status === 403) {
+      throw new Error(
+        `GitHub returned 403. The token is valid but lacks "Contents: Read and write" permission on ${config.owner}/${config.repo}.`
+      );
+    }
     throw new Error(data.message || `GitHub upload failed with status ${response.status}`);
   }
 

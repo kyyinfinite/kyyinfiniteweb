@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
-import { IconDownload, IconWhatsapp, IconTerminal, IconGamepad } from '../lib/icons.jsx';
+import { IconDownload, IconWhatsapp, IconPlugin } from '../lib/icons.jsx';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -16,19 +16,19 @@ const itemVariants = {
 
 const CATEGORY_ICON = {
   'whatsapp-bot': IconWhatsapp,
-  snippet: IconTerminal,
-  plugin: IconGamepad,
+  plugin: IconPlugin,
 };
 
 const FILTERS = [
   { key: 'all', label: 'All' },
   { key: 'whatsapp-bot', label: 'WhatsApp Bots' },
-  { key: 'snippet', label: 'Snippets' },
-  { key: 'plugin', label: 'Game Plugins' },
+  { key: 'plugin', label: 'Plugins' },
+  { key: 'snippets', label: 'Snippets', external: '/snippets' },
 ];
 
 export default function ShowcaseHub() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -54,11 +54,15 @@ export default function ShowcaseHub() {
     };
   }, [filter]);
 
-  function setFilter(key) {
-    if (key === 'all') {
+  function setFilter(item) {
+    if (item.external) {
+      navigate(item.external);
+      return;
+    }
+    if (item.key === 'all') {
       setSearchParams({});
     } else {
-      setSearchParams({ category: key });
+      setSearchParams({ category: item.key });
     }
   }
 
@@ -89,15 +93,15 @@ export default function ShowcaseHub() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
         <div>
           <h1 className="text-3xl font-semibold text-zinc-50">Products</h1>
-          <p className="text-zinc-400 mt-2">WhatsApp bots, code snippets, and game plugins, ready to download.</p>
+          <p className="text-zinc-400 mt-2">WhatsApp bots, libraries, and reusable plugins, ready to download.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((item) => (
             <button
               key={item.key}
-              onClick={() => setFilter(item.key)}
+              onClick={() => setFilter(item)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                filter === item.key
+                !item.external && filter === item.key
                   ? 'bg-cyan-500 text-zinc-950 shadow-glow-cyan'
                   : 'border border-zinc-800 text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/40'
               }`}
@@ -122,7 +126,7 @@ export default function ShowcaseHub() {
           variants={containerVariants}
         >
           {assets.map((asset) => {
-            const Icon = CATEGORY_ICON[asset.category] || IconTerminal;
+            const Icon = CATEGORY_ICON[asset.category] || IconPlugin;
             return (
               <motion.div key={asset._id} variants={itemVariants} whileHover={{ y: -6 }}>
                 <Link to={`/product/${asset.slug}`} className="card-surface p-6 flex flex-col h-full">
