@@ -21,7 +21,9 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 text-lg font-semibold text-zinc-50 font-display">
           <Logo size={30} />
-          Kyy<span className="text-brand-light">Infinite</span>
+          <span className="whitespace-nowrap tracking-tight">
+            Kyy<span className="text-brand-light">Infinite</span>
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

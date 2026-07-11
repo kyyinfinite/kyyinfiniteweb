@@ -69,7 +69,17 @@ body {
   background-size: 40px 40px;
 }
 
-.terminal-mockup {
+.terminal-cursor {
+  display: inline-block;
+  animation: kyy-blink 1s steps(1) infinite;
+  color: #60a5fa;
+}
+
+@keyframes kyy-blink {
+  50% {
+    opacity: 0;
+  }
+}
   background: rgba(11, 18, 32, 0.75);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(59, 130, 246, 0.2);

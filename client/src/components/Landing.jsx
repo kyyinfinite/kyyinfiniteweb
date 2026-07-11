@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { IconArrowRight, IconWhatsapp, IconTerminal, IconPlugin, IconDownload, IconServer } from '../lib/icons.jsx';
 import { api } from '../lib/api.js';
+import LiveTerminal from './LiveTerminal.jsx';
 
 const categories = [
   {
@@ -122,24 +123,8 @@ export default function Landing() {
           </Link>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants}
-          className="terminal-mockup mt-16 max-w-2xl mx-auto text-left overflow-hidden"
-        >
-          <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-            <span className="ml-3 text-xs text-zinc-500 font-mono-ui">bash</span>
-          </div>
-          <div className="p-5 font-mono-ui text-sm leading-relaxed">
-            <p className="text-zinc-500">$ npm install @kyyinfinite/baileys</p>
-            <p className="text-brand-light mt-1">✓ installed in 1.2s</p>
-            <p className="text-zinc-500 mt-3">$ node bot.js</p>
-            <p className="text-zinc-400 mt-1">
-              <span className="text-brand-light">[kyyinfinite]</span> socket connected, ready for pairing
-            </p>
-          </div>
+        <motion.div variants={itemVariants} className="mt-16">
+          <LiveTerminal />
         </motion.div>
       </motion.section>
 
