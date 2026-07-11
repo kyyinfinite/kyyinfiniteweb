@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://kyyinfinite.my.id", "http://localhost:5173"],
+    "method": ["GET", "PUT", "POST", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization", "x-goog-resumable"]
+  }
+]

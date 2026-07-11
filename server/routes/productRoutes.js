@@ -1,7 +1,7 @@
 const express = require('express');
 const Product = require('../models/Product');
 const { adminAuthMiddleware } = require('../middlewares/adminAuthMiddleware');
-const { createProduct, updateProduct } = require('../controllers/adminController');
+const { createProduct, updateProduct, listProductsAdmin } = require('../controllers/adminController');
 
 const router = express.Router();
 
@@ -14,6 +14,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/admin/all', adminAuthMiddleware, listProductsAdmin);
 router.post('/', adminAuthMiddleware, createProduct);
 router.put('/:id', adminAuthMiddleware, updateProduct);
 

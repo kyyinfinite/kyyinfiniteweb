@@ -54,6 +54,15 @@ async function listPanels(req, res) {
   }
 }
 
+async function listProductsAdmin(req, res) {
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 }).lean();
+    return res.status(200).json(products);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to list products', error: error.message });
+  }
+}
+
 async function createProduct(req, res) {
   try {
     const product = await Product.create(req.body);
@@ -76,4 +85,4 @@ async function updateProduct(req, res) {
   }
 }
 
-module.exports = { getMetrics, listOrders, listPanels, createProduct, updateProduct };
+module.exports = { getMetrics, listOrders, listPanels, listProductsAdmin, createProduct, updateProduct };

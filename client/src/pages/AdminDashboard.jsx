@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { useAdmin } from '../context/AdminContext.jsx';
@@ -18,6 +18,7 @@ const TABS = [
  { key: 'metrics', label: 'Metrics', icon: IconChart },
  { key: 'assets', label: 'Asset Manager', icon: IconPlugin },
  { key: 'snippets', label: 'Snippets', icon: IconScript },
+ { key: 'hosting', label: 'Hosting Products', icon: IconServer },
  { key: 'changelog', label: 'Changelog', icon: IconUpload },
  { key: 'orders', label: 'Orders and Tickets', icon: IconTicket },
 ];
@@ -69,6 +70,7 @@ export default function AdminDashboard() {
  {activeTab === 'metrics' && <MetricsPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'assets' && <AssetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'snippets' && <SnippetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
+ {activeTab === 'hosting' && <HostingProductsPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
  </main>
@@ -205,6 +207,7 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  const [newNotes, setNewNotes] = useState('');
  const [newFileUrl, setNewFileUrl] = useState('');
  const [isSavingChangelog, setIsSavingChangelog] = useState(false);
+ const uploadTaskRef = useRef(null);
 
  async function loadAssets() {
  const token = (await refreshToken()) || idToken;
@@ -224,20 +227,31 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  }
  setErrorMessage('');
  setIsUploading(true);
+ setUploadProgress(0);
 
- try {
  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
  const storagePath = `assets/${category}/${Date.now()}-${safeName}`;
  const storageRef = ref(firebaseStorage, storagePath);
  const uploadTask = uploadBytesResumable(storageRef, file);
+ uploadTaskRef.current = uploadTask;
 
+ let lastProgressAt = Date.now();
+ const stallCheckInterval = setInterval(() => {
+ if (Date.now() - lastProgressAt > 20000) {
+ clearInterval(stallCheckInterval);
+ uploadTask.cancel();
+ }
+ }, 2000);
+
+ try {
  await new Promise((resolve, reject) => {
  uploadTask.on(
  'state_changed',
  (snapshot) => {
+ lastProgressAt = Date.now();
  setUploadProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
  },
- reject,
+ (error) => reject(error),
  resolve
  );
  });
@@ -264,9 +278,25 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  setUploadProgress(0);
  await loadAssets();
  } catch (error) {
- setErrorMessage(error.message);
+ if (error && error.code === 'storage/canceled') {
+ setErrorMessage(
+ 'Upload stalled for 20s with no progress and was cancelled. This usually means Firebase Storage CORS is not configured for this domain, or Storage security rules are blocking the write. Check the browser console network tab for the exact request that failed.'
+ );
+ } else if (error && error.code === 'storage/unauthorized') {
+ setErrorMessage('Firebase Storage rejected this upload: check your Storage security rules allow writes for authenticated admin users.');
+ } else {
+ setErrorMessage(error.message || 'Upload failed');
+ }
  } finally {
+ clearInterval(stallCheckInterval);
+ uploadTaskRef.current = null;
  setIsUploading(false);
+ }
+ }
+
+ function handleCancelUpload() {
+ if (uploadTaskRef.current) {
+ uploadTaskRef.current.cancel();
  }
  }
 
@@ -359,11 +389,19 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  />
 
  {isUploading && (
- <div className="w-full h-2 rounded-full bg-zinc-800 mb-4 overflow-hidden">
+ <div className="mb-4">
+ <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
  <div
  className="h-full bg-cyan-400 shadow-glow-cyan transition-all duration-300"
  style={{ width: `${uploadProgress}%` }}
  />
+ </div>
+ <div className="flex items-center justify-between mt-2">
+ <span className="text-xs text-zinc-500 font-mono-ui">{uploadProgress}% uploaded</span>
+ <button type="button" onClick={handleCancelUpload} className="text-xs text-red-400 hover:text-red-300">
+ Cancel upload
+ </button>
+ </div>
  </div>
  )}
 
@@ -555,6 +593,203 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  className="text-red-400 hover:text-red-300 text-sm font-medium"
  >
  Delete
+ </button>
+ </div>
+ ))}
+ </div>
+ </div>
+ );
+}
+
+function HostingProductsPanel({ idToken, refreshToken }) {
+ const [products, setProducts] = useState([]);
+ const [name, setName] = useState('');
+ const [description, setDescription] = useState('');
+ const [price, setPrice] = useState('');
+ const [cpuLimit, setCpuLimit] = useState('100');
+ const [ramLimit, setRamLimit] = useState('1024');
+ const [diskLimit, setDiskLimit] = useState('5120');
+ const [eggId, setEggId] = useState('');
+ const [nestId, setNestId] = useState('');
+ const [locationId, setLocationId] = useState('');
+ const [errorMessage, setErrorMessage] = useState('');
+ const [isSaving, setIsSaving] = useState(false);
+
+ async function loadProducts() {
+ const token = (await refreshToken()) || idToken;
+ const data = await api.listProductsAdmin(token);
+ setProducts(data);
+ }
+
+ useEffect(() => {
+ loadProducts().catch((error) => setErrorMessage(error.message));
+ }, []);
+
+ async function handleSubmit(event) {
+ event.preventDefault();
+ setIsSaving(true);
+ setErrorMessage('');
+ try {
+ const token = (await refreshToken()) || idToken;
+ await api.createProduct(token, {
+ name,
+ description,
+ price: Number(price),
+ cpuLimit: Number(cpuLimit),
+ ramLimit: Number(ramLimit),
+ diskLimit: Number(diskLimit),
+ eggId: Number(eggId),
+ nestId: Number(nestId),
+ locationId: Number(locationId),
+ });
+ setName('');
+ setDescription('');
+ setPrice('');
+ setEggId('');
+ setNestId('');
+ setLocationId('');
+ await loadProducts();
+ } catch (error) {
+ setErrorMessage(error.message);
+ } finally {
+ setIsSaving(false);
+ }
+ }
+
+ async function handleToggleActive(product) {
+ const token = (await refreshToken()) || idToken;
+ await api.updateProduct(token, product._id, { isActive: !product.isActive });
+ await loadProducts();
+ }
+
+ return (
+ <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+ <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
+ <h2 className="text-zinc-50 font-semibold mb-5">Add Hosting Product</h2>
+
+ <label className="text-sm text-zinc-400 mb-2 block">Name</label>
+ <input
+ required
+ value={name}
+ onChange={(event) => setName(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+
+ <label className="text-sm text-zinc-400 mb-2 block">Description</label>
+ <textarea
+ required
+ rows={2}
+ value={description}
+ onChange={(event) => setDescription(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+
+ <label className="text-sm text-zinc-400 mb-2 block">Price (IDR)</label>
+ <input
+ required
+ type="number"
+ min="0"
+ value={price}
+ onChange={(event) => setPrice(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+
+ <div className="grid grid-cols-3 gap-3 mb-4">
+ <div>
+ <label className="text-xs text-zinc-400 mb-2 block">CPU %</label>
+ <input
+ required
+ type="number"
+ min="0"
+ value={cpuLimit}
+ onChange={(event) => setCpuLimit(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+ </div>
+ <div>
+ <label className="text-xs text-zinc-400 mb-2 block">RAM MB</label>
+ <input
+ required
+ type="number"
+ min="0"
+ value={ramLimit}
+ onChange={(event) => setRamLimit(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+ </div>
+ <div>
+ <label className="text-xs text-zinc-400 mb-2 block">Disk MB</label>
+ <input
+ required
+ type="number"
+ min="0"
+ value={diskLimit}
+ onChange={(event) => setDiskLimit(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+ </div>
+ </div>
+
+ <p className="text-xs text-zinc-500 mb-2">Pterodactyl identifiers, from your panel's admin area</p>
+ <div className="grid grid-cols-3 gap-3 mb-4">
+ <div>
+ <label className="text-xs text-zinc-400 mb-2 block">Egg ID</label>
+ <input
+ required
+ type="number"
+ value={eggId}
+ onChange={(event) => setEggId(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+ </div>
+ <div>
+ <label className="text-xs text-zinc-400 mb-2 block">Nest ID</label>
+ <input
+ required
+ type="number"
+ value={nestId}
+ onChange={(event) => setNestId(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+ </div>
+ <div>
+ <label className="text-xs text-zinc-400 mb-2 block">Location ID</label>
+ <input
+ required
+ type="number"
+ value={locationId}
+ onChange={(event) => setLocationId(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+ />
+ </div>
+ </div>
+
+ {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+
+ <button type="submit" disabled={isSaving} className="btn-primary w-full">
+ {isSaving ? 'Saving.' : 'Add product'}
+ </button>
+ </form>
+
+ <div className="lg:col-span-3 space-y-4">
+ {products.map((product) => (
+ <div key={product._id} className="card-surface p-5 flex items-center justify-between gap-4">
+ <div>
+ <p className="text-zinc-50 font-medium">{product.name}</p>
+ <p className="text-zinc-500 text-xs mt-1">
+ Rp {product.price.toLocaleString('id-ID')} - {product.cpuLimit}% CPU - {product.ramLimit}MB RAM - {product.diskLimit}MB Disk
+ </p>
+ <p className="text-zinc-600 text-xs mt-1">
+ egg {product.eggId} - nest {product.nestId} - location {product.locationId}
+ </p>
+ </div>
+ <button
+ onClick={() => handleToggleActive(product)}
+ className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
+ product.isActive ? 'bg-cyan-500/10 text-cyan-400' : 'bg-zinc-800 text-zinc-500'
+ }`}
+ >
+ {product.isActive ? 'Active' : 'Inactive'}
  </button>
  </div>
  ))}

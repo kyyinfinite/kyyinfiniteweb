@@ -32,8 +32,10 @@ export const api = {
   updateAsset: (token, id, body) => request(`/assets/${id}`, { method: 'PUT', body, token }),
   deleteAsset: (token, id) => request(`/assets/${id}`, { method: 'DELETE', token }),
 
-  listProducts: () => request('/products'),
-  createProduct: (token, body) => request('/products', { method: 'POST', body, token }),
+api.listProducts = () => request('/products');
+api.listProductsAdmin = (token) => request('/products/admin/all', { token });
+api.createProduct = (token, body) => request('/products', { method: 'POST', body, token });
+api.updateProduct = (token, id, body) => request(`/products/${id}`, { method: 'PUT', body, token });
 
   createOrder: (body) => request('/payments/order', { method: 'POST', body }),
   getOrderStatus: (orderId) => request(`/payments/order/${orderId}`),

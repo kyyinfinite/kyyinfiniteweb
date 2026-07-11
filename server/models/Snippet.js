@@ -12,6 +12,9 @@ const SnippetSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-SnippetSchema.index({ title: 'text', description: 'text', tags: 'text' });
+SnippetSchema.index(
+  { title: 'text', description: 'text', tags: 'text' },
+  { language_override: 'textIndexLanguage' }
+);
 
 module.exports = mongoose.models.Snippet || mongoose.model('Snippet', SnippetSchema);
