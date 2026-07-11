@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const ProjectAsset = require('../models/ProjectAsset');
+const LicenseKey = require('../models/LicenseKey');
 const { uploadFileToGithub, deleteFileFromGithub } = require('../services/githubStorageService');
 
 function buildStoragePath(category, originalName) {
@@ -138,15 +139,29 @@ async function deleteAsset(req, res) {
 async function downloadAsset(req, res) {
   try {
     const { id } = req.params;
+    const { licenseKey } = req.body || {};
+
+    const existing = await ProjectAsset.findById(id);
+    if (!existing) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+
+    if (existing.isPremium) {
+      if (!licenseKey) {
+        return res.status(402).json({ message: 'This asset requires a valid license key to download' });
+      }
+
+      const license = await LicenseKey.findOne({ key: licenseKey.trim().toUpperCase(), asset: existing._id });
+      if (!license || license.status !== 'active' || license.isExpired()) {
+        return res.status(403).json({ message: 'Invalid, revoked, or expired license key' });
+      }
+    }
+
     const asset = await ProjectAsset.findByIdAndUpdate(
       id,
       { $inc: { downloadCount: 1 } },
       { new: true }
     );
-
-    if (!asset) {
-      return res.status(404).json({ message: 'Asset not found' });
-    }
 
     return res.status(200).json({ downloadUrl: asset.downloadUrl, downloadCount: asset.downloadCount });
   } catch (error) {

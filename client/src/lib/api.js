@@ -61,7 +61,8 @@ export const api = {
     const query = new URLSearchParams(params).toString();
     return request(`/assets${query ? `?${query}` : ''}`);
   },
-  downloadAsset: (id) => request(`/assets/${id}/download`, { method: 'POST' }),
+  downloadAsset: (id, licenseKey) =>
+    request(`/assets/${id}/download`, { method: 'POST', body: licenseKey ? { licenseKey } : undefined }),
   listAssetsAdmin: (token) => request('/assets/admin/all', { token }),
   createAssetWithFile: (token, formData, onProgress) =>
     uploadWithProgress('/assets', formData, token, onProgress),
@@ -86,6 +87,14 @@ export const api = {
   listOrders: (token) => request('/admin/orders', { token }),
   listPanels: (token) => request('/admin/panels', { token }),
 
+  listLicenseKeys: (token, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/admin/license-keys${query ? `?${query}` : ''}`, { token });
+  },
+  revokeLicenseKey: (token, id) => request(`/admin/license-keys/${id}/revoke`, { method: 'PATCH', token }),
+  resetLicenseActivations: (token, id) =>
+    request(`/admin/license-keys/${id}/reset-activations`, { method: 'POST', token }),
+
   listChangelog: () => request('/changelog'),
   createChangelog: (token, body) => request('/changelog', { method: 'POST', body, token }),
 
@@ -98,7 +107,41 @@ export const api = {
   createSnippet: (token, body) => request('/snippets', { method: 'POST', body, token }),
   updateSnippet: (token, id, body) => request(`/snippets/${id}`, { method: 'PUT', body, token }),
   deleteSnippet: (token, id) => request(`/snippets/${id}`, { method: 'DELETE', token }),
+
+  listApiKeys: (token) => request('/admin/api-keys', { token }),
+  createApiKey: (token, body) => request('/admin/api-keys', { method: 'POST', body, token }),
+  revokeApiKey: (token, id) => request(`/admin/api-keys/${id}/revoke`, { method: 'PATCH', token }),
+
+  listApiEndpoints: () => request('/v1/_meta/endpoints'),
 };
+
+export async function runPlaygroundRequest(path, params, apiKey) {
+  const query = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, value]) => value !== '' && value != null))
+  ).toString();
+  const url = `${API_BASE}/v1${path}${query ? `?${query}` : ''}`;
+
+  const response = await fetch(url, {
+    headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
+  });
+
+  const rateLimit = {
+    limit: response.headers.get('X-RateLimit-Limit'),
+    remaining: response.headers.get('X-RateLimit-Remaining'),
+    reset: response.headers.get('X-RateLimit-Reset'),
+  };
+
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    const data = await response.json();
+    return { ok: response.ok, status: response.status, kind: 'json', data, rateLimit };
+  }
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  return { ok: response.ok, status: response.status, kind: 'binary', contentType, blobUrl, rateLimit };
+}
 
 export function cancelActiveUpload() {
   if (uploadWithProgress.activeXhr) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { IconTerminal, IconWhatsapp, IconServer } from '../lib/icons.jsx';
+import { IconTerminal, IconWhatsapp, IconServer, IconKey } from '../lib/icons.jsx';
 
 function IconHome({ className = 'w-5 h-5' }) {
   return (
@@ -17,6 +17,7 @@ const TABS = [
   { to: '/', label: 'Home', icon: IconHome, end: true },
   { to: '/showcase', label: 'Products', icon: IconWhatsapp },
   { to: '/snippets', label: 'Snippets', icon: IconTerminal },
+  { to: '/developers', label: 'API', icon: IconKey },
   { to: '/marketplace', label: 'Hosting', icon: IconServer },
 ];
 

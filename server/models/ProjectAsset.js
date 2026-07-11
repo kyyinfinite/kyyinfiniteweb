@@ -29,6 +29,10 @@ const ProjectAssetSchema = new mongoose.Schema(
     tags: { type: [String], default: [], index: true },
     changelogs: { type: [ChangelogEntrySchema], default: [] },
     isPublished: { type: Boolean, default: true, index: true },
+    isPremium: { type: Boolean, default: false, index: true },
+    price: { type: Number, default: 0, min: 0 },
+    maxActivations: { type: Number, default: 1, min: 1 },
+    licenseDurationDays: { type: Number, default: null, min: 1 },
   },
   { timestamps: true }
 );

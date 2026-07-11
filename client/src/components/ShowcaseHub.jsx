@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import { IconDownload, IconWhatsapp, IconPlugin } from '../lib/icons.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { SkeletonGrid, EmptyState } from './Skeleton.jsx';
+import AssetPurchaseModal from './AssetPurchaseModal.jsx';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -53,6 +54,7 @@ export default function ShowcaseHub() {
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [purchaseAsset, setPurchaseAsset] = useState(null);
   const showToast = useToast();
 
   const filter = searchParams.get('category') || 'all';
@@ -92,7 +94,12 @@ export default function ShowcaseHub() {
     event.preventDefault();
     event.stopPropagation();
     try {
-      const result = await api.downloadAsset(asset._id);
+      let licenseKey;
+      if (asset.isPremium) {
+        licenseKey = window.prompt(`Enter your license key for ${asset.name}`);
+        if (!licenseKey) return;
+      }
+      const result = await api.downloadAsset(asset._id, licenseKey);
       const link = document.createElement('a');
       link.href = result.downloadUrl;
       link.setAttribute('download', '');
@@ -173,6 +180,12 @@ export default function ShowcaseHub() {
                     </span>
                   )}
 
+                  {asset.isPremium && (
+                    <span className="inline-flex w-fit items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border bg-amber-500/10 text-amber-400 border-amber-500/30 mb-3">
+                      Premium · Rp {asset.price?.toLocaleString('id-ID')}
+                    </span>
+                  )}
+
                   <h3 className="font-display text-zinc-50 font-semibold mb-2">{asset.name}</h3>
                   <p
                     className="text-zinc-400 text-sm leading-relaxed flex-1"
@@ -193,18 +206,43 @@ export default function ShowcaseHub() {
 
                   <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
                     <span className="text-xs text-zinc-600">{asset.downloadCount} downloads</span>
-                    <button
-                      onClick={(event) => handleDownload(event, asset)}
-                      className="flex items-center gap-2 text-brand-light hover:text-brand text-sm font-medium"
-                    >
-                      <IconDownload className="w-4 h-4" /> Download
-                    </button>
+                    {asset.isPremium ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={(event) => handleDownload(event, asset)}
+                          className="text-zinc-500 hover:text-zinc-300 text-xs"
+                        >
+                          Punya key?
+                        </button>
+                        <button
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setPurchaseAsset(asset);
+                          }}
+                          className="flex items-center gap-2 text-brand-light hover:text-brand text-sm font-medium"
+                        >
+                          <IconDownload className="w-4 h-4" /> Beli License
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(event) => handleDownload(event, asset)}
+                        className="flex items-center gap-2 text-brand-light hover:text-brand text-sm font-medium"
+                      >
+                        <IconDownload className="w-4 h-4" /> Download
+                      </button>
+                    )}
                   </div>
                 </Link>
               </motion.div>
             );
           })}
         </motion.div>
+      )}
+
+      {purchaseAsset && (
+        <AssetPurchaseModal asset={purchaseAsset} onClose={() => setPurchaseAsset(null)} />
       )}
     </main>
   );

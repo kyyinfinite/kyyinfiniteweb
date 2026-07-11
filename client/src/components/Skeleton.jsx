@@ -33,6 +33,30 @@ export function SkeletonGrid({ count = 6, columns = 'md:grid-cols-2 lg:grid-cols
   );
 }
 
+export function SkeletonRow() {
+  return (
+    <div className="card-surface p-5 flex items-center justify-between gap-4 animate-pulse">
+      <div className="flex-1">
+        <div className="w-1/3 h-4 rounded bg-white/5 mb-2" />
+        <div className="w-1/2 h-3 rounded bg-white/5" />
+      </div>
+      <div className="w-16 h-6 rounded-full bg-white/5" />
+    </div>
+  );
+}
+
+export function SkeletonTableRow({ columns = 4 }) {
+  return (
+    <tr className="border-b border-white/5">
+      {Array.from({ length: columns }).map((_, index) => (
+        <td key={index} className="px-5 py-4">
+          <div className="w-full h-3 rounded bg-white/5 animate-pulse" />
+        </td>
+      ))}
+    </tr>
+  );
+}
+
 export function EmptyState({ title, description }) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 px-6">

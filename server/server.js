@@ -8,6 +8,9 @@ const productRoutes = require('./routes/productRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const changelogRoutes = require('./routes/changelogRoutes');
 const snippetRoutes = require('./routes/snippetRoutes');
+const licenseRoutes = require('./routes/licenseRoutes');
+const proxyRoutes = require('./routes/proxyRoutes');
+const apiKeyRoutes = require('./routes/apiKeyRoutes');
 
 const app = express();
 
@@ -38,6 +41,10 @@ app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/changelog', changelogRoutes);
 app.use('/api/snippets', snippetRoutes);
+app.use('/api/v1/license', licenseRoutes.publicRouter);
+app.use('/api/admin/license-keys', licenseRoutes.adminRouter);
+app.use('/api/v1', proxyRoutes);
+app.use('/api/admin/api-keys', apiKeyRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

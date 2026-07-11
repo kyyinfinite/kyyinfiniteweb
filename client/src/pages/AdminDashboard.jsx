@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext.jsx';
 import { api, cancelActiveUpload } from '../lib/api.js';
 import MarkdownRenderer from '../components/MarkdownRenderer.jsx';
+import { useToast } from '../context/ToastContext.jsx';
+import { SkeletonRow, SkeletonTableRow } from '../components/Skeleton.jsx';
 import {
  IconChart,
  IconPlugin,
@@ -11,6 +13,10 @@ import {
  IconServer,
  IconDownload,
  IconScript,
+ IconKey,
+ IconCopy,
+ IconRefresh,
+ IconLock,
 } from '../lib/icons.jsx';
 
 const TABS = [
@@ -18,6 +24,8 @@ const TABS = [
  { key: 'assets', label: 'Asset Manager', icon: IconPlugin },
  { key: 'snippets', label: 'Snippets', icon: IconScript },
  { key: 'hosting', label: 'Hosting Products', icon: IconServer },
+ { key: 'apikeys', label: 'API Keys', icon: IconKey },
+ { key: 'licenses', label: 'License Keys', icon: IconLock },
  { key: 'changelog', label: 'Changelog', icon: IconUpload },
  { key: 'orders', label: 'Orders and Tickets', icon: IconTicket },
 ];
@@ -70,6 +78,8 @@ export default function AdminDashboard() {
  {activeTab === 'assets' && <AssetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'snippets' && <SnippetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'hosting' && <HostingProductsPanel idToken={idToken} refreshToken={refreshToken} />}
+ {activeTab === 'apikeys' && <ApiKeysPanel idToken={idToken} refreshToken={refreshToken} />}
+ {activeTab === 'licenses' && <LicenseKeysPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
  </main>
@@ -869,6 +879,319 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  </button>
  </div>
  ))}
+ </div>
+ </div>
+ );
+}
+
+const SCOPE_OPTIONS = ['tools:search', 'tools:maker', '*'];
+
+function ApiKeysPanel({ idToken, refreshToken }) {
+ const [keys, setKeys] = useState([]);
+ const [isLoading, setIsLoading] = useState(true);
+ const [label, setLabel] = useState('');
+ const [ownerEmail, setOwnerEmail] = useState('');
+ const [scopes, setScopes] = useState([]);
+ const [rateLimitTier, setRateLimitTier] = useState('default');
+ const [errorMessage, setErrorMessage] = useState('');
+ const [isSaving, setIsSaving] = useState(false);
+ const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
+ const showToast = useToast();
+
+ async function loadKeys() {
+ const token = (await refreshToken()) || idToken;
+ const data = await api.listApiKeys(token);
+ setKeys(data);
+ }
+
+ useEffect(() => {
+ loadKeys()
+ .catch((error) => setErrorMessage(error.message))
+ .finally(() => setIsLoading(false));
+ }, []);
+
+ function toggleScope(scope) {
+ setScopes((current) =>
+ current.includes(scope) ? current.filter((item) => item !== scope) : [...current, scope]
+ );
+ }
+
+ async function handleSubmit(event) {
+ event.preventDefault();
+ if (scopes.length === 0) {
+ setErrorMessage('Select at least one scope');
+ return;
+ }
+ setIsSaving(true);
+ setErrorMessage('');
+ try {
+ const token = (await refreshToken()) || idToken;
+ const result = await api.createApiKey(token, { label, ownerEmail, scopes, rateLimitTier });
+ setNewlyCreatedKey(result.apiKey);
+ setLabel('');
+ setOwnerEmail('');
+ setScopes([]);
+ setRateLimitTier('default');
+ await loadKeys();
+ } catch (error) {
+ setErrorMessage(error.message);
+ } finally {
+ setIsSaving(false);
+ }
+ }
+
+ async function handleRevoke(id) {
+ const token = (await refreshToken()) || idToken;
+ await api.revokeApiKey(token, id);
+ await loadKeys();
+ }
+
+ function copyKey() {
+ navigator.clipboard.writeText(newlyCreatedKey);
+ showToast('API key copied', { type: 'success' });
+ }
+
+ return (
+ <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+ <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
+ <h2 className="text-zinc-50 font-semibold mb-5">Create API Key</h2>
+
+ <label className="text-sm text-zinc-400 mb-2 block">Label</label>
+ <input
+ required
+ value={label}
+ onChange={(event) => setLabel(event.target.value)}
+ placeholder="e.g. my-whatsapp-bot"
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+
+ <label className="text-sm text-zinc-400 mb-2 block">Owner email (optional)</label>
+ <input
+ type="email"
+ value={ownerEmail}
+ onChange={(event) => setOwnerEmail(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+
+ <label className="text-sm text-zinc-400 mb-2 block">Scopes</label>
+ <div className="flex flex-wrap gap-2 mb-4">
+ {SCOPE_OPTIONS.map((scope) => (
+ <button
+ key={scope}
+ type="button"
+ onClick={() => toggleScope(scope)}
+ className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
+ scopes.includes(scope)
+ ? 'bg-brand text-white border-brand'
+ : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+ }`}
+ >
+ {scope}
+ </button>
+ ))}
+ </div>
+
+ <label className="text-sm text-zinc-400 mb-2 block">Rate limit tier</label>
+ <select
+ value={rateLimitTier}
+ onChange={(event) => setRateLimitTier(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ >
+ <option value="default">Default (30/min)</option>
+ <option value="pro">Pro (120/min)</option>
+ </select>
+
+ {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+
+ <button type="submit" disabled={isSaving} className="btn-primary w-full">
+ {isSaving ? 'Creating.' : 'Create key'}
+ </button>
+
+ {newlyCreatedKey && (
+ <div className="mt-5 pt-5 border-t border-zinc-800">
+ <p className="text-xs text-yellow-400 mb-2">
+ Copy this now — it won't be shown again.
+ </p>
+ <button
+ onClick={copyKey}
+ className="w-full font-mono-ui text-brand-light text-xs tracking-wide bg-black/30 border border-brand/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-brand/50 transition-colors duration-200"
+ >
+ <span className="truncate">{newlyCreatedKey}</span>
+ <IconCopy className="w-3.5 h-3.5 shrink-0" />
+ </button>
+ </div>
+ )}
+ </form>
+
+ <div className="lg:col-span-3 space-y-4">
+ {isLoading ? (
+ <>
+ <SkeletonRow />
+ <SkeletonRow />
+ </>
+ ) : keys.length === 0 ? (
+ <p className="text-zinc-500 text-sm">No API keys created yet.</p>
+ ) : (
+ keys.map((key) => (
+ <div key={key._id} className="card-surface p-5 flex items-center justify-between gap-4">
+ <div className="min-w-0">
+ <p className="text-zinc-50 font-medium">{key.label}</p>
+ <p className="text-zinc-500 text-xs mt-1 font-mono-ui">
+ kyy_{key.keyId}... - {key.scopes.join(', ')} - {key.rateLimitTier}
+ </p>
+ <p className="text-zinc-600 text-xs mt-1">
+ {key.requestCount} requests
+ {key.lastUsedAt ? ` - last used ${new Date(key.lastUsedAt).toLocaleDateString('en-US')}` : ' - never used'}
+ </p>
+ </div>
+ <div className="flex items-center gap-3 shrink-0">
+ <span
+ className={`text-xs px-2.5 py-1 rounded-full ${
+ key.status === 'active' ? 'bg-brand/15 text-brand-light' : 'bg-red-500/10 text-red-400'
+ }`}
+ >
+ {key.status}
+ </span>
+ {key.status === 'active' && (
+ <button
+ onClick={() => handleRevoke(key._id)}
+ className="text-red-400 hover:text-red-300 text-sm font-medium"
+ >
+ Revoke
+ </button>
+ )}
+ </div>
+ </div>
+ ))
+ )}
+ </div>
+ </div>
+ );
+}
+
+function LicenseKeysPanel({ idToken, refreshToken }) {
+ const [licenses, setLicenses] = useState([]);
+ const [isLoading, setIsLoading] = useState(true);
+ const [statusFilter, setStatusFilter] = useState('all');
+ const [errorMessage, setErrorMessage] = useState('');
+
+ async function loadLicenses() {
+ const token = (await refreshToken()) || idToken;
+ const params = statusFilter !== 'all' ? { status: statusFilter } : {};
+ const data = await api.listLicenseKeys(token, params);
+ setLicenses(data);
+ }
+
+ useEffect(() => {
+ setIsLoading(true);
+ loadLicenses()
+ .catch((error) => setErrorMessage(error.message))
+ .finally(() => setIsLoading(false));
+ }, [statusFilter]);
+
+ async function handleRevoke(id) {
+ const token = (await refreshToken()) || idToken;
+ await api.revokeLicenseKey(token, id);
+ await loadLicenses();
+ }
+
+ async function handleResetActivations(id) {
+ const token = (await refreshToken()) || idToken;
+ await api.resetLicenseActivations(token, id);
+ await loadLicenses();
+ }
+
+ return (
+ <div>
+ <div className="flex gap-2 mb-6">
+ {['all', 'active', 'revoked', 'expired'].map((status) => (
+ <button
+ key={status}
+ onClick={() => setStatusFilter(status)}
+ className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors duration-200 ${
+ statusFilter === status
+ ? 'bg-brand text-white'
+ : 'border border-zinc-800 text-zinc-400 hover:text-brand-light'
+ }`}
+ >
+ {status}
+ </button>
+ ))}
+ </div>
+
+ {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+
+ <div className="card-surface overflow-x-auto">
+ <table className="w-full text-sm">
+ <thead>
+ <tr className="text-left text-zinc-400 border-b border-zinc-800">
+ <th className="px-5 py-3">License Key</th>
+ <th className="px-5 py-3">Asset</th>
+ <th className="px-5 py-3">Buyer</th>
+ <th className="px-5 py-3">Activations</th>
+ <th className="px-5 py-3">Status</th>
+ <th className="px-5 py-3">Actions</th>
+ </tr>
+ </thead>
+ <tbody>
+ {isLoading ? (
+ <>
+ <SkeletonTableRow columns={6} />
+ <SkeletonTableRow columns={6} />
+ <SkeletonTableRow columns={6} />
+ </>
+ ) : licenses.length === 0 ? (
+ <tr>
+ <td colSpan={6} className="px-5 py-8 text-center text-zinc-500">
+ No license keys found.
+ </td>
+ </tr>
+ ) : (
+ licenses.map((license) => (
+ <tr key={license._id} className="border-b border-white/5 last:border-0">
+ <td className="px-5 py-3 font-mono-ui text-zinc-100 text-xs">{license.key}</td>
+ <td className="px-5 py-3 text-zinc-400">{license.asset?.name}</td>
+ <td className="px-5 py-3 text-zinc-400">{license.buyerEmail}</td>
+ <td className="px-5 py-3 text-zinc-400">
+ {license.activations.length}/{license.maxActivations}
+ </td>
+ <td className="px-5 py-3">
+ <span
+ className={`text-xs px-2 py-1 rounded-full ${
+ license.status === 'active'
+ ? 'bg-brand/15 text-brand-light'
+ : license.status === 'expired'
+ ? 'bg-yellow-500/10 text-yellow-400'
+ : 'bg-red-500/10 text-red-400'
+ }`}
+ >
+ {license.status}
+ </span>
+ </td>
+ <td className="px-5 py-3">
+ <div className="flex items-center gap-3">
+ <button
+ onClick={() => handleResetActivations(license._id)}
+ className="text-zinc-400 hover:text-brand-light flex items-center gap-1"
+ title="Reset activations"
+ >
+ <IconRefresh className="w-3.5 h-3.5" />
+ </button>
+ {license.status !== 'revoked' && (
+ <button
+ onClick={() => handleRevoke(license._id)}
+ className="text-red-400 hover:text-red-300 text-xs font-medium"
+ >
+ Revoke
+ </button>
+ )}
+ </div>
+ </td>
+ </tr>
+ ))
+ )}
+ </tbody>
+ </table>
  </div>
  </div>
  );

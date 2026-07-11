@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Home', end: true },
   { to: '/showcase', label: 'Products' },
   { to: '/snippets', label: 'Snippets' },
+  { to: '/developers', label: 'API' },
   { to: '/marketplace', label: 'Hosting' },
 ];
 
