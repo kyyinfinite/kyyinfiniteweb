@@ -23,7 +23,6 @@ const TABS = [
 
 export default function BottomNav() {
   return (
-    {/* Container Floating Navbar */}
     <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
       
       {/* Efek Glassmorphism & Cyber/Edgy Dark Style */}
