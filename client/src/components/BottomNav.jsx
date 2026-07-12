@@ -23,25 +23,43 @@ const TABS = [
 
 export default function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-nav border-t border-white/5 pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-stretch justify-around px-2">
+    {/* Container Floating Navbar */}
+    <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
+      
+      {/* Efek Glassmorphism & Cyber/Edgy Dark Style */}
+      <div className="bg-zinc-950/75 backdrop-blur-xl border border-zinc-800 shadow-2xl rounded-2xl flex items-center justify-around px-2 py-2">
+        
         {TABS.map((tab) => (
           <NavLink
             key={tab.to}
             to={tab.to}
             end={tab.end}
-            className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5"
+            className="relative flex-1 flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl z-10 tap-highlight-transparent"
           >
             {({ isActive }) => (
               <>
+                {/* Animasi Pill Background Framer Motion */}
                 {isActive && (
-                  <motion.span
-                    layoutId="bottom-nav-glow"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-brand-light rounded-full shadow-glow-brand"
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-zinc-800/80 rounded-xl -z-10 border border-zinc-700/50 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <tab.icon className={`w-5 h-5 ${isActive ? 'text-brand-light' : 'text-zinc-500'}`} />
-                <span className={`text-[10px] font-medium ${isActive ? 'text-brand-light' : 'text-zinc-500'}`}>
+                
+                {/* Transisi Warna Ikon yang Smooth */}
+                <tab.icon 
+                  className={`w-5 h-5 transition-all duration-300 ${
+                    isActive ? 'text-brand-light drop-shadow-md' : 'text-zinc-500 hover:text-zinc-400'
+                  }`} 
+                />
+                
+                {/* Teks dengan Font Weight dan Tracking disesuaikan */}
+                <span 
+                  className={`text-[10px] font-semibold tracking-wider transition-colors duration-300 ${
+                    isActive ? 'text-white' : 'text-zinc-500'
+                  }`}
+                >
                   {tab.label}
                 </span>
               </>
