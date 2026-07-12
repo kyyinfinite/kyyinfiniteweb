@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAdmin } from '../context/AdminContext.jsx';
 import { api, cancelActiveUpload } from '../lib/api.js';
 import MarkdownRenderer from '../components/MarkdownRenderer.jsx';
@@ -49,18 +50,52 @@ export default function AdminDashboard() {
  }
 
  return (
- <main className="max-w-6xl mx-auto px-6 py-12">
- <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
- <div>
- <h1 className="text-3xl font-semibold text-zinc-50">Admin Dashboard</h1>
- <p className="text-zinc-400 mt-1 text-sm">{adminUser.email}</p>
+ <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 md:flex md:gap-8">
+ <aside className="hidden md:flex md:w-64 md:flex-col md:shrink-0">
+ <div className="card-surface p-5 sticky top-24">
+ <p className="text-zinc-50 font-semibold">Admin Dashboard</p>
+ <p className="text-zinc-500 text-xs mt-1 truncate">{adminUser.email}</p>
+
+ <nav className="flex flex-col gap-1 mt-6">
+ {TABS.map((tab) => (
+ <button
+ key={tab.key}
+ onClick={() => setActiveTab(tab.key)}
+ className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-left transition-all duration-200 ${
+ activeTab === tab.key
+ ? 'bg-brand/15 text-brand-light'
+ : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
+ }`}
+ >
+ {activeTab === tab.key && (
+ <motion.span
+ layoutId="admin-sidebar-active"
+ className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full bg-brand-light shadow-glow-brand"
+ />
+ )}
+ <tab.icon className="w-4 h-4 shrink-0" />
+ <span className="truncate">{tab.label}</span>
+ </button>
+ ))}
+ </nav>
+
+ <button onClick={logout} className="btn-outline w-full mt-6 text-sm">
+ Sign out
+ </button>
  </div>
- <button onClick={logout} className="btn-outline w-fit">
+ </aside>
+
+ <div className="md:hidden flex items-center justify-between gap-4 mb-6">
+ <div>
+ <h1 className="text-2xl font-semibold text-zinc-50">Admin Dashboard</h1>
+ <p className="text-zinc-400 mt-1 text-xs truncate">{adminUser.email}</p>
+ </div>
+ <button onClick={logout} className="btn-outline text-sm shrink-0">
  Sign out
  </button>
  </div>
 
- <div className="flex gap-2 mb-10 overflow-x-auto">
+ <div className="md:hidden flex gap-2 mb-8 overflow-x-auto pb-1">
  {TABS.map((tab) => (
  <button
  key={tab.key}
@@ -76,6 +111,13 @@ export default function AdminDashboard() {
  ))}
  </div>
 
+ <main className="min-w-0 flex-1">
+ <div className="hidden md:block mb-8">
+ <h1 className="text-2xl font-semibold text-zinc-50">
+ {TABS.find((tab) => tab.key === activeTab)?.label}
+ </h1>
+ </div>
+
  {activeTab === 'metrics' && <MetricsPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'assets' && <AssetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'snippets' && <SnippetManagerPanel idToken={idToken} refreshToken={refreshToken} />}
@@ -85,6 +127,7 @@ export default function AdminDashboard() {
  {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
  </main>
+ </div>
  );
 }
 
@@ -157,6 +200,7 @@ function VerifyEmailGate({ adminUser, logout, refreshAdminUser, sendVerification
 
 function MetricsPanel({ idToken, refreshToken }) {
  const [metrics, setMetrics] = useState(null);
+ const [series, setSeries] = useState(null);
  const [errorMessage, setErrorMessage] = useState('');
 
  useEffect(() => {
@@ -164,8 +208,14 @@ function MetricsPanel({ idToken, refreshToken }) {
  async function load() {
  try {
  const token = (await refreshToken()) || idToken;
- const data = await api.getMetrics(token);
- if (isMounted) setMetrics(data);
+ const [metricsData, seriesData] = await Promise.all([
+ api.getMetrics(token),
+ api.getMetricsTimeseries(token),
+ ]);
+ if (isMounted) {
+ setMetrics(metricsData);
+ setSeries(seriesData.series);
+ }
  } catch (error) {
  if (isMounted) setErrorMessage(error.message);
  }
@@ -177,7 +227,26 @@ function MetricsPanel({ idToken, refreshToken }) {
  }, [idToken, refreshToken]);
 
  if (errorMessage) return <p className="text-red-400">{errorMessage}</p>;
- if (!metrics) return <p className="text-zinc-400">Loading metrics.</p>;
+
+ if (!metrics || !series) {
+ return (
+ <div className="space-y-6">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+ {Array.from({ length: 5 }).map((_, index) => (
+ <div key={index} className="card-surface p-6 animate-pulse">
+ <div className="w-10 h-10 rounded-lg bg-white/5 mb-4" />
+ <div className="w-2/3 h-3 rounded bg-white/5 mb-3" />
+ <div className="w-1/3 h-6 rounded bg-white/5" />
+ </div>
+ ))}
+ </div>
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+ <div className="card-surface p-6 h-64 animate-pulse" />
+ <div className="card-surface p-6 h-64 animate-pulse" />
+ </div>
+ </div>
+ );
+ }
 
  const cards = [
  { label: 'Total Downloads', value: metrics.totalDownloads, icon: IconDownload },
@@ -187,7 +256,13 @@ function MetricsPanel({ idToken, refreshToken }) {
  { label: 'Published Assets', value: metrics.totalAssets, icon: IconPlugin },
  ];
 
+ const chartData = series.map((row) => ({
+ ...row,
+ label: new Date(row.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+ }));
+
  return (
+ <div className="space-y-6">
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
  {cards.map((card) => (
  <div key={card.label} className="card-surface p-6">
@@ -198,6 +273,73 @@ function MetricsPanel({ idToken, refreshToken }) {
  <p className="text-2xl font-semibold text-zinc-50 mt-1">{card.value}</p>
  </div>
  ))}
+ </div>
+
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+ <div className="card-surface p-6">
+ <p className="text-zinc-50 font-semibold mb-1">Downloads</p>
+ <p className="text-zinc-500 text-xs mb-4">Last 30 days</p>
+ <ResponsiveContainer width="100%" height={220}>
+ <AreaChart data={chartData}>
+ <defs>
+ <linearGradient id="downloadsGradient" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+ <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+ </linearGradient>
+ </defs>
+ <XAxis dataKey="label" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
+ <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} width={30} allowDecimals={false} />
+ <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+ <Tooltip
+ contentStyle={{
+ background: 'rgba(9,9,11,0.9)',
+ border: '1px solid rgba(255,255,255,0.1)',
+ borderRadius: 12,
+ fontSize: 12,
+ }}
+ labelStyle={{ color: '#a1a1aa' }}
+ />
+ <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fill="url(#downloadsGradient)" />
+ </AreaChart>
+ </ResponsiveContainer>
+ </div>
+
+ <div className="card-surface p-6">
+ <p className="text-zinc-50 font-semibold mb-1">Revenue</p>
+ <p className="text-zinc-500 text-xs mb-4">Last 30 days, completed orders</p>
+ <ResponsiveContainer width="100%" height={220}>
+ <AreaChart data={chartData}>
+ <defs>
+ <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
+ <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+ </linearGradient>
+ </defs>
+ <XAxis dataKey="label" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
+ <YAxis
+ stroke="#71717a"
+ fontSize={11}
+ tickLine={false}
+ axisLine={false}
+ width={44}
+ tickFormatter={(value) => `${Math.round(value / 1000)}k`}
+ />
+ <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+ <Tooltip
+ contentStyle={{
+ background: 'rgba(9,9,11,0.9)',
+ border: '1px solid rgba(255,255,255,0.1)',
+ borderRadius: 12,
+ fontSize: 12,
+ }}
+ labelStyle={{ color: '#a1a1aa' }}
+ formatter={(value) => [`Rp ${Number(value).toLocaleString('id-ID')}`, 'Revenue']}
+ />
+ <Area type="monotone" dataKey="revenue" stroke="#22d3ee" strokeWidth={2} fill="url(#revenueGradient)" />
+ </AreaChart>
+ </ResponsiveContainer>
+ </div>
+ </div>
  </div>
  );
 }
@@ -215,11 +357,17 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  const [isUploading, setIsUploading] = useState(false);
  const [errorMessage, setErrorMessage] = useState('');
  const [expandedAssetId, setExpandedAssetId] = useState(null);
+ const [panelMode, setPanelMode] = useState('version');
  const [newVersion, setNewVersion] = useState('');
  const [newNotes, setNewNotes] = useState('');
  const [newFile, setNewFile] = useState(null);
  const [newVersionProgress, setNewVersionProgress] = useState(0);
  const [isSavingChangelog, setIsSavingChangelog] = useState(false);
+ const [editName, setEditName] = useState('');
+ const [editDescription, setEditDescription] = useState('');
+ const [editDescriptionTab, setEditDescriptionTab] = useState('write');
+ const [editTags, setEditTags] = useState('');
+ const [isSavingEdit, setIsSavingEdit] = useState(false);
 
  async function loadAssets() {
  const token = (await refreshToken()) || idToken;
@@ -279,6 +427,48 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  const token = (await refreshToken()) || idToken;
  await api.deleteAsset(token, id);
  await loadAssets();
+ }
+
+ function openVersionPanel(assetId) {
+ if (expandedAssetId === assetId && panelMode === 'version') {
+ setExpandedAssetId(null);
+ return;
+ }
+ setExpandedAssetId(assetId);
+ setPanelMode('version');
+ }
+
+ function openEditPanel(asset) {
+ if (expandedAssetId === asset._id && panelMode === 'edit') {
+ setExpandedAssetId(null);
+ return;
+ }
+ setEditName(asset.name);
+ setEditDescription(asset.description);
+ setEditDescriptionTab('write');
+ setEditTags((asset.tags || []).join(', '));
+ setExpandedAssetId(asset._id);
+ setPanelMode('edit');
+ }
+
+ async function handleSaveEdit(event, assetId) {
+ event.preventDefault();
+ setIsSavingEdit(true);
+ setErrorMessage('');
+ try {
+ const token = (await refreshToken()) || idToken;
+ await api.updateAsset(token, assetId, {
+ name: editName,
+ description: editDescription,
+ tags: editTags.split(',').map((tag) => tag.trim()).filter(Boolean),
+ });
+ setExpandedAssetId(null);
+ await loadAssets();
+ } catch (error) {
+ setErrorMessage(error.message);
+ } finally {
+ setIsSavingEdit(false);
+ }
  }
 
  async function handleAddChangelog(event, assetId) {
@@ -439,10 +629,16 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  </div>
  <div className="flex items-center gap-4">
  <button
- onClick={() => setExpandedAssetId(expandedAssetId === asset._id ? null : asset._id)}
+ onClick={() => openEditPanel(asset)}
+ className="text-zinc-400 hover:text-brand-light text-sm font-medium"
+ >
+ {expandedAssetId === asset._id && panelMode === 'edit' ? 'Close' : 'Edit'}
+ </button>
+ <button
+ onClick={() => openVersionPanel(asset._id)}
  className="text-brand-light hover:text-cyan-300 text-sm font-medium"
  >
- {expandedAssetId === asset._id ? 'Close' : 'Add version'}
+ {expandedAssetId === asset._id && panelMode === 'version' ? 'Close' : 'Add version'}
  </button>
  <button
  onClick={() => handleDelete(asset._id)}
@@ -453,7 +649,68 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  </div>
  </div>
 
- {expandedAssetId === asset._id && (
+ {expandedAssetId === asset._id && panelMode === 'edit' && (
+ <form onSubmit={(event) => handleSaveEdit(event, asset._id)} className="mt-5 pt-5 border-t border-zinc-800">
+ <label className="text-sm text-zinc-400 mb-2 block">Name</label>
+ <input
+ required
+ value={editName}
+ onChange={(event) => setEditName(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+
+ <div className="flex items-center justify-between mb-2">
+ <label className="text-sm text-zinc-400 block">Description (Markdown supported)</label>
+ <div className="flex gap-1 text-xs">
+ <button
+ type="button"
+ onClick={() => setEditDescriptionTab('write')}
+ className={`px-2.5 py-1 rounded-md ${editDescriptionTab === 'write' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
+ >
+ Write
+ </button>
+ <button
+ type="button"
+ onClick={() => setEditDescriptionTab('preview')}
+ className={`px-2.5 py-1 rounded-md ${editDescriptionTab === 'preview' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
+ >
+ Preview
+ </button>
+ </div>
+ </div>
+
+ {editDescriptionTab === 'write' ? (
+ <textarea
+ required
+ rows={10}
+ value={editDescription}
+ onChange={(event) => setEditDescription(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+ ) : (
+ <div className="mb-4">
+ {editDescription ? (
+ <MarkdownRenderer content={editDescription} />
+ ) : (
+ <p className="text-zinc-600 text-sm px-4 py-6 border border-zinc-800 rounded-xl">Nothing to preview yet.</p>
+ )}
+ </div>
+ )}
+
+ <label className="text-sm text-zinc-400 mb-2 block">Tags (comma separated)</label>
+ <input
+ value={editTags}
+ onChange={(event) => setEditTags(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+
+ <button type="submit" disabled={isSavingEdit} className="btn-primary text-sm">
+ {isSavingEdit ? 'Saving.' : 'Save changes'}
+ </button>
+ </form>
+ )}
+
+ {expandedAssetId === asset._id && panelMode === 'version' && (
  <form onSubmit={(event) => handleAddChangelog(event, asset._id)} className="mt-5 pt-5 border-t border-zinc-800">
  <div className="grid grid-cols-2 gap-4 mb-3">
  <input

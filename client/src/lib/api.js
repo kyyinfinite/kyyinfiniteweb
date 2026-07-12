@@ -84,6 +84,7 @@ export const api = {
   getOrderStatus: (orderId) => request(`/payments/order/${orderId}`),
 
   getMetrics: (token) => request('/admin/metrics', { token }),
+  getMetricsTimeseries: (token) => request('/admin/metrics/timeseries', { token }),
   listOrders: (token) => request('/admin/orders', { token }),
   listPanels: (token) => request('/admin/panels', { token }),
 

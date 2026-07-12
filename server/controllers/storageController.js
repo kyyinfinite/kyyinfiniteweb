@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const ProjectAsset = require('../models/ProjectAsset');
 const LicenseKey = require('../models/LicenseKey');
+const DownloadEvent = require('../models/DownloadEvent');
 const { uploadFileToGithub, deleteFileFromGithub } = require('../services/githubStorageService');
 
 function buildStoragePath(category, originalName) {
@@ -163,6 +164,8 @@ async function downloadAsset(req, res) {
       { new: true }
     );
 
+    DownloadEvent.create({ asset: asset._id, version: asset.currentVersion }).catch(() => null);
+
     return res.status(200).json({ downloadUrl: asset.downloadUrl, downloadCount: asset.downloadCount });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to process download', error: error.message });
@@ -226,6 +229,8 @@ async function downloadChangelogVersion(req, res) {
     if (!entry) {
       return res.status(404).json({ message: 'Changelog entry not found' });
     }
+
+    DownloadEvent.create({ asset: asset._id, version: entry.version }).catch(() => null);
 
     return res.status(200).json({ downloadUrl: entry.fileUrl });
   } catch (error) {

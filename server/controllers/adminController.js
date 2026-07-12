@@ -2,6 +2,64 @@ const ProjectAsset = require('../models/ProjectAsset');
 const Order = require('../models/Order');
 const PurchasedPanel = require('../models/PurchasedPanel');
 const Product = require('../models/Product');
+const DownloadEvent = require('../models/DownloadEvent');
+
+function buildLastNDays(n) {
+  const days = [];
+  for (let i = n - 1; i >= 0; i -= 1) {
+    const date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - i);
+    days.push(date.toISOString().slice(0, 10));
+  }
+  return days;
+}
+
+async function getMetricsTimeseries(req, res) {
+  try {
+    const rangeDays = 30;
+    const since = new Date();
+    since.setUTCHours(0, 0, 0, 0);
+    since.setUTCDate(since.getUTCDate() - (rangeDays - 1));
+
+    const [downloadAgg, revenueAgg] = await Promise.all([
+      DownloadEvent.aggregate([
+        { $match: { createdAt: { $gte: since } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      Order.aggregate([
+        { $match: { paymentStatus: 'completed', createdAt: { $gte: since } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            total: { $sum: '$grossAmount' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const downloadMap = new Map(downloadAgg.map((row) => [row._id, row.count]));
+    const revenueMap = new Map(revenueAgg.map((row) => [row._id, { total: row.total, count: row.count }]));
+
+    const days = buildLastNDays(rangeDays);
+    const series = days.map((day) => ({
+      date: day,
+      downloads: downloadMap.get(day) || 0,
+      revenue: revenueMap.get(day)?.total || 0,
+      orders: revenueMap.get(day)?.count || 0,
+    }));
+
+    return res.status(200).json({ series });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to load metrics timeseries', error: error.message });
+  }
+}
 
 async function getMetrics(req, res) {
   try {
@@ -85,4 +143,12 @@ async function updateProduct(req, res) {
   }
 }
 
-module.exports = { getMetrics, listOrders, listPanels, listProductsAdmin, createProduct, updateProduct };
+module.exports = {
+  getMetrics,
+  getMetricsTimeseries,
+  listOrders,
+  listPanels,
+  listProductsAdmin,
+  createProduct,
+  updateProduct,
+};
