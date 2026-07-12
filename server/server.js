@@ -20,6 +20,13 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*' }));
 app.use(express.json({ limit: '2mb' }));
 
+// Midtrans's dashboard "Tes URL notifikasi" pings this URL with a plain GET
+// and expects a fast response. It must NOT depend on the DB middleware below,
+// since a cold Mongo connection can be slower than Midtrans's test timeout.
+app.get('/api/payments/webhook', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Webhook endpoint is reachable. Use POST for real notifications.' });
+});
+
 app.use(async (req, res, next) => {
   try {
     await connectDB();
