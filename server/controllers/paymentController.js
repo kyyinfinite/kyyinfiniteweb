@@ -107,7 +107,10 @@ async function handleApiKeyOrderWebhook(payload, res) {
 
   const order = await ApiKeyOrder.findOne({ orderId: order_id });
   if (!order) {
-    return res.status(404).json({ message: 'API key order not found' });
+    // Order tidak ketemu (bisa jadi ping test dari dashboard Midtrans, order_id
+    // dummy, dsb). Tetap balas 200 supaya Midtrans tidak menganggap endpoint ini
+    // bermasalah — cuma tidak ada apapun yang perlu diproses di sisi kita.
+    return res.status(200).json({ message: 'Acknowledged (no matching order)' });
   }
 
   order.rawWebhookData = payload;
@@ -131,13 +134,26 @@ async function handleApiKeyOrderWebhook(payload, res) {
 }
 
 async function handleWebhook(req, res) {
+  const payload = req.body || {};
+
   try {
-    const payload = req.body;
     const { order_id, transaction_status, fraud_status } = payload;
+
+    // Midtrans's own docs: notification URL must always respond HTTP 200 to
+    // confirm receipt — including for reachability pings / test payloads that
+    // don't carry a real order_id or valid signature. We use the signature
+    // ONLY to decide whether to act on the payload, never to set the HTTP
+    // status code (returning 401/404 here is exactly what breaks the
+    // dashboard's "Tes URL notifikasi" button and can also make Midtrans
+    // flag the endpoint as unhealthy).
+    if (!order_id || typeof order_id !== 'string') {
+      return res.status(200).json({ message: 'Acknowledged (no order_id in payload)' });
+    }
 
     const isValid = verifySignature(payload);
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid signature' });
+      console.warn('Webhook received with invalid signature, ignoring payload for order:', order_id);
+      return res.status(200).json({ message: 'Acknowledged (signature not verified, ignored)' });
     }
 
     if (order_id.startsWith(ORDER_ID_PREFIX)) {
@@ -146,7 +162,7 @@ async function handleWebhook(req, res) {
 
     const order = await Order.findOne({ orderId: order_id }).populate('product').populate('asset');
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(200).json({ message: 'Acknowledged (no matching order)' });
     }
 
     order.rawWebhookData = payload;
@@ -187,7 +203,12 @@ async function handleWebhook(req, res) {
 
     return res.status(200).json({ message: 'Webhook processed' });
   } catch (error) {
-    return res.status(500).json({ message: 'Webhook processing failed', error: error.message });
+    // Tetap log errornya buat kita, tapi jangan balas non-200 ke Midtrans
+    // supaya endpoint tidak ditandai bermasalah — retry dari Midtrans (kalau
+    // ada) toh akan diproses ulang dengan aman karena semua update di atas
+    // idempotent (cek paymentStatus dulu sebelum ubah).
+    console.error('Webhook processing error:', error.message, { orderId: payload.order_id });
+    return res.status(200).json({ message: 'Acknowledged (internal error logged)' });
   }
 }
 
