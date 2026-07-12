@@ -111,6 +111,8 @@ export const api = {
   listApiKeys: (token) => request('/admin/api-keys', { token }),
   createApiKey: (token, body) => request('/admin/api-keys', { method: 'POST', body, token }),
   revokeApiKey: (token, id) => request(`/admin/api-keys/${id}/revoke`, { method: 'PATCH', token }),
+  updateApiKey: (token, id, body) => request(`/admin/api-keys/${id}`, { method: 'PATCH', body, token }),
+  deleteApiKey: (token, id) => request(`/admin/api-keys/${id}`, { method: 'DELETE', token }),
 
   listApiEndpoints: () => request('/v1/_meta/endpoints'),
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAdmin } from '../context/AdminContext.jsx';
 import { api, cancelActiveUpload } from '../lib/api.js';
 import MarkdownRenderer from '../components/MarkdownRenderer.jsx';
@@ -17,6 +18,7 @@ import {
  IconCopy,
  IconRefresh,
  IconLock,
+ IconClose,
 } from '../lib/icons.jsx';
 
 const TABS = [
@@ -896,6 +898,8 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  const [errorMessage, setErrorMessage] = useState('');
  const [isSaving, setIsSaving] = useState(false);
  const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
+ const [editingKey, setEditingKey] = useState(null);
+ const [deletingKey, setDeletingKey] = useState(null);
  const showToast = useToast();
 
  async function loadKeys() {
@@ -946,12 +950,29 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  await loadKeys();
  }
 
+ async function handleUpdateKey(id, changes) {
+ const token = (await refreshToken()) || idToken;
+ await api.updateApiKey(token, id, changes);
+ await loadKeys();
+ setEditingKey(null);
+ showToast('API key updated', { type: 'success' });
+ }
+
+ async function handleDeleteKey(id) {
+ const token = (await refreshToken()) || idToken;
+ await api.deleteApiKey(token, id);
+ await loadKeys();
+ setDeletingKey(null);
+ showToast('API key deleted', { type: 'success' });
+ }
+
  function copyKey() {
  navigator.clipboard.writeText(newlyCreatedKey);
  showToast('API key copied', { type: 'success' });
  }
 
  return (
+ <>
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
  <h2 className="text-zinc-50 font-semibold mb-5">Create API Key</h2>
@@ -1060,11 +1081,193 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  Revoke
  </button>
  )}
+ <button
+ onClick={() => setEditingKey(key)}
+ className="text-zinc-400 hover:text-brand-light text-sm font-medium"
+ >
+ Edit
+ </button>
+ <button
+ onClick={() => setDeletingKey(key)}
+ className="text-zinc-500 hover:text-red-400 text-sm font-medium"
+ >
+ Delete
+ </button>
  </div>
  </div>
  ))
  )}
  </div>
+ </div>
+
+ {editingKey && (
+ <EditApiKeyModal
+ apiKey={editingKey}
+ onClose={() => setEditingKey(null)}
+ onSave={(changes) => handleUpdateKey(editingKey._id, changes)}
+ />
+ )}
+
+ {deletingKey && (
+ <ConfirmModal
+ title="Delete API key?"
+ message={`This permanently deletes "${deletingKey.label}". Any client using it will immediately lose access. This cannot be undone.`}
+ confirmLabel="Delete"
+ onCancel={() => setDeletingKey(null)}
+ onConfirm={() => handleDeleteKey(deletingKey._id)}
+ />
+ )}
+ </>
+ );
+}
+
+function EditApiKeyModal({ apiKey, onClose, onSave }) {
+ const [label, setLabel] = useState(apiKey.label);
+ const [ownerEmail, setOwnerEmail] = useState(apiKey.ownerEmail || '');
+ const [scopes, setScopes] = useState(apiKey.scopes || []);
+ const [rateLimitTier, setRateLimitTier] = useState(apiKey.rateLimitTier || 'default');
+ const [isSaving, setIsSaving] = useState(false);
+ const [errorMessage, setErrorMessage] = useState('');
+
+ function toggleScope(scope) {
+ setScopes((current) =>
+ current.includes(scope) ? current.filter((item) => item !== scope) : [...current, scope]
+ );
+ }
+
+ async function handleSubmit(event) {
+ event.preventDefault();
+ if (scopes.length === 0) {
+ setErrorMessage('Select at least one scope');
+ return;
+ }
+ setIsSaving(true);
+ setErrorMessage('');
+ try {
+ await onSave({ label, ownerEmail, scopes, rateLimitTier });
+ } catch (error) {
+ setErrorMessage(error.message);
+ setIsSaving(false);
+ }
+ }
+
+ return (
+ <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+ <motion.div
+ initial={{ opacity: 0, scale: 0.96, y: 8 }}
+ animate={{ opacity: 1, scale: 1, y: 0 }}
+ exit={{ opacity: 0, scale: 0.96, y: 8 }}
+ transition={{ duration: 0.2, ease: 'easeOut' }}
+ className="card-surface relative w-full max-w-md p-6"
+ >
+ <button
+ onClick={onClose}
+ className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-200"
+ >
+ <IconClose className="w-5 h-5" />
+ </button>
+
+ <h2 className="text-zinc-50 font-semibold mb-5">Edit API Key</h2>
+
+ <form onSubmit={handleSubmit}>
+ <label className="text-sm text-zinc-400 mb-2 block">Label</label>
+ <input
+ required
+ value={label}
+ onChange={(event) => setLabel(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+
+ <label className="text-sm text-zinc-400 mb-2 block">Owner email</label>
+ <input
+ type="email"
+ value={ownerEmail}
+ onChange={(event) => setOwnerEmail(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ />
+
+ <label className="text-sm text-zinc-400 mb-2 block">Scopes</label>
+ <div className="flex flex-wrap gap-2 mb-4">
+ {SCOPE_OPTIONS.map((scope) => (
+ <button
+ key={scope}
+ type="button"
+ onClick={() => toggleScope(scope)}
+ className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
+ scopes.includes(scope)
+ ? 'bg-brand text-white border-brand'
+ : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+ }`}
+ >
+ {scope}
+ </button>
+ ))}
+ </div>
+
+ <label className="text-sm text-zinc-400 mb-2 block">Rate limit tier</label>
+ <select
+ value={rateLimitTier}
+ onChange={(event) => setRateLimitTier(event.target.value)}
+ className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ >
+ <option value="default">Default (30/min)</option>
+ <option value="pro">Pro (120/min)</option>
+ </select>
+
+ {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+
+ <div className="flex gap-3">
+ <button type="button" onClick={onClose} className="btn-outline flex-1">
+ Cancel
+ </button>
+ <button type="submit" disabled={isSaving} className="btn-primary flex-1">
+ {isSaving ? 'Saving.' : 'Save changes'}
+ </button>
+ </div>
+ </form>
+ </motion.div>
+ </div>
+ );
+}
+
+function ConfirmModal({ title, message, confirmLabel, onCancel, onConfirm }) {
+ const [isConfirming, setIsConfirming] = useState(false);
+
+ async function handleConfirm() {
+ setIsConfirming(true);
+ try {
+ await onConfirm();
+ } finally {
+ setIsConfirming(false);
+ }
+ }
+
+ return (
+ <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
+ <motion.div
+ initial={{ opacity: 0, scale: 0.96, y: 8 }}
+ animate={{ opacity: 1, scale: 1, y: 0 }}
+ exit={{ opacity: 0, scale: 0.96, y: 8 }}
+ transition={{ duration: 0.2, ease: 'easeOut' }}
+ className="card-surface relative w-full max-w-sm p-6"
+ >
+ <h2 className="text-zinc-50 font-semibold mb-2">{title}</h2>
+ <p className="text-zinc-400 text-sm mb-6">{message}</p>
+ <div className="flex gap-3">
+ <button onClick={onCancel} className="btn-outline flex-1">
+ Cancel
+ </button>
+ <button
+ onClick={handleConfirm}
+ disabled={isConfirming}
+ className="flex-1 rounded-xl bg-red-500/90 hover:bg-red-500 text-white font-semibold px-5 py-2.5 transition-colors duration-200"
+ >
+ {isConfirming ? 'Please wait.' : confirmLabel}
+ </button>
+ </div>
+ </motion.div>
  </div>
  );
 }

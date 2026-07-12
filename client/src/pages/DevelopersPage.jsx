@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api, runPlaygroundRequest } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
@@ -10,9 +10,27 @@ import {
   IconEyeOff,
   IconClock,
   IconDownload,
+  IconSearch,
 } from '../lib/icons.jsx';
 
 const STORAGE_KEY = 'kyy-playground-api-key';
+
+const METHOD_STYLES = {
+  GET: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  POST: 'bg-brand/15 text-brand-light border-brand/30',
+  PUT: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  DELETE: 'bg-red-500/15 text-red-300 border-red-500/30',
+};
+
+function categoryOf(endpoint) {
+  if (endpoint.category) return endpoint.category;
+  const segment = endpoint.path.split('/').filter(Boolean)[0];
+  return segment || 'other';
+}
+
+function categoryLabel(category) {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
 
 function EndpointCard({ endpoint, apiKey }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +38,7 @@ function EndpointCard({ endpoint, apiKey }) {
   const [result, setResult] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const showToast = useToast();
+  const methodStyle = METHOD_STYLES[endpoint.method] || METHOD_STYLES.GET;
 
   async function handleRun() {
     setIsRunning(true);
@@ -48,11 +67,11 @@ function EndpointCard({ endpoint, apiKey }) {
     <div className="card-surface overflow-hidden">
       <button
         onClick={() => setIsOpen((open) => !open)}
-        className="w-full flex items-center justify-between gap-4 p-5 text-left"
+        className="w-full flex items-center justify-between gap-4 p-5 text-left group"
       >
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono-ui px-2 py-0.5 rounded bg-brand/15 text-brand-light uppercase">
+            <span className={`text-[10px] font-mono-ui px-2 py-0.5 rounded border uppercase tracking-wide ${methodStyle}`}>
               {endpoint.method}
             </span>
             <span className="font-mono-ui text-sm text-zinc-200 truncate">/api/v1{endpoint.path}</span>
@@ -62,9 +81,11 @@ function EndpointCard({ endpoint, apiKey }) {
               </span>
             )}
           </div>
-          <p className="text-zinc-400 text-sm mt-1">{endpoint.description}</p>
+          <p className="text-zinc-400 text-sm mt-1.5">{endpoint.description}</p>
         </div>
-        <span className="text-zinc-500 text-xs shrink-0">{isOpen ? 'Close' : 'Try it'}</span>
+        <span className="text-zinc-500 text-xs shrink-0 group-hover:text-brand-light transition-colors">
+          {isOpen ? 'Close' : 'Try it'}
+        </span>
       </button>
 
       <AnimatePresence>
@@ -164,6 +185,8 @@ export default function DevelopersPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [isKeyVisible, setIsKeyVisible] = useState(false);
+  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -185,6 +208,25 @@ export default function DevelopersPage() {
     }
   }
 
+  const categories = useMemo(() => {
+    const set = new Set(endpoints.map((endpoint) => categoryOf(endpoint)));
+    return ['all', ...Array.from(set).sort()];
+  }, [endpoints]);
+
+  const filteredEndpoints = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return endpoints.filter((endpoint) => {
+      const matchesCategory = activeCategory === 'all' || categoryOf(endpoint) === activeCategory;
+      if (!matchesCategory) return false;
+      if (!q) return true;
+      return (
+        endpoint.title?.toLowerCase().includes(q) ||
+        endpoint.description?.toLowerCase().includes(q) ||
+        endpoint.path.toLowerCase().includes(q)
+      );
+    });
+  }, [endpoints, query, activeCategory]);
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
       <div className="flex items-center gap-3 mb-2">
@@ -198,7 +240,7 @@ export default function DevelopersPage() {
         it's kept in this browser tab only and never sent anywhere except in requests you trigger here.
       </p>
 
-      <div className="card-surface p-5 mb-10">
+      <div className="card-surface p-5 mb-8">
         <label className="text-sm text-zinc-400 mb-2 block">Your API Key</label>
         <div className="relative">
           <input
@@ -221,13 +263,45 @@ export default function DevelopersPage() {
         </p>
       </div>
 
+      {/* Search + category toolbar */}
+      <div className="sticky top-16 z-10 -mx-6 px-6 py-3 mb-6 bg-zinc-950/70 backdrop-blur-md border-y border-white/5">
+        <div className="relative mb-3">
+          <IconSearch className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search endpoints by name, path, or description."
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-9 pr-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                activeCategory === category
+                  ? 'bg-brand text-zinc-950 border-brand font-medium'
+                  : 'border-zinc-800 text-zinc-400 hover:border-brand/40 hover:text-brand-light'
+              }`}
+            >
+              {category === 'all' ? 'All' : categoryLabel(category)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {errorMessage && <p className="text-red-400 mb-6">{errorMessage}</p>}
 
       {isLoading ? (
         <p className="text-zinc-400">Loading endpoints.</p>
+      ) : filteredEndpoints.length === 0 ? (
+        <div className="card-surface p-8 text-center text-zinc-500 text-sm">
+          No endpoints match "{query}"{activeCategory !== 'all' ? ` in ${categoryLabel(activeCategory)}` : ''}.
+        </div>
       ) : (
         <div className="space-y-4">
-          {endpoints.map((endpoint) => (
+          {filteredEndpoints.map((endpoint) => (
             <EndpointCard key={endpoint.path} endpoint={endpoint} apiKey={apiKey} />
           ))}
         </div>

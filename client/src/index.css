@@ -89,10 +89,36 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(59, 130, 246, 0.08);
 }
 
+/* ---- Markdown / README rendering ----
+   github-markdown-css ships its own opaque GitHub palette which clashed with
+   this site's translucent glass surfaces and brand-blue accent. Everything
+   below re-points its CSS variables at the site's own tokens instead, so a
+   rendered README blends into card-surface/terminal-mockup rather than
+   floating as a separate flat black box. */
 .kyy-markdown {
+  --color-canvas-default: transparent;
+  --color-canvas-subtle: rgba(255, 255, 255, 0.04);
+  --color-fg-default: #e4e4e7;
+  --color-fg-muted: #a1a1aa;
+  --color-fg-subtle: #71717a;
+  --color-border-default: rgba(255, 255, 255, 0.12);
+  --color-border-muted: rgba(255, 255, 255, 0.08);
+  --color-accent-fg: #60a5fa;
+  --color-accent-emphasis: #3b82f6;
+  --color-danger-fg: #f87171;
+  --color-success-fg: #4ade80;
+  --color-attention-fg: #fbbf24;
+  --color-neutral-muted: rgba(255, 255, 255, 0.06);
+
+  background: rgba(24, 24, 27, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--color-fg-default);
   padding: 1.5rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .kyy-markdown--attached {
@@ -103,7 +129,131 @@ body {
   border-bottom-right-radius: 0.75rem;
 }
 
+.kyy-markdown a {
+  color: var(--color-accent-fg);
+  text-decoration: none;
+}
+.kyy-markdown a:hover {
+  text-decoration: underline;
+}
+
+.kyy-markdown h1,
+.kyy-markdown h2,
+.kyy-markdown h3,
+.kyy-markdown h4 {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  border-bottom-color: var(--color-border-muted);
+}
+
+.kyy-markdown h1 { font-size: 1.65em; }
+.kyy-markdown h2 { font-size: 1.35em; }
+.kyy-markdown h3 { font-size: 1.15em; }
+
+.kyy-markdown blockquote {
+  color: var(--color-fg-muted);
+  border-left: 3px solid rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+
+.kyy-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.kyy-markdown table th,
+.kyy-markdown table td {
+  border-color: var(--color-border-default);
+}
+.kyy-markdown table tr {
+  background: transparent;
+  border-top-color: var(--color-border-default);
+}
+.kyy-markdown table tr:nth-child(2n) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.kyy-markdown hr {
+  background-color: var(--color-border-default);
+}
+
+.kyy-markdown img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+.kyy-markdown :not(pre) > code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f0b429;
+  border-radius: 0.3rem;
+  padding: 0.15em 0.4em;
+  font-size: 0.85em;
+}
+
+/* Fenced code blocks: header bar with language + copy button, no double padding */
 .kyy-markdown pre {
   background: transparent !important;
   padding: 0 !important;
+  margin: 0 !important;
+}
+
+.kyy-code-block {
+  margin: 1rem 0;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 14, 18, 0.9);
+}
+
+.kyy-code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.kyy-code-block-lang {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #71717a;
+}
+
+.kyy-code-block pre,
+.kyy-code-block code {
+  background: transparent !important;
+}
+
+.kyy-code-block > div {
+  overflow-x: auto;
+}
+
+.kyy-code-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 11px;
+  color: #a1a1aa;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.kyy-code-copy:hover {
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.kyy-code-copy--done {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.08);
 }
