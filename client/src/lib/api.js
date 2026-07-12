@@ -116,6 +116,10 @@ export const api = {
   deleteApiKey: (token, id) => request(`/admin/api-keys/${id}`, { method: 'DELETE', token }),
 
   listApiEndpoints: () => request('/v1/_meta/endpoints'),
+
+  requestMyApiKey: (token, body) => request('/user/api-keys', { method: 'POST', body, token }),
+  listMyApiKeys: (token) => request('/user/api-keys', { token }),
+  revokeMyApiKey: (token, id) => request(`/user/api-keys/${id}/revoke`, { method: 'PATCH', token }),
 };
 
 export async function runPlaygroundRequest(path, params, apiKey) {

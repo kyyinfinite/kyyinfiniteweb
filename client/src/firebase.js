@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,5 +25,9 @@ if (isConfigValid) {
   );
 }
 
-export { firebaseAuth, isConfigValid };
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
+githubProvider.addScope('user:email');
+
+export { firebaseAuth, isConfigValid, googleProvider, githubProvider };
 export default firebaseApp;

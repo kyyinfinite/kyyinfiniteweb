@@ -1143,7 +1143,7 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  );
 }
 
-const SCOPE_OPTIONS = ['tools:search', 'tools:maker', '*'];
+const SCOPE_OPTIONS = ['tools:search', 'tools:maker', 'tools:downloader', '*'];
 
 function ApiKeysPanel({ idToken, refreshToken }) {
  const [keys, setKeys] = useState([]);
@@ -1313,10 +1313,24 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  keys.map((key) => (
  <div key={key._id} className="card-surface p-5 flex items-center justify-between gap-4">
  <div className="min-w-0">
+ <div className="flex items-center gap-2 flex-wrap">
  <p className="text-zinc-50 font-medium">{key.label}</p>
+ <span
+ className={`text-[10px] px-2 py-0.5 rounded-full border ${
+ key.ownerType === 'user'
+ ? 'border-purple-500/30 bg-purple-500/10 text-purple-300'
+ : 'border-zinc-700 bg-zinc-800/60 text-zinc-400'
+ }`}
+ >
+ {key.ownerType === 'user' ? 'Self-serve' : 'Admin-issued'}
+ </span>
+ </div>
  <p className="text-zinc-500 text-xs mt-1 font-mono-ui">
  kyy_{key.keyId}... - {key.scopes.join(', ')} - {key.rateLimitTier}
  </p>
+ {key.ownerEmail && (
+ <p className="text-zinc-600 text-xs mt-1">Owner: {key.ownerEmail}</p>
+ )}
  <p className="text-zinc-600 text-xs mt-1">
  {key.requestCount} requests
  {key.lastUsedAt ? ` - last used ${new Date(key.lastUsedAt).toLocaleDateString('en-US')}` : ' - never used'}

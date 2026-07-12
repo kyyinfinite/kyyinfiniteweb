@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { AdminProvider } from './context/AdminContext.jsx';
+import { UserProvider } from './context/UserContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import './index.css';
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <ToastProvider>
           <AdminProvider>
-            <App />
+            <UserProvider>
+              <App />
+            </UserProvider>
           </AdminProvider>
         </ToastProvider>
       </BrowserRouter>

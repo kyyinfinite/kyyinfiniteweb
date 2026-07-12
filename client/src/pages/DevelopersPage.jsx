@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api, runPlaygroundRequest } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
@@ -12,9 +13,25 @@ import {
   IconDownload,
   IconClose,
   IconArrowRight,
+  IconSearch,
 } from '../lib/icons.jsx';
 
 const STORAGE_KEY = 'kyy-playground-api-key';
+
+const CATEGORY_LABELS = {
+  search: 'Search',
+  maker: 'Maker',
+  downloader: 'Downloader',
+};
+
+function categoryOf(endpoint) {
+  const segment = endpoint.path.split('/').filter(Boolean)[0];
+  return segment || 'other';
+}
+
+function categoryLabel(category) {
+  return CATEGORY_LABELS[category] || category.charAt(0).toUpperCase() + category.slice(1);
+}
 
 function EndpointTestModal({ endpoint, apiKey, onClose }) {
   const [values, setValues] = useState({});
@@ -187,6 +204,8 @@ export default function DevelopersPage() {
   const [apiKey, setApiKey] = useState('');
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [activeEndpoint, setActiveEndpoint] = useState(null);
+  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -208,6 +227,35 @@ export default function DevelopersPage() {
     }
   }
 
+  const categories = useMemo(() => {
+    const set = new Set(endpoints.map((endpoint) => categoryOf(endpoint)));
+    return ['all', ...Array.from(set).sort()];
+  }, [endpoints]);
+
+  const filteredEndpoints = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return endpoints.filter((endpoint) => {
+      const matchesCategory = activeCategory === 'all' || categoryOf(endpoint) === activeCategory;
+      if (!matchesCategory) return false;
+      if (!q) return true;
+      return (
+        endpoint.title?.toLowerCase().includes(q) ||
+        endpoint.description?.toLowerCase().includes(q) ||
+        endpoint.path.toLowerCase().includes(q)
+      );
+    });
+  }, [endpoints, query, activeCategory]);
+
+  const groupedEndpoints = useMemo(() => {
+    const groups = new Map();
+    filteredEndpoints.forEach((endpoint) => {
+      const category = categoryOf(endpoint);
+      if (!groups.has(category)) groups.set(category, []);
+      groups.get(category).push(endpoint);
+    });
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredEndpoints]);
+
   return (
     <main className="max-w-3xl mx-auto px-6 py-14">
       <div className="flex items-center gap-3 mb-2">
@@ -219,6 +267,12 @@ export default function DevelopersPage() {
       <p className="text-zinc-400 text-sm mb-6">
         Tap any endpoint to test it in a popup — your key stays in this tab only.
       </p>
+      <Link
+        to="/developers/request-key"
+        className="inline-flex items-center gap-1.5 text-brand-light text-sm mb-6 hover:underline"
+      >
+        Don't have a key? Sign in to request one →
+      </Link>
 
       <div className="card-surface p-4 mb-8">
         <div className="relative">
@@ -239,6 +293,34 @@ export default function DevelopersPage() {
         </div>
       </div>
 
+      {/* Search + category toolbar */}
+      <div className="mb-8">
+        <div className="relative mb-3">
+          <IconSearch className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search endpoints by name, path, or description."
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-9 pr-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                activeCategory === category
+                  ? 'bg-brand text-zinc-950 border-brand font-medium'
+                  : 'border-zinc-800 text-zinc-400 hover:border-brand/40 hover:text-brand-light'
+              }`}
+            >
+              {category === 'all' ? 'All' : categoryLabel(category)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {errorMessage && <p className="text-red-400 mb-6">{errorMessage}</p>}
 
       {isLoading ? (
@@ -247,10 +329,29 @@ export default function DevelopersPage() {
             <div key={index} className="card-surface p-4 h-16 animate-pulse" />
           ))}
         </div>
+      ) : groupedEndpoints.length === 0 ? (
+        <div className="card-surface p-8 text-center text-zinc-500 text-sm">
+          No endpoints match "{query}"{activeCategory !== 'all' ? ` in ${categoryLabel(activeCategory)}` : ''}.
+        </div>
       ) : (
-        <div className="space-y-3">
-          {endpoints.map((endpoint) => (
-            <EndpointRow key={endpoint.path} endpoint={endpoint} onTry={setActiveEndpoint} />
+        <div className="space-y-8">
+          {groupedEndpoints.map(([category, categoryEndpoints]) => (
+            <section key={category}>
+              <div className="flex items-center gap-3 mb-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  {categoryLabel(category)}
+                </h2>
+                <span className="text-[10px] text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-full px-2 py-0.5">
+                  {categoryEndpoints.length}
+                </span>
+                <div className="h-px flex-1 bg-white/5" />
+              </div>
+              <div className="space-y-3">
+                {categoryEndpoints.map((endpoint) => (
+                  <EndpointRow key={endpoint.path} endpoint={endpoint} onTry={setActiveEndpoint} />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
