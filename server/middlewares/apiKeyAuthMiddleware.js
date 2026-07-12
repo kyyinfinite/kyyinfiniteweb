@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const ApiKey = require('../models/ApiKey');
+const ApiKeyUsageEvent = require('../models/ApiKeyUsageEvent');
 const { consumeRateLimit } = require('../utils/rateLimit');
 const { KEY_PREFIX, KEY_ID_LENGTH } = require('../utils/apiKeyGenerator');
 
@@ -61,6 +62,14 @@ function requireApiKey(scope) {
         return res.status(403).json({ status: false, creator: 'KyyInfinite', message: 'API key not authorized for this endpoint' });
       }
 
+      if (apiKey.requestLimit !== null && apiKey.requestLimit !== undefined && apiKey.requestCount >= apiKey.requestLimit) {
+        return res.status(403).json({
+          status: false,
+          creator: 'KyyInfinite',
+          message: `This API key has used all ${apiKey.requestLimit} lifetime requests. Purchase a new key to keep using this API.`,
+        });
+      }
+
       const limit = apiKey.rateLimitTier === 'pro' ? 120 : 30;
       const rateResult = await consumeRateLimit(`apikey:${apiKey.keyId}`, { limit, windowMs: 60_000 });
       res.set('X-RateLimit-Limit', String(rateResult.limit));
@@ -75,6 +84,8 @@ function requireApiKey(scope) {
       apiKey.lastUsedAt = new Date();
       apiKey.lastUsedIp = clientIp(req);
       apiKey.save().catch(() => null); // fire-and-forget, jangan blocking response
+
+      ApiKeyUsageEvent.create({ keyId: apiKey.keyId, ownerUid: apiKey.ownerUid || null, scope }).catch(() => null);
 
       req.apiKeyContext = { keyId: apiKey.keyId, scopes: apiKey.scopes };
       next();

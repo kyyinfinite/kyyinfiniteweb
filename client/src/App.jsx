@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar.jsx';
 import BottomNav from './components/BottomNav.jsx';
@@ -15,7 +15,7 @@ import ChangelogsPage from './pages/ChangelogsPage.jsx';
 import DevelopersPage from './pages/DevelopersPage.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import RequestApiKey from './pages/RequestApiKey.jsx';
+import Profile from './pages/Profile.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ServerError from './pages/ServerError.jsx';
 
@@ -34,7 +34,8 @@ export default function App() {
           <Route path="/snippets/:id" element={<PageTransition><SnippetDetail /></PageTransition>} />
           <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
  <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
-          <Route path="/developers/request-key" element={<PageTransition><RequestApiKey /></PageTransition>} />
+          <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />
+          <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />

@@ -2,9 +2,19 @@ const { getAuthAdmin } = require('../config/firebase');
 const UserAccount = require('../models/UserAccount');
 
 /**
+ * Ambil 2 huruf pertama dari bagian sebelum '@' di email (atau dari nama),
+ * dipakai sebagai handle singkat pas pertama kali akun dibuat.
+ * Contoh: "kyyinfinite@gmail.com" -> "ky"
+ */
+function deriveUsername(decodedToken) {
+  const source = decodedToken.email?.split('@')[0] || decodedToken.name || decodedToken.uid;
+  return source.replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toLowerCase() || 'us';
+}
+
+/**
  * Beda dari adminAuthMiddleware: middleware ini menerima siapa saja yang
- * berhasil login lewat Firebase (Google/GitHub/dll), bukan cuma email admin.
- * Dipakai buat endpoint self-serve API key milik user biasa.
+ * berhasil login lewat Firebase (Google/GitHub/Email/Phone), bukan cuma
+ * email admin. Dipakai buat endpoint self-serve API key & profile user biasa.
  */
 async function userAuthMiddleware(req, res, next) {
   try {
@@ -22,8 +32,8 @@ async function userAuthMiddleware(req, res, next) {
       return res.status(401).json({ message: 'Invalid or expired authentication token', error: verifyError.message });
     }
 
-    if (!decodedToken.email) {
-      return res.status(403).json({ message: 'Account has no email on file' });
+    if (!decodedToken.email && !decodedToken.phone_number) {
+      return res.status(403).json({ message: 'Account has no email or phone number on file' });
     }
 
     const provider = decodedToken.firebase?.sign_in_provider || 'other';
@@ -32,14 +42,24 @@ async function userAuthMiddleware(req, res, next) {
     if (!userRecord) {
       userRecord = await UserAccount.create({
         uid: decodedToken.uid,
-        email: decodedToken.email,
+        email: decodedToken.email || null,
+        phoneNumber: decodedToken.phone_number || null,
+        username: deriveUsername(decodedToken),
         displayName: decodedToken.name || '',
         photoURL: decodedToken.picture || '',
         provider,
       });
-    } else if (userRecord.email !== decodedToken.email) {
-      userRecord.email = decodedToken.email;
-      await userRecord.save();
+    } else {
+      let dirty = false;
+      if (decodedToken.email && userRecord.email !== decodedToken.email) {
+        userRecord.email = decodedToken.email;
+        dirty = true;
+      }
+      if (decodedToken.phone_number && userRecord.phoneNumber !== decodedToken.phone_number) {
+        userRecord.phoneNumber = decodedToken.phone_number;
+        dirty = true;
+      }
+      if (dirty) await userRecord.save();
     }
 
     req.user = userRecord;

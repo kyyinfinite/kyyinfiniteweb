@@ -11,6 +11,8 @@ const ApiKeySchema = new mongoose.Schema(
     scopes: { type: [String], default: [] },
     status: { type: String, enum: ['active', 'revoked'], default: 'active', index: true },
     rateLimitTier: { type: String, enum: ['default', 'pro'], default: 'default' },
+    plan: { type: String, enum: ['free', '1000', '10000', 'unlimited'], default: 'free' },
+    requestLimit: { type: Number, default: 40 }, // batas seumur hidup; null = unlimited
     requestCount: { type: Number, default: 0 },
     lastUsedAt: { type: Date },
     lastUsedIp: { type: String },

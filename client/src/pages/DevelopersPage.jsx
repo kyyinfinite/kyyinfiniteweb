@@ -268,7 +268,7 @@ export default function DevelopersPage() {
         Tap any endpoint to test it in a popup — your key stays in this tab only.
       </p>
       <Link
-        to="/developers/request-key"
+        to="/profile"
         className="inline-flex items-center gap-1.5 text-brand-light text-sm mb-6 hover:underline"
       >
         Don't have a key? Sign in to request one →

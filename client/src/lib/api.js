@@ -120,6 +120,13 @@ export const api = {
   requestMyApiKey: (token, body) => request('/user/api-keys', { method: 'POST', body, token }),
   listMyApiKeys: (token) => request('/user/api-keys', { token }),
   revokeMyApiKey: (token, id) => request(`/user/api-keys/${id}/revoke`, { method: 'PATCH', token }),
+
+  createApiKeyOrder: (token, body) => request('/user/api-key-orders', { method: 'POST', body, token }),
+  getApiKeyOrderStatus: (token, orderId) => request(`/user/api-key-orders/${orderId}`, { token }),
+  revealApiKeyOrderKey: (token, orderId) => request(`/user/api-key-orders/${orderId}/reveal`, { token }),
+
+  getMyProfile: (token) => request('/user/profile', { token }),
+  getMyUsage: (token) => request('/user/usage', { token }),
 };
 
 export async function runPlaygroundRequest(path, params, apiKey) {

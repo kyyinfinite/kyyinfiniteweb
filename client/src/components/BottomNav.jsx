@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { IconTerminal, IconWhatsapp, IconServer, IconKey } from '../lib/icons.jsx';
+import { useUser } from '../context/UserContext.jsx';
 
 function IconHome({ className = 'w-5 h-5' }) {
   return (
@@ -13,22 +14,34 @@ function IconHome({ className = 'w-5 h-5' }) {
   );
 }
 
-const TABS = [
+function IconProfile({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M4.5 20c1.3-3.5 4.2-5.5 7.5-5.5s6.2 2 7.5 5.5" />
+    </svg>
+  );
+}
+
+const STATIC_TABS = [
   { to: '/', label: 'Home', icon: IconHome, end: true },
   { to: '/showcase', label: 'Products', icon: IconWhatsapp },
-  { to: '/snippets', label: 'Snippets', icon: IconTerminal },
   { to: '/developers', label: 'API', icon: IconKey },
   { to: '/marketplace', label: 'Hosting', icon: IconServer },
 ];
 
 export default function BottomNav() {
+  const { user } = useUser();
+  const profileTab = { to: user ? '/profile' : '/login', label: 'Profile', icon: IconProfile };
+  const tabs = [...STATIC_TABS.slice(0, 2), profileTab, ...STATIC_TABS.slice(2)];
+
   return (
     <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
       
       {/* Efek Glassmorphism & Cyber/Edgy Dark Style */}
       <div className="bg-zinc-950/75 backdrop-blur-xl border border-zinc-800 shadow-2xl rounded-2xl flex items-center justify-around px-2 py-2">
         
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <NavLink
             key={tab.to}
             to={tab.to}

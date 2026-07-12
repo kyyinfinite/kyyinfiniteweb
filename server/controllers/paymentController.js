@@ -6,8 +6,10 @@ const Product = require('../models/Product');
 const ProjectAsset = require('../models/ProjectAsset');
 const PurchasedPanel = require('../models/PurchasedPanel');
 const LicenseKey = require('../models/LicenseKey');
+const ApiKeyOrder = require('../models/ApiKeyOrder');
 const { provisionServer } = require('../services/pterodactylService');
 const { generateLicenseKey } = require('../utils/licenseKeyGenerator');
+const { issueApiKeyForOrder, ORDER_ID_PREFIX } = require('./apiKeyOrderController');
 
 async function createOrder(req, res) {
   try {
@@ -100,6 +102,34 @@ async function issueLicenseKey(order) {
   });
 }
 
+async function handleApiKeyOrderWebhook(payload, res) {
+  const { order_id, transaction_status, fraud_status } = payload;
+
+  const order = await ApiKeyOrder.findOne({ orderId: order_id });
+  if (!order) {
+    return res.status(404).json({ message: 'API key order not found' });
+  }
+
+  order.rawWebhookData = payload;
+
+  const isSettled =
+    transaction_status === 'settlement' || (transaction_status === 'capture' && fraud_status === 'accept');
+
+  if (isSettled && order.paymentStatus !== 'completed') {
+    order.paymentStatus = 'completed';
+    order.midtransTransactionId = payload.transaction_id;
+    await order.save();
+    await issueApiKeyForOrder(order);
+  } else if (['deny', 'cancel', 'expire'].includes(transaction_status)) {
+    order.paymentStatus = 'failed';
+    await order.save();
+  } else {
+    await order.save();
+  }
+
+  return res.status(200).json({ message: 'Webhook processed' });
+}
+
 async function handleWebhook(req, res) {
   try {
     const payload = req.body;
@@ -108,6 +138,10 @@ async function handleWebhook(req, res) {
     const isValid = verifySignature(payload);
     if (!isValid) {
       return res.status(401).json({ message: 'Invalid signature' });
+    }
+
+    if (order_id.startsWith(ORDER_ID_PREFIX)) {
+      return handleApiKeyOrderWebhook(payload, res);
     }
 
     const order = await Order.findOne({ orderId: order_id }).populate('product').populate('asset');

@@ -12,6 +12,8 @@ const licenseRoutes = require('./routes/licenseRoutes');
 const proxyRoutes = require('./routes/proxyRoutes');
 const apiKeyRoutes = require('./routes/apiKeyRoutes');
 const userApiKeyRoutes = require('./routes/userApiKeyRoutes');
+const userApiKeyOrderRoutes = require('./routes/userApiKeyOrderRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -47,6 +49,8 @@ app.use('/api/admin/license-keys', licenseRoutes.adminRouter);
 app.use('/api/v1', proxyRoutes);
 app.use('/api/admin/api-keys', apiKeyRoutes);
 app.use('/api/user/api-keys', userApiKeyRoutes);
+app.use('/api/user/api-key-orders', userApiKeyOrderRoutes);
+app.use('/api/user', userRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

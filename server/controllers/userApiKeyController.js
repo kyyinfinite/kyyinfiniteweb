@@ -4,6 +4,7 @@ const { generateApiKey } = require('../utils/apiKeyGenerator');
 const MAX_KEYS_PER_USER = 2;
 const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader'];
 const USER_RATE_LIMIT_TIER = 'default';
+const FREE_PLAN_REQUEST_LIMIT = 40;
 
 /** POST /api/user/api-keys — bikin API key milik user sendiri, dibatasi jumlah dan scope. */
 async function requestApiKey(req, res) {
@@ -37,9 +38,11 @@ async function requestApiKey(req, res) {
       ownerUid: req.user.uid,
       scopes: requestedScopes,
       rateLimitTier: USER_RATE_LIMIT_TIER,
+      plan: 'free',
+      requestLimit: FREE_PLAN_REQUEST_LIMIT,
     });
 
-    return res.status(201).json({ apiKey: plaintext, keyId });
+    return res.status(201).json({ apiKey: plaintext, keyId, requestLimit: FREE_PLAN_REQUEST_LIMIT });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to create API key', error: error.message });
   }
@@ -52,7 +55,12 @@ async function listMyApiKeys(req, res) {
       .sort({ createdAt: -1 })
       .select('-hashedSecret')
       .lean();
-    return res.status(200).json({ keys, limit: MAX_KEYS_PER_USER, allowedScopes: ALLOWED_USER_SCOPES });
+    return res.status(200).json({
+      keys,
+      limit: MAX_KEYS_PER_USER,
+      allowedScopes: ALLOWED_USER_SCOPES,
+      freePlanRequestLimit: FREE_PLAN_REQUEST_LIMIT,
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to list API keys', error: error.message });
   }
