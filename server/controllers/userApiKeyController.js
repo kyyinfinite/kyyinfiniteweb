@@ -10,6 +10,8 @@ const ALLOWED_USER_SCOPES = [
   'tools:news',
   'tools:info',
   'tools:primbon',
+  'tools:random',
+  'tools:stalker',
 ];
 const USER_RATE_LIMIT_TIER = 'default';
 const FREE_PLAN_REQUEST_LIMIT = 40;
