@@ -7,7 +7,25 @@ import { useToast } from '../context/ToastContext.jsx';
 import { IconKey, IconCopy, IconQr, IconTicket } from '../lib/icons.jsx';
 import ApiKeyPurchaseModal from '../components/ApiKeyPurchaseModal.jsx';
 
-const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader'];
+const ALLOWED_USER_SCOPES = [
+  'tools:search',
+  'tools:maker',
+  'tools:downloader',
+  'tools:utility',
+  'tools:news',
+  'tools:info',
+  'tools:primbon',
+];
+
+const SCOPE_INFO = {
+  'tools:search': { label: 'Search', description: 'Spotify, TikTok, YouTube, Apple Music search' },
+  'tools:maker': { label: 'Image Maker', description: 'Brat, lobby fakes, memes, text effects' },
+  'tools:downloader': { label: 'Downloader', description: 'TikTok, Instagram, YouTube, Spotify, and more' },
+  'tools:utility': { label: 'Utility', description: 'Translate, text-to-speech, image unblur' },
+  'tools:news': { label: 'News', description: 'Kompas, CNN, Tribunnews, and other feeds' },
+  'tools:info': { label: 'Info', description: 'Weather, earthquakes, TV schedules' },
+  'tools:primbon': { label: 'Primbon', description: 'Name meaning, lucky numbers, dream readings' },
+};
 
 function initialsOf(username, email) {
   const source = username || email?.split('@')[0] || '??';
@@ -212,13 +230,14 @@ export default function Profile() {
                     key={scope}
                     type="button"
                     onClick={() => toggleScope(scope)}
+                    title={SCOPE_INFO[scope]?.description}
                     className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
                       scopes.includes(scope)
                         ? 'bg-brand text-white border-brand'
                         : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
                     }`}
                   >
-                    {scope}
+                    {SCOPE_INFO[scope]?.label || scope}
                   </button>
                 ))}
               </div>
@@ -276,7 +295,7 @@ export default function Profile() {
                       </span>
                     </div>
                     <p className="text-zinc-500 text-xs mt-1 font-mono-ui">
-                      kyy_{key.keyId}... - {key.scopes.join(', ')}
+                      kyy_{key.keyId}... - {key.scopes.map((scope) => SCOPE_INFO[scope]?.label || scope).join(', ')}
                     </p>
                     <p className="text-zinc-600 text-xs mt-1">
                       {key.requestCount}

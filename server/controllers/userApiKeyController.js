@@ -2,7 +2,15 @@ const ApiKey = require('../models/ApiKey');
 const { generateApiKey } = require('../utils/apiKeyGenerator');
 
 const MAX_KEYS_PER_USER = 2;
-const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader'];
+const ALLOWED_USER_SCOPES = [
+  'tools:search',
+  'tools:maker',
+  'tools:downloader',
+  'tools:utility',
+  'tools:news',
+  'tools:info',
+  'tools:primbon',
+];
 const USER_RATE_LIMIT_TIER = 'default';
 const FREE_PLAN_REQUEST_LIMIT = 40;
 
