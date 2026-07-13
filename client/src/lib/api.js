@@ -127,6 +127,18 @@ export const api = {
 
   getMyProfile: (token) => request('/user/profile', { token }),
   getMyUsage: (token) => request('/user/usage', { token }),
+
+  createTicket: (token, body) => request('/user/tickets', { method: 'POST', body, token }),
+  listMyTickets: (token) => request('/user/tickets', { token }),
+  getMyTicket: (token, id) => request(`/user/tickets/${id}`, { token }),
+  replyToMyTicket: (token, id, body) => request(`/user/tickets/${id}/reply`, { method: 'POST', body, token }),
+
+  listAllTickets: (token, status) =>
+    request(`/admin/tickets${status && status !== 'all' ? `?status=${status}` : ''}`, { token }),
+  getAdminTicket: (token, id) => request(`/admin/tickets/${id}`, { token }),
+  replyToTicketAsAdmin: (token, id, body) => request(`/admin/tickets/${id}/reply`, { method: 'POST', body, token }),
+  updateTicketStatus: (token, id, status) =>
+    request(`/admin/tickets/${id}/status`, { method: 'PATCH', body: { status }, token }),
 };
 
 export async function runPlaygroundRequest(path, params, apiKey) {

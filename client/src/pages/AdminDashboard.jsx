@@ -31,6 +31,7 @@ const TABS = [
  { key: 'licenses', label: 'License Keys', icon: IconLock },
  { key: 'changelog', label: 'Changelog', icon: IconUpload },
  { key: 'orders', label: 'Orders and Tickets', icon: IconTicket },
+ { key: 'support', label: 'Support Tickets', icon: IconTicket },
 ];
 
 export default function AdminDashboard() {
@@ -126,6 +127,7 @@ export default function AdminDashboard() {
  {activeTab === 'licenses' && <LicenseKeysPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
+ {activeTab === 'support' && <SupportTicketsPanel idToken={idToken} refreshToken={refreshToken} />}
  </main>
  </div>
  );
@@ -1869,6 +1871,172 @@ function OrdersPanel({ idToken, refreshToken }) {
  </tbody>
  </table>
  </div>
+ </div>
+ </div>
+ );
+}
+
+const TICKET_STATUS_STYLES = {
+ open: 'bg-brand/15 text-brand-light',
+ in_progress: 'bg-amber-500/15 text-amber-300',
+ resolved: 'bg-emerald-500/15 text-emerald-300',
+ closed: 'bg-zinc-800 text-zinc-500',
+};
+
+function SupportTicketsPanel({ idToken, refreshToken }) {
+ const [tickets, setTickets] = useState([]);
+ const [statusFilter, setStatusFilter] = useState('all');
+ const [isLoading, setIsLoading] = useState(true);
+ const [errorMessage, setErrorMessage] = useState('');
+ const [selectedId, setSelectedId] = useState(null);
+ const [ticket, setTicket] = useState(null);
+ const [reply, setReply] = useState('');
+ const [replyStatus, setReplyStatus] = useState('in_progress');
+ const [isSending, setIsSending] = useState(false);
+
+ async function loadTickets() {
+ const token = (await refreshToken()) || idToken;
+ const data = await api.listAllTickets(token, statusFilter);
+ setTickets(data.tickets);
+ }
+
+ useEffect(() => {
+ setIsLoading(true);
+ loadTickets()
+ .catch((error) => setErrorMessage(error.message))
+ .finally(() => setIsLoading(false));
+ }, [statusFilter]);
+
+ async function openTicket(id) {
+ setSelectedId(id);
+ setTicket(null);
+ try {
+ const token = (await refreshToken()) || idToken;
+ const data = await api.getAdminTicket(token, id);
+ setTicket(data.ticket);
+ setReplyStatus(data.ticket.status === 'open' ? 'in_progress' : data.ticket.status);
+ } catch (error) {
+ setErrorMessage(error.message);
+ }
+ }
+
+ async function handleReply(event) {
+ event.preventDefault();
+ setIsSending(true);
+ setErrorMessage('');
+ try {
+ const token = (await refreshToken()) || idToken;
+ const data = await api.replyToTicketAsAdmin(token, selectedId, { message: reply, status: replyStatus });
+ setTicket(data.ticket);
+ setReply('');
+ await loadTickets();
+ } catch (error) {
+ setErrorMessage(error.message);
+ } finally {
+ setIsSending(false);
+ }
+ }
+
+ return (
+ <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+ <div className="lg:col-span-2">
+ <div className="flex items-center gap-2 mb-4 flex-wrap">
+ {['all', 'open', 'in_progress', 'resolved', 'closed'].map((status) => (
+ <button
+ key={status}
+ onClick={() => setStatusFilter(status)}
+ className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
+ statusFilter === status
+ ? 'bg-brand text-white border-brand'
+ : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+ }`}
+ >
+ {status.replace('_', ' ')}
+ </button>
+ ))}
+ </div>
+
+ {isLoading ? (
+ <p className="text-zinc-500 text-sm">Loading.</p>
+ ) : tickets.length === 0 ? (
+ <p className="text-zinc-500 text-sm">No tickets.</p>
+ ) : (
+ <div className="space-y-2">
+ {tickets.map((item) => (
+ <button
+ key={item._id}
+ onClick={() => openTicket(item._id)}
+ className={`w-full text-left card-surface p-4 ${selectedId === item._id ? 'border-brand/40' : ''}`}
+ >
+ <div className="flex items-center justify-between gap-3 mb-1">
+ <p className="text-zinc-50 text-sm font-medium truncate">{item.subject}</p>
+ <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${TICKET_STATUS_STYLES[item.status]}`}>
+ {item.status.replace('_', ' ')}
+ </span>
+ </div>
+ <p className="text-zinc-600 text-xs font-mono-ui">{item.ticketNumber} - {item.ownerEmail}</p>
+ </button>
+ ))}
+ </div>
+ )}
+ </div>
+
+ <div className="lg:col-span-3">
+ {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {!ticket ? (
+ <p className="text-zinc-500 text-sm">Select a ticket to view the conversation.</p>
+ ) : (
+ <>
+ <div className="flex items-center justify-between gap-4 mb-1">
+ <h2 className="text-zinc-50 font-semibold">{ticket.subject}</h2>
+ <span className={`text-xs px-2.5 py-1 rounded-full shrink-0 ${TICKET_STATUS_STYLES[ticket.status]}`}>
+ {ticket.status.replace('_', ' ')}
+ </span>
+ </div>
+ <p className="text-zinc-600 text-xs mb-5 font-mono-ui">
+ {ticket.ticketNumber} - {ticket.ownerEmail} - {ticket.category}
+ </p>
+
+ <div className="space-y-3 mb-5 max-h-[50vh] overflow-y-auto">
+ {ticket.replies.map((entry, index) => (
+ <div key={index} className={`card-surface p-4 ${entry.authorType === 'admin' ? 'border-brand/30' : ''}`}>
+ <div className="flex items-center justify-between gap-3 mb-1.5">
+ <span className={`text-xs font-medium ${entry.authorType === 'admin' ? 'text-brand-light' : 'text-zinc-300'}`}>
+ {entry.authorLabel}
+ </span>
+ <span className="text-[10px] text-zinc-600">{new Date(entry.createdAt).toLocaleString('en-US')}</span>
+ </div>
+ <p className="text-zinc-200 text-sm whitespace-pre-wrap">{entry.message}</p>
+ </div>
+ ))}
+ </div>
+
+ <form onSubmit={handleReply} className="card-surface p-4">
+ <textarea
+ required
+ rows={3}
+ value={reply}
+ onChange={(event) => setReply(event.target.value)}
+ placeholder="Write a reply."
+ className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+ />
+ <div className="flex items-center gap-3">
+ <select
+ value={replyStatus}
+ onChange={(event) => setReplyStatus(event.target.value)}
+ className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+ >
+ <option value="in_progress">In progress</option>
+ <option value="resolved">Resolved</option>
+ <option value="closed">Closed</option>
+ </select>
+ <button type="submit" disabled={isSending} className="btn-primary flex-1 text-sm">
+ {isSending ? 'Sending.' : 'Send reply'}
+ </button>
+ </div>
+ </form>
+ </>
+ )}
  </div>
  </div>
  );

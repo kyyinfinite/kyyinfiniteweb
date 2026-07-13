@@ -16,6 +16,8 @@ import DevelopersPage from './pages/DevelopersPage.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Profile from './pages/Profile.jsx';
+import Support from './pages/Support.jsx';
+import SupportTicketDetail from './pages/SupportTicketDetail.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ServerError from './pages/ServerError.jsx';
 
@@ -36,6 +38,8 @@ export default function App() {
  <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
           <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />
           <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+          <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
+          <Route path="/support/:id" element={<PageTransition><SupportTicketDetail /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />

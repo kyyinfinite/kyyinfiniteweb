@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useUser } from '../context/UserContext.jsx';
 import { api } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
-import { IconKey, IconCopy, IconQr } from '../lib/icons.jsx';
+import { IconKey, IconCopy, IconQr, IconTicket } from '../lib/icons.jsx';
 import ApiKeyPurchaseModal from '../components/ApiKeyPurchaseModal.jsx';
 
 const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader'];
@@ -104,7 +104,7 @@ export default function Profile() {
   }
 
   const activeCount = keys.filter((k) => k.status === 'active').length;
-  const canCreateFree = activeCount < limit;
+  const canCreateFree = keys.length < limit;
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-14 pb-28">
@@ -125,9 +125,14 @@ export default function Profile() {
             <p className="text-zinc-500 text-sm">{profile?.email || profile?.phoneNumber}</p>
           </div>
         </div>
-        <button onClick={logout} className="text-xs text-zinc-500 hover:text-red-400 shrink-0">
-          Sign out
-        </button>
+        <div className="flex items-center gap-4 shrink-0">
+          <Link to="/support" className="text-xs text-zinc-500 hover:text-brand-light flex items-center gap-1">
+            <IconTicket className="w-3.5 h-3.5" /> Support
+          </Link>
+          <button onClick={logout} className="text-xs text-zinc-500 hover:text-red-400">
+            Sign out
+          </button>
+        </div>
       </div>
 
       {errorMessage && <p className="text-red-400 text-sm mb-6">{errorMessage}</p>}
@@ -184,7 +189,7 @@ export default function Profile() {
           </div>
 
           {/* Create free key */}
-          {canCreateFree && (
+          {canCreateFree ? (
             <form onSubmit={handleCreateFreeKey} className="card-surface p-6 mb-6">
               <div className="flex items-center gap-2 mb-1">
                 <IconKey className="w-4 h-4 text-brand-light" />
@@ -234,6 +239,17 @@ export default function Profile() {
                 </div>
               )}
             </form>
+          ) : (
+            <div className="card-surface p-6 mb-6">
+              <div className="flex items-center gap-2 mb-1">
+                <IconKey className="w-4 h-4 text-zinc-500" />
+                <h2 className="text-zinc-50 font-semibold">Free API key</h2>
+              </div>
+              <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+                You've used all {limit} of your free lifetime key slots. This counts every key you've
+                ever created — revoking a key doesn't return the slot. Buy a premium key below to keep going.
+              </p>
+            </div>
           )}
 
           {/* Buy premium key */}

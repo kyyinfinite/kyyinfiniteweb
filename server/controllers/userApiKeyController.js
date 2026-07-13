@@ -20,10 +20,11 @@ async function requestApiKey(req, res) {
       return res.status(400).json({ message: `Select at least one scope from: ${ALLOWED_USER_SCOPES.join(', ')}` });
     }
 
-    const activeCount = await ApiKey.countDocuments({ ownerUid: req.user.uid, status: 'active' });
-    if (activeCount >= MAX_KEYS_PER_USER) {
+    const totalEverCreated = await ApiKey.countDocuments({ ownerUid: req.user.uid, ownerType: 'user' });
+    if (totalEverCreated >= MAX_KEYS_PER_USER) {
       return res.status(429).json({
-        message: `You already have ${activeCount} active API key(s). Revoke one before creating another (limit: ${MAX_KEYS_PER_USER}).`,
+        message: `You've already created ${totalEverCreated} API key(s), which is the free limit of ${MAX_KEYS_PER_USER}. This limit counts every key you've ever created, including revoked ones — revoking a key does not free up a new slot. Purchase a premium key from your profile page to keep going.`,
+        limitReached: true,
       });
     }
 
