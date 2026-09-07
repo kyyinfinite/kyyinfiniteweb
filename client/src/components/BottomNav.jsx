@@ -37,10 +37,10 @@ export default function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
-      
-      {/* Efek Glassmorphism & Cyber/Edgy Dark Style */}
-      <div className="bg-zinc-950/75 backdrop-blur-xl border border-zinc-800 shadow-2xl rounded-2xl flex items-center justify-around px-2 py-2">
-        
+
+      {/* Soft floating pill, consistent with the new light design system */}
+      <div className="bg-[var(--kyy-surface)]/95 backdrop-blur-xl border border-[var(--kyy-border)] shadow-[var(--kyy-shadow-lg)] rounded-2xl flex items-center justify-around px-2 py-2">
+
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
@@ -54,22 +54,22 @@ export default function BottomNav() {
                 {isActive && (
                   <motion.div
                     layoutId="nav-pill"
-                    className="absolute inset-0 bg-zinc-800/80 rounded-xl -z-10 border border-zinc-700/50 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+                    className="absolute inset-0 bg-[var(--kyy-primary-soft)] rounded-xl -z-10 border border-[var(--kyy-primary)]/15"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                
+
                 {/* Transisi Warna Ikon yang Smooth */}
-                <tab.icon 
+                <tab.icon
                   className={`w-5 h-5 transition-all duration-300 ${
-                    isActive ? 'text-brand-light drop-shadow-md' : 'text-zinc-500 hover:text-zinc-400'
-                  }`} 
+                    isActive ? 'text-[var(--kyy-primary-dark)]' : 'text-[var(--kyy-text-muted)] hover:text-[var(--kyy-text-secondary)]'
+                  }`}
                 />
-                
+
                 {/* Teks dengan Font Weight dan Tracking disesuaikan */}
-                <span 
+                <span
                   className={`text-[10px] font-semibold tracking-wider transition-colors duration-300 ${
-                    isActive ? 'text-white' : 'text-zinc-500'
+                    isActive ? 'text-[var(--kyy-primary-dark)]' : 'text-[var(--kyy-text-muted)]'
                   }`}
                 >
                   {tab.label}
