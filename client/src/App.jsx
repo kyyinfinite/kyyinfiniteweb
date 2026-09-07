@@ -39,10 +39,10 @@ export default function App() {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
-          <Route path="/showcase" element={<PageTransition><LegacyDarkShell><ShowcaseHub /></LegacyDarkShell></PageTransition>} />
+          <Route path="/showcase" element={<PageTransition><ShowcaseHub /></PageTransition>} />
           <Route path="/product/:slug" element={<PageTransition><LegacyDarkShell><ChangelogsPage /></LegacyDarkShell></PageTransition>} />
-          <Route path="/snippets" element={<PageTransition><LegacyDarkShell><SnippetsHub /></LegacyDarkShell></PageTransition>} />
-          <Route path="/snippets/:id" element={<PageTransition><LegacyDarkShell><SnippetDetail /></LegacyDarkShell></PageTransition>} />
+          <Route path="/snippets" element={<PageTransition><SnippetsHub /></PageTransition>} />
+          <Route path="/snippets/:id" element={<PageTransition><SnippetDetail /></PageTransition>} />
           <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
           <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
           <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />
