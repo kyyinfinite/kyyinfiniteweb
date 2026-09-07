@@ -33,6 +33,20 @@ function categoryLabel(category) {
   return CATEGORY_LABELS[category] || category.charAt(0).toUpperCase() + category.slice(1);
 }
 
+const METHOD_TONES = {
+  GET: 'bg-indigo-soft text-indigo-dark',
+  POST: 'bg-clover-soft text-clover',
+  DELETE: 'bg-rust-soft text-rust',
+};
+
+function MethodBadge({ method }) {
+  return (
+    <span className={`text-[10px] font-mono-ui px-2 py-0.5 rounded uppercase font-medium shrink-0 ${METHOD_TONES[method] || 'bg-paper-soft text-slate'}`}>
+      {method}
+    </span>
+  );
+}
+
 function EndpointTestModal({ endpoint, apiKey, onClose }) {
   const [values, setValues] = useState({});
   const [result, setResult] = useState(null);
@@ -67,28 +81,26 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm px-4 py-8"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.97 }}
+        initial={{ opacity: 0, y: 8, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 8, scale: 0.97 }}
+        exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
         onClick={(event) => event.stopPropagation()}
-        className="glass-panel rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
+        className="glass-panel w-full max-w-lg max-h-[85vh] overflow-y-auto"
       >
-        <div className="flex items-start justify-between gap-4 p-5 border-b border-white/10 sticky top-0 glass-panel">
+        <div className="flex items-start justify-between gap-4 p-5 border-b border-line sticky top-0 bg-paper rounded-t-[20px]">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-mono-ui px-2 py-0.5 rounded bg-brand/15 text-brand-light uppercase">
-                {endpoint.method}
-              </span>
-              <span className="font-mono-ui text-sm text-zinc-200 truncate">/api/v1{endpoint.path}</span>
+              <MethodBadge method={endpoint.method} />
+              <span className="font-mono-ui text-sm text-ink truncate">/api/v1{endpoint.path}</span>
             </div>
-            <p className="text-zinc-400 text-sm mt-1.5">{endpoint.description}</p>
+            <p className="text-slate text-sm mt-1.5">{endpoint.description}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-200 shrink-0">
+          <button onClick={onClose} className="text-slate hover:text-ink shrink-0">
             <IconClose className="w-5 h-5" />
           </button>
         </div>
@@ -96,33 +108,24 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
         <div className="p-5 space-y-4">
           {endpoint.params.map((param) => (
             <div key={param.name}>
-              <label className="text-xs text-zinc-400 mb-1.5 block">
+              <label className="text-xs text-slate mb-1.5 block">
                 {param.name}
-                {param.required && <span className="text-red-400 ml-1">*</span>}
+                {param.required && <span className="text-rust ml-1">*</span>}
               </label>
               <input
                 value={values[param.name] || ''}
                 onChange={(event) => setValues((prev) => ({ ...prev, [param.name]: event.target.value }))}
                 placeholder={param.description || param.name}
-                className="w-full rounded-lg border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+                className="w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo"
               />
             </div>
           ))}
 
           <div className="flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={handleRun}
-              disabled={isRunning}
-              className="btn-primary text-sm flex items-center gap-2"
-            >
-              <IconPlay className="w-3.5 h-3.5" /> {isRunning ? 'Running.' : 'Run'}
-            </motion.button>
-            <button
-              onClick={copyAsCurl}
-              className="text-xs text-zinc-500 hover:text-brand-light flex items-center gap-1.5"
-            >
+            <button onClick={handleRun} disabled={isRunning} className="btn-primary text-sm flex items-center gap-2">
+              <IconPlay className="w-3.5 h-3.5" /> {isRunning ? 'Running…' : 'Run'}
+            </button>
+            <button onClick={copyAsCurl} className="text-xs text-slate hover:text-indigo flex items-center gap-1.5">
               <IconCopy className="w-3.5 h-3.5" /> Copy as curl
             </button>
           </div>
@@ -130,14 +133,11 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
           {result && (
             <div className="terminal-mockup overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
-                <span className="w-2 h-2 rounded-full bg-red-500/70" />
-                <span className="w-2 h-2 rounded-full bg-yellow-500/70" />
-                <span className="w-2 h-2 rounded-full bg-green-500/70" />
-                <span className="ml-2 text-[11px] text-zinc-500 font-mono-ui">
-                  response — {result.status || (result.ok ? 200 : 'error')}
+                <span className="text-[11px] text-zinc-400 font-mono-ui">
+                  Response · {result.status || (result.ok ? 200 : 'error')}
                 </span>
                 {result.rateLimit?.remaining !== null && result.rateLimit?.remaining !== undefined && (
-                  <span className="ml-auto text-[10px] text-zinc-600 font-mono-ui">
+                  <span className="ml-auto text-[10px] text-zinc-500 font-mono-ui">
                     {result.rateLimit.remaining}/{result.rateLimit.limit} left
                   </span>
                 )}
@@ -151,7 +151,7 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
                     {result.contentType?.startsWith('video/') && (
                       <video src={result.blobUrl} controls className="max-w-full rounded-lg border border-white/10" />
                     )}
-                    <a href={result.blobUrl} download className="inline-flex items-center gap-1.5 text-brand-light text-xs">
+                    <a href={result.blobUrl} download className="inline-flex items-center gap-1.5 text-[#8B84F5] text-xs">
                       <IconDownload className="w-3.5 h-3.5" /> Download response
                     </a>
                   </div>
@@ -171,29 +171,26 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
 
 function EndpointRow({ endpoint, onTry }) {
   return (
-    <motion.button
+    <button
       onClick={() => onTry(endpoint)}
-      whileHover={{ x: 2 }}
       className="w-full card-surface p-4 flex items-center justify-between gap-4 text-left"
     >
       <div className="min-w-0 flex items-center gap-3">
-        <span className="text-[10px] font-mono-ui px-2 py-0.5 rounded bg-brand/15 text-brand-light uppercase shrink-0">
-          {endpoint.method}
-        </span>
+        <MethodBadge method={endpoint.method} />
         <div className="min-w-0">
-          <p className="font-mono-ui text-sm text-zinc-200 truncate">/api/v1{endpoint.path}</p>
-          <p className="text-zinc-500 text-xs truncate mt-0.5">{endpoint.title}</p>
+          <p className="font-mono-ui text-sm text-ink truncate">/api/v1{endpoint.path}</p>
+          <p className="text-slate text-xs truncate mt-0.5">{endpoint.title}</p>
         </div>
         {endpoint.cached && (
-          <span className="text-zinc-600 shrink-0" title="Cached">
+          <span className="text-mist shrink-0" title="Cached">
             <IconClock className="w-3.5 h-3.5" />
           </span>
         )}
       </div>
-      <span className="text-brand-light text-xs font-medium flex items-center gap-1 shrink-0">
+      <span className="text-indigo text-xs font-medium flex items-center gap-1 shrink-0">
         Try it <IconArrowRight className="w-3.5 h-3.5" />
       </span>
-    </motion.button>
+    </button>
   );
 }
 
@@ -257,51 +254,48 @@ export default function DevelopersPage() {
   }, [filteredEndpoints]);
 
   return (
-    <main className="max-w-3xl mx-auto px-6 py-14">
+    <main className="theme-light max-w-3xl mx-auto px-6 py-14 min-h-screen">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-9 h-9 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand-light">
+        <div className="w-9 h-9 rounded-xl bg-indigo-soft flex items-center justify-center text-indigo">
           <IconTerminal className="w-4.5 h-4.5" />
         </div>
-        <h1 className="text-2xl font-semibold text-zinc-50 font-display">API Playground</h1>
+        <h1 className="text-2xl font-semibold text-ink font-display">API playground</h1>
       </div>
-      <p className="text-zinc-400 text-sm mb-6">
+      <p className="text-slate text-sm mb-6">
         Tap any endpoint to test it in a popup — your key stays in this tab only.
       </p>
-      <Link
-        to="/profile"
-        className="inline-flex items-center gap-1.5 text-brand-light text-sm mb-6 hover:underline"
-      >
-        Don't have a key? Sign in to request one →
+      <Link to="/profile" className="inline-flex items-center gap-1.5 text-indigo text-sm mb-6 hover:underline">
+        Don't have a key? Sign in to request one <IconArrowRight className="w-3.5 h-3.5" />
       </Link>
 
       <div className="card-surface p-4 mb-8">
+        <label className="text-xs text-slate mb-1.5 block">Your API key</label>
         <div className="relative">
           <input
             type={isKeyVisible ? 'text' : 'password'}
             value={apiKey}
             onChange={(event) => handleKeyChange(event.target.value)}
             placeholder="kyy_xxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxx"
-            className="w-full rounded-lg border border-zinc-800 bg-transparent pl-3 pr-10 py-2 text-sm font-mono-ui text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+            className="w-full rounded-md border border-line bg-paper pl-3 pr-10 py-2 text-sm font-mono-ui text-ink focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo"
           />
           <button
             type="button"
             onClick={() => setIsKeyVisible((visible) => !visible)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate hover:text-ink"
           >
             {isKeyVisible ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* Search + category toolbar */}
       <div className="mb-8">
         <div className="relative mb-3">
-          <IconSearch className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <IconSearch className="w-4 h-4 text-mist absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search endpoints by name, path, or description."
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-9 pr-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+            placeholder="Search endpoints by name, path, or description"
+            className="w-full rounded-md border border-line bg-paper pl-9 pr-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -309,10 +303,10 @@ export default function DevelopersPage() {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
                 activeCategory === category
-                  ? 'bg-brand text-zinc-950 border-brand font-medium'
-                  : 'border-zinc-800 text-zinc-400 hover:border-brand/40 hover:text-brand-light'
+                  ? 'bg-indigo text-white border-indigo font-medium'
+                  : 'border-line text-slate hover:border-indigo/40 hover:text-indigo'
               }`}
             >
               {category === 'all' ? 'All' : categoryLabel(category)}
@@ -321,16 +315,16 @@ export default function DevelopersPage() {
         </div>
       </div>
 
-      {errorMessage && <p className="text-red-400 mb-6">{errorMessage}</p>}
+      {errorMessage && <p className="text-rust mb-6">{errorMessage}</p>}
 
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="card-surface p-4 h-16 animate-pulse" />
+            <div key={index} className="card-surface p-4 h-16 animate-pulse bg-paper-soft" />
           ))}
         </div>
       ) : groupedEndpoints.length === 0 ? (
-        <div className="card-surface p-8 text-center text-zinc-500 text-sm">
+        <div className="card-surface p-8 text-center text-slate text-sm">
           No endpoints match "{query}"{activeCategory !== 'all' ? ` in ${categoryLabel(activeCategory)}` : ''}.
         </div>
       ) : (
@@ -338,13 +332,13 @@ export default function DevelopersPage() {
           {groupedEndpoints.map(([category, categoryEndpoints]) => (
             <section key={category}>
               <div className="flex items-center gap-3 mb-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-mist">
                   {categoryLabel(category)}
                 </h2>
-                <span className="text-[10px] text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-full px-2 py-0.5">
+                <span className="text-[10px] text-slate bg-paper-soft border border-line rounded-full px-2 py-0.5">
                   {categoryEndpoints.length}
                 </span>
-                <div className="h-px flex-1 bg-white/5" />
+                <div className="h-px flex-1 bg-line" />
               </div>
               <div className="space-y-3">
                 {categoryEndpoints.map((endpoint) => (

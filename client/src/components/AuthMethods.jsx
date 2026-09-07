@@ -21,7 +21,7 @@ function GithubGlyph() {
 }
 
 const inputClass =
-  'w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand';
+  'w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink text-sm placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 transition-colors duration-200';
 
 export default function AuthMethods({ mode = 'login' }) {
   const { loginWithGoogle, loginWithGithub, loginWithEmail, registerWithEmail, sendOtp, confirmOtp } = useUser();
@@ -87,7 +87,7 @@ export default function AuthMethods({ mode = 'login' }) {
           type="button"
           disabled={isSubmitting}
           onClick={() => run(loginWithGoogle)}
-          className="w-full flex items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-white/5 hover:bg-white/10 text-zinc-100 text-sm font-medium py-2.5 transition-colors duration-200"
+          className="w-full flex items-center justify-center gap-3 rounded-xl border border-line bg-white hover:bg-paper-soft text-ink text-sm font-medium py-2.5 transition-colors duration-200"
         >
           <GoogleGlyph /> Continue with Google
         </button>
@@ -95,41 +95,41 @@ export default function AuthMethods({ mode = 'login' }) {
           type="button"
           disabled={isSubmitting}
           onClick={() => run(loginWithGithub)}
-          className="w-full flex items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-white/5 hover:bg-white/10 text-zinc-100 text-sm font-medium py-2.5 transition-colors duration-200"
+          className="w-full flex items-center justify-center gap-3 rounded-xl border border-line bg-white hover:bg-paper-soft text-ink text-sm font-medium py-2.5 transition-colors duration-200"
         >
           <GithubGlyph /> Continue with GitHub
         </button>
       </div>
 
       <div className="flex items-center gap-3 my-5">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[11px] text-zinc-600 uppercase tracking-wider">or</span>
-        <div className="h-px flex-1 bg-white/10" />
+        <div className="h-px flex-1 bg-line" />
+        <span className="text-[11px] text-mist uppercase tracking-wider">or</span>
+        <div className="h-px flex-1 bg-line" />
       </div>
 
       <div className="flex gap-2 mb-4">
         <button
           type="button"
           onClick={() => setMethod('email')}
-          className={`flex-1 text-xs py-2 rounded-lg border transition-colors ${
-            method === 'email' ? 'border-brand text-brand-light bg-brand/10' : 'border-zinc-800 text-zinc-400'
+          className={`flex-1 text-xs py-2 rounded-lg border transition-colors duration-200 ${
+            method === 'email' ? 'border-indigo text-indigo bg-indigo-soft' : 'border-line text-slate'
           }`}
         >
-          Email & password
+          Email &amp; password
         </button>
         <button
           type="button"
           onClick={() => setMethod('phone')}
-          className={`flex-1 text-xs py-2 rounded-lg border transition-colors ${
-            method === 'phone' ? 'border-brand text-brand-light bg-brand/10' : 'border-zinc-800 text-zinc-400'
+          className={`flex-1 text-xs py-2 rounded-lg border transition-colors duration-200 ${
+            method === 'phone' ? 'border-indigo text-indigo bg-indigo-soft' : 'border-line text-slate'
           }`}
         >
           Phone (OTP)
         </button>
       </div>
 
-      {errorMessage && <p className="text-red-400 text-sm mb-3">{errorMessage}</p>}
-      {infoMessage && <p className="text-emerald-400 text-sm mb-3">{infoMessage}</p>}
+      {errorMessage && <p className="text-rust text-sm mb-3">{errorMessage}</p>}
+      {infoMessage && <p className="text-clover text-sm mb-3">{infoMessage}</p>}
 
       {method === 'email' && (
         <form onSubmit={handleEmailSubmit} className="space-y-3">
@@ -151,7 +151,7 @@ export default function AuthMethods({ mode = 'login' }) {
             className={inputClass}
           />
           <button type="submit" disabled={isSubmitting} className="btn-primary w-full text-sm">
-            {isSubmitting ? 'Please wait.' : isRegister ? 'Create account' : 'Sign in'}
+            {isSubmitting ? 'Please wait…' : isRegister ? 'Create account' : 'Sign in'}
           </button>
         </form>
       )}
@@ -166,10 +166,10 @@ export default function AuthMethods({ mode = 'login' }) {
             placeholder="+6281234567890"
             className={inputClass}
           />
-          <p className="text-xs text-zinc-600">Use international format, e.g. +62 for Indonesia.</p>
+          <p className="text-xs text-mist">Use international format, e.g. +62 for Indonesia.</p>
           <div id="recaptcha-container" />
           <button type="submit" disabled={isSubmitting} className="btn-primary w-full text-sm">
-            {isSubmitting ? 'Sending.' : 'Send code'}
+            {isSubmitting ? 'Sending…' : 'Send code'}
           </button>
         </form>
       )}
@@ -186,7 +186,7 @@ export default function AuthMethods({ mode = 'login' }) {
             className={inputClass}
           />
           <button type="submit" disabled={isSubmitting} className="btn-primary w-full text-sm">
-            {isSubmitting ? 'Verifying.' : 'Verify code'}
+            {isSubmitting ? 'Verifying…' : 'Verify code'}
           </button>
         </form>
       )}

@@ -21,29 +21,38 @@ import SupportTicketDetail from './pages/SupportTicketDetail.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ServerError from './pages/ServerError.jsx';
 
+// The visual redesign is rolling out page by page. Pages that have been
+// migrated to the new light "soft modern digital studio" system supply their
+// own background; everything else still expects the old dark canvas. This
+// wrapper keeps the two from bleeding into each other while both exist.
+// Remove once every route below is migrated.
+function LegacyDarkShell({ children }) {
+  return <div className="min-h-screen bg-zinc-950 text-zinc-100">{children}</div>;
+}
+
 export default function App() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen text-zinc-100 transition-colors duration-300 pb-20 md:pb-0">
+    <div className="min-h-screen transition-colors duration-300 pb-20 md:pb-0">
       <Navbar />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
-          <Route path="/showcase" element={<PageTransition><ShowcaseHub /></PageTransition>} />
-          <Route path="/product/:slug" element={<PageTransition><ChangelogsPage /></PageTransition>} />
-          <Route path="/snippets" element={<PageTransition><SnippetsHub /></PageTransition>} />
-          <Route path="/snippets/:id" element={<PageTransition><SnippetDetail /></PageTransition>} />
+          <Route path="/showcase" element={<PageTransition><LegacyDarkShell><ShowcaseHub /></LegacyDarkShell></PageTransition>} />
+          <Route path="/product/:slug" element={<PageTransition><LegacyDarkShell><ChangelogsPage /></LegacyDarkShell></PageTransition>} />
+          <Route path="/snippets" element={<PageTransition><LegacyDarkShell><SnippetsHub /></LegacyDarkShell></PageTransition>} />
+          <Route path="/snippets/:id" element={<PageTransition><LegacyDarkShell><SnippetDetail /></LegacyDarkShell></PageTransition>} />
           <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
- <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
+          <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
           <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />
           <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-          <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
-          <Route path="/support/:id" element={<PageTransition><SupportTicketDetail /></PageTransition>} />
+          <Route path="/support" element={<PageTransition><LegacyDarkShell><Support /></LegacyDarkShell></PageTransition>} />
+          <Route path="/support/:id" element={<PageTransition><LegacyDarkShell><SupportTicketDetail /></LegacyDarkShell></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />
-          <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="/admin" element={<PageTransition><LegacyDarkShell><AdminDashboard /></LegacyDarkShell></PageTransition>} />
           <Route path="/500" element={<PageTransition><ServerError /></PageTransition>} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>

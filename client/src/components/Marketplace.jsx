@@ -28,10 +28,10 @@ export default function Marketplace() {
   }, []);
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-16 min-h-screen">
+    <main className="theme-light max-w-6xl mx-auto px-6 py-16 min-h-screen">
       <div className="mb-10">
-        <h1 className="font-display text-3xl font-semibold text-zinc-50">Marketplace</h1>
-        <p className="text-zinc-400 mt-2">Pterodactyl panel servers, provisioned instantly after payment.</p>
+        <h1 className="font-display text-3xl font-semibold text-ink">Marketplace</h1>
+        <p className="text-slate mt-2">Pterodactyl panel servers, provisioned instantly after payment.</p>
       </div>
 
       {isLoading ? (
@@ -49,21 +49,21 @@ export default function Marketplace() {
           variants={containerVariants}
         >
           {products.map((product) => (
-            <motion.div key={product._id} variants={itemVariants} whileHover={{ y: -6 }} className="card-surface p-6 flex flex-col h-full">
-              <div className="w-10 h-10 rounded-lg bg-brand/10 border border-brand/30 flex items-center justify-center text-brand-light mb-4">
+            <motion.div key={product._id} variants={itemVariants} whileHover={{ y: -2 }} className="card-surface p-6 flex flex-col h-full">
+              <div className="w-10 h-10 rounded-lg bg-indigo-soft flex items-center justify-center text-indigo mb-4">
                 <IconServer className="w-5 h-5" />
               </div>
-              <h3 className="font-display text-zinc-50 font-semibold mb-2">{product.name}</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed flex-1">{product.description}</p>
+              <h3 className="font-display text-ink font-semibold mb-2">{product.name}</h3>
+              <p className="text-slate text-sm leading-relaxed flex-1">{product.description}</p>
 
-              <div className="grid grid-cols-3 gap-2 my-5 text-xs text-zinc-400">
-                <div className="border border-zinc-800 rounded-lg py-2 text-center">{product.cpuLimit}% CPU</div>
-                <div className="border border-zinc-800 rounded-lg py-2 text-center">{product.ramLimit} MB RAM</div>
-                <div className="border border-zinc-800 rounded-lg py-2 text-center">{product.diskLimit} MB Disk</div>
+              <div className="grid grid-cols-3 gap-2 my-5 text-xs text-slate">
+                <div className="border border-line rounded-lg py-2 text-center">{product.cpuLimit}% CPU</div>
+                <div className="border border-line rounded-lg py-2 text-center">{product.ramLimit} MB RAM</div>
+                <div className="border border-line rounded-lg py-2 text-center">{product.diskLimit} MB Disk</div>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                <span className="text-brand-light font-semibold">Rp {product.price.toLocaleString('id-ID')}</span>
+              <div className="flex items-center justify-between pt-4 border-t border-line">
+                <span className="text-indigo font-semibold">Rp {product.price.toLocaleString('id-ID')}</span>
                 <button
                   onClick={() => setSelectedProduct(product)}
                   className="btn-primary flex items-center gap-2 text-sm"

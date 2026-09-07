@@ -29,18 +29,16 @@ export function ToastProvider({ children }) {
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: 16, scale: 0.95 }}
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              exit={{ opacity: 0, y: -8, scale: 0.97 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className={`pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium shadow-lg backdrop-blur-xl border ${
-                toast.type === 'error'
-                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                  : 'bg-brand/10 border-brand/30 text-brand-light'
+              className={`pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium bg-white/95 backdrop-blur-xl border shadow-raised ${
+                toast.type === 'error' ? 'border-rust/30 text-rust' : 'border-indigo/25 text-indigo-dark'
               }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${toast.type === 'error' ? 'bg-red-400' : 'bg-brand-light'}`}
+                className={`w-1.5 h-1.5 rounded-full ${toast.type === 'error' ? 'bg-rust' : 'bg-indigo'}`}
               />
               {toast.message}
             </motion.div>

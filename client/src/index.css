@@ -6,213 +6,49 @@ html {
   scroll-behavior: smooth;
 }
 
-/* =========================================================
-   KyyInfinite — "Soft Modern Digital Studio" design tokens
-   New light design system (redesign in progress).
-   Additive only: everything below is namespaced with a
-   kyy- prefix and does not touch the legacy dark utility
-   classes further down this file (glass-panel, card-surface,
-   btn-primary, terminal-mockup, grid-overlay, etc). Those
-   are still used by pages not yet migrated to the new system
-   and must keep working unmodified until their own redesign
-   pass. Currently consumed by: Navbar, BottomNav, Landing,
-   Logo, LiveTerminal.
-   ========================================================= */
-:root {
-  --kyy-bg: #F7F5F1;
-  --kyy-bg-soft: #FBFAF7;
-  --kyy-surface: #FFFFFF;
-  --kyy-surface-soft: #FCFBF9;
-  --kyy-text: #1E1B2E;
-  --kyy-text-secondary: #5B5768;
-  --kyy-text-muted: #97929F;
-  --kyy-border: #E9E5DD;
-  --kyy-border-soft: #F0ECE4;
-  --kyy-primary: #6D6AE8;
-  --kyy-primary-light: #8F8CF0;
-  --kyy-primary-dark: #5451C9;
-  --kyy-primary-soft: #EDECFB;
-  --kyy-success: #2E9E6B;
-  --kyy-success-soft: #E6F5EE;
-  --kyy-warning: #B9822E;
-  --kyy-warning-soft: #FAF0DF;
-  --kyy-danger: #C24E4E;
-  --kyy-danger-soft: #FBEAEA;
-  --kyy-radius-sm: 10px;
-  --kyy-radius-md: 16px;
-  --kyy-radius-lg: 22px;
-  --kyy-shadow-sm: 0 2px 10px rgba(30, 27, 46, 0.05);
-  --kyy-shadow-md: 0 8px 30px rgba(30, 27, 46, 0.06);
-  --kyy-shadow-lg: 0 24px 60px rgba(30, 27, 46, 0.10);
-}
-
-.kyy-ambient {
-  background-color: var(--kyy-bg);
-  background-image:
-    radial-gradient(circle at 12% -10%, rgba(109, 106, 232, 0.14), transparent 40%),
-    radial-gradient(circle at 100% 0%, rgba(143, 140, 240, 0.12), transparent 38%),
-    radial-gradient(circle at 45% 100%, rgba(109, 106, 232, 0.07), transparent 45%);
-  background-attachment: fixed;
-}
-
-.kyy-nav {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--kyy-border-soft);
-}
-
-.kyy-card {
-  background: var(--kyy-surface);
-  border: 1px solid var(--kyy-border);
-  border-radius: var(--kyy-radius-lg);
-  box-shadow: var(--kyy-shadow-md);
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
-}
-
-.kyy-card:hover {
-  box-shadow: var(--kyy-shadow-lg);
-  border-color: rgba(109, 106, 232, 0.25);
-  transform: translateY(-2px);
-}
-
-.kyy-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: var(--kyy-primary);
-  color: #FFFFFF;
-  font-weight: 600;
-  padding: 0.7rem 1.35rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(109, 106, 232, 0.26);
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.kyy-btn-primary:hover {
-  background: var(--kyy-primary-dark);
-  box-shadow: 0 10px 26px rgba(109, 106, 232, 0.32);
-}
-
-.kyy-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: var(--kyy-surface);
-  color: var(--kyy-text);
-  font-weight: 600;
-  padding: 0.7rem 1.35rem;
-  border-radius: 12px;
-  border: 1px solid var(--kyy-border);
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-}
-
-.kyy-btn-secondary:hover {
-  border-color: rgba(109, 106, 232, 0.35);
-  background: var(--kyy-primary-soft);
-}
-
-.kyy-btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  color: var(--kyy-text-secondary);
-  font-weight: 500;
-  padding: 0.55rem 0.9rem;
-  border-radius: 10px;
-  transition: color 0.2s ease, background 0.2s ease;
-}
-
-.kyy-btn-ghost:hover {
-  color: var(--kyy-primary-dark);
-  background: var(--kyy-primary-soft);
-}
-
-.kyy-badge-soft {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--kyy-primary-soft);
-  color: var(--kyy-primary-dark);
-  font-weight: 600;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 0.4rem 0.75rem;
-  border-radius: 999px;
-}
-
-.kyy-code-panel {
-  background: #1B1A24;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: var(--kyy-radius-lg);
-  box-shadow: 0 24px 60px rgba(30, 27, 46, 0.18);
-}
-
-.kyy-underline-sketch {
-  position: relative;
-  display: inline-block;
-  z-index: 0;
-}
-
-.kyy-underline-sketch::after {
-  content: '';
-  position: absolute;
-  left: -3px;
-  right: -3px;
-  bottom: 0.02em;
-  height: 0.32em;
-  background: rgba(109, 106, 232, 0.20);
-  border-radius: 4px;
-  z-index: -1;
-  transform: rotate(-0.7deg);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .kyy-ambient,
-  .kyy-card,
-  .kyy-btn-primary,
-  .kyy-btn-secondary,
-  .kyy-btn-ghost {
-    transition: none !important;
-  }
-}
+/*
+  This app is mid-redesign: pages migrated to the new light "soft modern
+  digital studio" system are wrapped in .theme-light (see LegacyDarkShell in
+  App.jsx for the pages that are NOT yet migrated). Shared class names like
+  .card-surface and .btn-primary keep their original dark styling as the
+  default so unmigrated pages keep working, and .theme-light overrides them
+  scoped to migrated subtrees only. Once every page is migrated, delete the
+  "legacy" block below, drop the .theme-light prefix from the "new" block,
+  and remove the LegacyDarkShell wrapper in App.jsx.
+*/
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #08090d;
-  background-image:
-    radial-gradient(circle at 15% -10%, rgba(59, 130, 246, 0.16), transparent 42%),
-    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1), transparent 38%),
-    radial-gradient(circle at 50% 100%, rgba(34, 211, 238, 0.05), transparent 45%);
-  background-attachment: fixed;
+  background-color: #F6F5F1;
   min-height: 100vh;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .font-display {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
   letter-spacing: -0.01em;
-}
-
-.glass-panel {
-  background: rgba(24, 24, 27, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-nav {
-  background: rgba(9, 9, 11, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
 }
 
 .font-mono-ui {
   font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
+
+/* Nav bar is redesigned globally (it's persistent chrome, not page content) */
+.glass-nav {
+  background: rgba(246, 245, 241, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* ============ LEGACY (dark) — unmigrated pages only ============ */
 
 .card-surface {
   background: rgba(24, 24, 27, 0.55);
@@ -230,6 +66,13 @@ body {
   transform: translateY(-4px);
 }
 
+.glass-panel {
+  background: rgba(24, 24, 27, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .btn-primary {
   @apply bg-brand hover:bg-brand-light text-zinc-950 font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring shadow-glow-brand;
 }
@@ -244,18 +87,6 @@ body {
   background-size: 40px 40px;
 }
 
-.terminal-cursor {
-  display: inline-block;
-  animation: kyy-blink 1s steps(1) infinite;
-  color: #60a5fa;
-}
-
-@keyframes kyy-blink {
-  50% {
-    opacity: 0;
-  }
-}
-
 .terminal-mockup {
   background: rgba(11, 18, 32, 0.75);
   backdrop-filter: blur(20px);
@@ -264,12 +95,17 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(59, 130, 246, 0.08);
 }
 
-/* ---- Markdown / README rendering ----
-   github-markdown-css ships its own opaque GitHub palette which clashed with
-   this site's translucent glass surfaces and brand-blue accent. Everything
-   below re-points its CSS variables at the site's own tokens instead, so a
-   rendered README blends into card-surface/terminal-mockup rather than
-   floating as a separate flat black box. */
+.terminal-cursor {
+  display: inline-block;
+  animation: kyy-blink 1s steps(1) infinite;
+  color: #60a5fa;
+}
+
+@keyframes kyy-blink {
+  50% { opacity: 0; }
+}
+
+/* Markdown / README rendering — dark theme, used by ChangelogsPage (not yet migrated) */
 .kyy-markdown {
   --color-canvas-default: transparent;
   --color-canvas-subtle: rgba(255, 255, 255, 0.04);
@@ -304,19 +140,11 @@ body {
   border-bottom-right-radius: 0.75rem;
 }
 
-.kyy-markdown a {
-  color: var(--color-accent-fg);
-  text-decoration: none;
-}
-.kyy-markdown a:hover {
-  text-decoration: underline;
-}
+.kyy-markdown a { color: var(--color-accent-fg); text-decoration: none; }
+.kyy-markdown a:hover { text-decoration: underline; }
 
-.kyy-markdown h1,
-.kyy-markdown h2,
-.kyy-markdown h3,
-.kyy-markdown h4 {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+.kyy-markdown h1, .kyy-markdown h2, .kyy-markdown h3, .kyy-markdown h4 {
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
   border-bottom-color: var(--color-border-muted);
 }
 
@@ -331,31 +159,12 @@ body {
   border-radius: 0 0.4rem 0.4rem 0;
 }
 
-.kyy-markdown table {
-  display: block;
-  max-width: 100%;
-  overflow-x: auto;
-}
-.kyy-markdown table th,
-.kyy-markdown table td {
-  border-color: var(--color-border-default);
-}
-.kyy-markdown table tr {
-  background: transparent;
-  border-top-color: var(--color-border-default);
-}
-.kyy-markdown table tr:nth-child(2n) {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.kyy-markdown hr {
-  background-color: var(--color-border-default);
-}
-
-.kyy-markdown img {
-  max-width: 100%;
-  border-radius: 0.5rem;
-}
+.kyy-markdown table { display: block; max-width: 100%; overflow-x: auto; }
+.kyy-markdown table th, .kyy-markdown table td { border-color: var(--color-border-default); }
+.kyy-markdown table tr { background: transparent; border-top-color: var(--color-border-default); }
+.kyy-markdown table tr:nth-child(2n) { background: rgba(255, 255, 255, 0.03); }
+.kyy-markdown hr { background-color: var(--color-border-default); }
+.kyy-markdown img { max-width: 100%; border-radius: 0.5rem; }
 
 .kyy-markdown :not(pre) > code {
   background: rgba(255, 255, 255, 0.08);
@@ -365,12 +174,7 @@ body {
   font-size: 0.85em;
 }
 
-/* Fenced code blocks: header bar with language + copy button, no double padding */
-.kyy-markdown pre {
-  background: transparent !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
+.kyy-markdown pre { background: transparent !important; padding: 0 !important; margin: 0 !important; }
 
 .kyy-code-block {
   margin: 1rem 0;
@@ -397,14 +201,8 @@ body {
   color: #71717a;
 }
 
-.kyy-code-block pre,
-.kyy-code-block code {
-  background: transparent !important;
-}
-
-.kyy-code-block > div {
-  overflow-x: auto;
-}
+.kyy-code-block pre, .kyy-code-block code { background: transparent !important; }
+.kyy-code-block > div { overflow-x: auto; }
 
 .kyy-code-copy {
   display: flex;
@@ -431,4 +229,89 @@ body {
   color: #4ade80;
   border-color: rgba(74, 222, 128, 0.4);
   background: rgba(74, 222, 128, 0.08);
+}
+
+/* ============ NEW (light) — "soft modern digital studio", scoped to .theme-light ============ */
+
+.theme-light {
+  color: #1D1F1A;
+  background-color: #F6F5F1;
+  background-image:
+    radial-gradient(circle at 12% -10%, rgba(88, 80, 230, 0.07), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(47, 143, 107, 0.05), transparent 42%);
+}
+
+.theme-light .card-surface {
+  background: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #E6E3D8;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.04), 0 8px 24px rgba(29, 31, 26, 0.05);
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-light .card-surface:hover {
+  border-color: #D8D4C6;
+  box-shadow: 0 2px 4px rgba(29, 31, 26, 0.05), 0 16px 40px rgba(29, 31, 26, 0.09);
+  transform: translateY(-2px);
+}
+
+.theme-light .glass-panel {
+  background: #FFFFFF;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid #E6E3D8;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.04), 0 20px 48px rgba(29, 31, 26, 0.10);
+}
+
+.theme-light .btn-primary {
+  background-color: #5850E6;
+  color: #FFFFFF;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.06), 0 6px 16px rgba(88, 80, 230, 0.18);
+}
+.theme-light .btn-primary:hover { background-color: #413AC2; }
+.theme-light .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+
+.theme-light .btn-outline {
+  background: #FFFFFF;
+  border: 1px solid #D8D4C6;
+  color: #1D1F1A;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.theme-light .btn-outline:hover { background: #FBFAF7; border-color: #6B6D64; }
+
+.theme-light .btn-ghost {
+  color: #6B6D64;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  transition: color 0.2s ease;
+}
+.theme-light .btn-ghost:hover { color: #1D1F1A; }
+
+/* Code / response panels stay a dark charcoal even inside the light theme —
+   deliberate contrast for "this is code", same idea as most docs sites */
+.theme-light .terminal-mockup {
+  background: #1B1C22;
+  backdrop-filter: none;
+  border: 1px solid #2A2B33;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.04), 0 20px 48px rgba(29, 31, 26, 0.10);
+}
+
+.theme-light .terminal-cursor { color: #7A73F0; }
+
+/* Ambient hero light — low-opacity radial gradient, never motion, never on cards */
+.ambient-blob {
+  filter: blur(60px);
+  opacity: 0.5;
 }

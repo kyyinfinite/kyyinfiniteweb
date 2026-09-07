@@ -8,19 +8,19 @@ import LiveTerminal from './LiveTerminal.jsx';
 const categories = [
   {
     icon: IconWhatsapp,
-    title: 'WhatsApp Bots',
+    title: 'WhatsApp bots',
     description: 'Premium automation scripts built on Baileys, ready to deploy on your own panel.',
     to: '/showcase?category=whatsapp-bot',
   },
   {
     icon: IconTerminal,
-    title: 'Code Snippets',
+    title: 'Code snippets',
     description: 'Battle-tested utility snippets and reusable modules across the stack.',
     to: '/snippets',
   },
   {
     icon: IconPlugin,
-    title: 'Plugins & Libraries',
+    title: 'Plugins & libraries',
     description: 'Custom libraries and plugins built for real projects, from npm packages to bot modules.',
     to: '/showcase?category=plugin',
   },
@@ -28,11 +28,11 @@ const categories = [
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 14 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
 };
 
@@ -59,93 +59,75 @@ export default function Landing() {
   }, []);
 
   return (
-    <main className="relative kyy-ambient overflow-hidden">
-      {/* Ambient decorative blobs — soft ambient lighting, not neon glow */}
+    <main className="theme-light relative overflow-hidden">
+      {/* Ambient light, not glow: one soft gradient behind the hero, low opacity, no motion */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -left-24 w-[26rem] h-[26rem] rounded-full bg-[#6D6AE8]/10 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-24 -right-32 w-[30rem] h-[30rem] rounded-full bg-[#8F8CF0]/10 blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] ambient-blob"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(88,80,230,0.10) 0%, rgba(88,80,230,0) 60%)',
+        }}
       />
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Hero                                                             */}
-      {/* ---------------------------------------------------------------- */}
       <motion.section
-        className="relative max-w-[1240px] mx-auto px-4 md:px-6 pt-16 md:pt-24 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-10 items-center"
+        className="relative max-w-shell mx-auto px-6 pt-20 pb-20 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-14 items-center"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <div className="text-center lg:text-left">
-          <motion.span variants={itemVariants} className="kyy-badge-soft">
-            kyyinfinite.my.id
-            <span className="opacity-50">/</span>
-            automation marketplace
-          </motion.span>
+        <div>
+          <motion.p variants={itemVariants} className="text-indigo font-medium text-sm mb-4">
+            Automation marketplace
+          </motion.p>
 
           <motion.h1
             variants={itemVariants}
-            className="font-display text-4xl md:text-5xl lg:text-[3.4rem] font-semibold text-[var(--kyy-text)] leading-[1.12] mt-6"
+            className="font-display text-4xl md:text-[3.4rem] font-semibold text-ink leading-[1.08]"
           >
-            Premium scripts and plugins
-            <br />
-            <span className="kyy-underline-sketch text-[var(--kyy-primary)]">built for production</span>
+            Premium scripts and plugins, built for production
           </motion.h1>
 
-          <motion.p
-            variants={itemVariants}
-            className="mt-6 text-[var(--kyy-text-secondary)] max-w-xl mx-auto lg:mx-0 text-base md:text-lg leading-relaxed"
-          >
-            WhatsApp automation scripts, reusable code snippets, and custom libraries and plugins
-            built for real projects. Download instantly, no account required.
+          <motion.p variants={itemVariants} className="mt-6 text-slate max-w-lg text-base md:text-lg leading-relaxed">
+            WhatsApp automation scripts, reusable code snippets, and custom libraries built for
+            real projects. Download instantly — no account required.
           </motion.p>
 
-          <motion.div
-            variants={itemVariants}
-            className="mt-9 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
-          >
-            <Link to="/showcase" className="w-full sm:w-auto">
-              <motion.span
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                className="kyy-btn-primary w-full sm:w-auto"
-              >
-                Browse Products <IconArrowRight className="w-4 h-4" />
-              </motion.span>
+          <motion.div variants={itemVariants} className="mt-9 flex items-center gap-4">
+            <Link to="/showcase" className="btn-primary inline-flex items-center gap-2">
+              Browse products <IconArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/marketplace" className="w-full sm:w-auto">
-              <motion.span
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                className="kyy-btn-secondary w-full sm:w-auto"
-              >
-                <IconServer className="w-4 h-4" /> Deploy a Panel
-              </motion.span>
+            <Link to="/marketplace" className="btn-outline inline-flex items-center gap-2">
+              <IconServer className="w-4 h-4" /> Deploy a panel
             </Link>
           </motion.div>
 
-          <motion.div
-            variants={itemVariants}
-            className="mt-8 flex items-center justify-center lg:justify-start gap-2 text-[var(--kyy-text-muted)] font-mono-ui text-xs"
-          >
-            <IconDownload className="w-4 h-4" />
-            <span>No login wall, no waiting page — downloads served directly.</span>
-          </motion.div>
+          {stats && (
+            <motion.div variants={itemVariants} className="mt-12 flex items-center gap-8">
+              <div>
+                <p className="font-display text-2xl font-semibold text-ink">{stats.totalAssets}</p>
+                <p className="text-slate text-xs mt-1">Products & snippets</p>
+              </div>
+              <div className="w-px h-9 bg-line" />
+              <div>
+                <p className="font-display text-2xl font-semibold text-ink">{stats.totalDownloads}</p>
+                <p className="text-slate text-xs mt-1">Total downloads</p>
+              </div>
+              <div className="w-px h-9 bg-line" />
+              <div>
+                <p className="font-display text-2xl font-semibold text-ink">{stats.totalPanels}</p>
+                <p className="text-slate text-xs mt-1">Hosting plans</p>
+              </div>
+            </motion.div>
+          )}
         </div>
 
-        <motion.div variants={itemVariants} className="relative">
+        <motion.div variants={itemVariants}>
           <LiveTerminal />
         </motion.div>
       </motion.section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Category cards                                                   */}
-      {/* ---------------------------------------------------------------- */}
       <motion.section
-        className="relative max-w-[1240px] mx-auto px-4 md:px-6 pb-20 grid grid-cols-1 md:grid-cols-3 gap-5"
+        className="relative max-w-shell mx-auto px-6 pb-28 grid grid-cols-1 md:grid-cols-3 gap-6"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
@@ -153,13 +135,13 @@ export default function Landing() {
       >
         {categories.map((item) => (
           <motion.div key={item.title} variants={itemVariants}>
-            <Link to={item.to} className="kyy-card p-6 flex flex-col h-full group">
-              <div className="w-11 h-11 rounded-xl bg-[var(--kyy-primary-soft)] flex items-center justify-center text-[var(--kyy-primary-dark)] mb-4">
+            <Link to={item.to} className="card-surface p-6 flex flex-col h-full group">
+              <div className="w-11 h-11 rounded-xl bg-indigo-soft flex items-center justify-center text-indigo mb-4">
                 <item.icon className="w-5 h-5" />
               </div>
-              <h3 className="font-display text-[var(--kyy-text)] font-semibold mb-2">{item.title}</h3>
-              <p className="text-[var(--kyy-text-secondary)] text-sm leading-relaxed flex-1">{item.description}</p>
-              <span className="flex items-center gap-1.5 text-[var(--kyy-primary-dark)] text-sm font-medium mt-5 group-hover:gap-2.5 transition-all duration-200">
+              <h3 className="font-display text-ink font-semibold mb-2">{item.title}</h3>
+              <p className="text-slate text-sm leading-relaxed flex-1">{item.description}</p>
+              <span className="flex items-center gap-1.5 text-indigo text-sm font-medium mt-5 group-hover:gap-2.5 transition-all duration-200">
                 Browse category <IconArrowRight className="w-4 h-4" />
               </span>
             </Link>
@@ -167,33 +149,16 @@ export default function Landing() {
         ))}
       </motion.section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Stats                                                            */}
-      {/* ---------------------------------------------------------------- */}
-      {stats && (
-        <motion.section
-          className="relative max-w-4xl mx-auto px-4 md:px-6 pb-24"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="kyy-card grid grid-cols-3 divide-x divide-[var(--kyy-border)]">
-            <div className="text-center py-7">
-              <p className="font-display text-2xl md:text-3xl font-semibold text-[var(--kyy-text)]">{stats.totalAssets}</p>
-              <p className="text-[var(--kyy-text-muted)] text-xs mt-1">Products & Snippets</p>
-            </div>
-            <div className="text-center py-7">
-              <p className="font-display text-2xl md:text-3xl font-semibold text-[var(--kyy-text)]">{stats.totalDownloads}</p>
-              <p className="text-[var(--kyy-text-muted)] text-xs mt-1">Total Downloads</p>
-            </div>
-            <div className="text-center py-7">
-              <p className="font-display text-2xl md:text-3xl font-semibold text-[var(--kyy-text)]">{stats.totalPanels}</p>
-              <p className="text-[var(--kyy-text-muted)] text-xs mt-1">Hosting Plans</p>
-            </div>
-          </div>
-        </motion.section>
-      )}
+      <motion.section
+        className="relative max-w-shell mx-auto px-6 pb-24 flex items-center justify-center gap-2.5 text-slate text-sm"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <IconDownload className="w-4 h-4" />
+        <span>All downloads served directly — no login wall, no waiting page.</span>
+      </motion.section>
     </main>
   );
 }

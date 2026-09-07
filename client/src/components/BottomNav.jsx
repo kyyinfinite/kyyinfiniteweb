@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { IconTerminal, IconWhatsapp, IconServer, IconKey } from '../lib/icons.jsx';
+import { IconWhatsapp, IconServer, IconKey } from '../lib/icons.jsx';
 import { useUser } from '../context/UserContext.jsx';
 
 function IconHome({ className = 'w-5 h-5' }) {
@@ -37,10 +37,7 @@ export default function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
-
-      {/* Soft floating pill, consistent with the new light design system */}
-      <div className="bg-[var(--kyy-surface)]/95 backdrop-blur-xl border border-[var(--kyy-border)] shadow-[var(--kyy-shadow-lg)] rounded-2xl flex items-center justify-around px-2 py-2">
-
+      <div className="bg-paper/95 backdrop-blur-xl border border-line shadow-raised rounded-2xl flex items-center justify-around px-2 py-2">
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
@@ -50,26 +47,21 @@ export default function BottomNav() {
           >
             {({ isActive }) => (
               <>
-                {/* Animasi Pill Background Framer Motion */}
                 {isActive && (
                   <motion.div
                     layoutId="nav-pill"
-                    className="absolute inset-0 bg-[var(--kyy-primary-soft)] rounded-xl -z-10 border border-[var(--kyy-primary)]/15"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className="absolute inset-0 bg-indigo-soft rounded-xl -z-10"
+                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   />
                 )}
-
-                {/* Transisi Warna Ikon yang Smooth */}
                 <tab.icon
-                  className={`w-5 h-5 transition-all duration-300 ${
-                    isActive ? 'text-[var(--kyy-primary-dark)]' : 'text-[var(--kyy-text-muted)] hover:text-[var(--kyy-text-secondary)]'
+                  className={`w-5 h-5 transition-colors duration-200 ${
+                    isActive ? 'text-indigo' : 'text-mist'
                   }`}
                 />
-
-                {/* Teks dengan Font Weight dan Tracking disesuaikan */}
                 <span
-                  className={`text-[10px] font-semibold tracking-wider transition-colors duration-300 ${
-                    isActive ? 'text-[var(--kyy-primary-dark)]' : 'text-[var(--kyy-text-muted)]'
+                  className={`text-[10px] font-medium transition-colors duration-200 ${
+                    isActive ? 'text-ink' : 'text-mist'
                   }`}
                 >
                   {tab.label}
