@@ -83,20 +83,20 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm px-4">
       <div className="card-surface w-full max-w-md p-8 relative max-h-[90vh] overflow-y-auto">
-        <button onClick={onClose} className="absolute top-5 right-5 text-zinc-400 hover:text-zinc-50">
+        <button onClick={onClose} className="absolute top-5 right-5 text-slate hover:text-ink transition-colors duration-200">
           <IconClose />
         </button>
 
         {stage === 'form' && (
           <form onSubmit={handleSubmit}>
-            <h2 className="text-xl font-semibold text-zinc-50 mb-1">Buy a premium API key</h2>
-            <p className="text-zinc-400 text-sm mb-6">
+            <h2 className="font-display text-xl font-semibold text-ink mb-1">Buy a premium API key</h2>
+            <p className="text-slate text-sm mb-6">
               Pay once via QRIS, key is generated automatically the moment payment settles.
             </p>
 
-            <label className="text-sm text-zinc-400 mb-2 block">Plan</label>
+            <label className="text-sm text-slate mb-2 block">Plan</label>
             <div className="space-y-2 mb-4">
               {PLANS.map((option) => (
                 <button
@@ -104,7 +104,7 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
                   type="button"
                   onClick={() => setPlan(option.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors duration-200 ${
-                    plan === option.id ? 'border-brand bg-brand/10 text-brand-light' : 'border-zinc-800 text-zinc-300'
+                    plan === option.id ? 'border-indigo bg-indigo-soft text-indigo-dark' : 'border-line text-slate'
                   }`}
                 >
                   <span className="text-sm font-medium">{option.title}</span>
@@ -113,16 +113,16 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
               ))}
             </div>
 
-            <label className="text-sm text-zinc-400 mb-2 block">Label</label>
+            <label className="text-sm text-slate mb-2 block">Label</label>
             <input
               required
               value={label}
               onChange={(event) => setLabel(event.target.value)}
               placeholder="e.g. my-premium-bot"
-              className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+              className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink mb-4 placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 transition-colors duration-200"
             />
 
-            <label className="text-sm text-zinc-400 mb-2 block">Scopes</label>
+            <label className="text-sm text-slate mb-2 block">Scopes</label>
             <div className="flex flex-wrap gap-2 mb-6">
               {ALLOWED_SCOPES.map((scope) => (
                 <button
@@ -131,8 +131,8 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
                   onClick={() => toggleScope(scope)}
                   className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
                     scopes.includes(scope)
-                      ? 'bg-brand text-white border-brand'
-                      : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+                      ? 'bg-indigo text-white border-indigo'
+                      : 'border-line text-slate hover:text-indigo'
                   }`}
                 >
                   {SCOPE_DESCRIPTIONS[scope]}
@@ -140,7 +140,7 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
               ))}
             </div>
 
-            {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+            {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
             <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
               <IconQr className="w-4 h-4" /> Generate QRIS
@@ -150,30 +150,30 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
 
         {stage === 'waiting' && orderData && (
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-zinc-50 mb-2">Scan to pay</h2>
-            <p className="text-zinc-400 text-sm mb-4">Order ID: {orderData.orderId}</p>
+            <h2 className="font-display text-xl font-semibold text-ink mb-2">Scan to pay</h2>
+            <p className="text-slate text-sm mb-4">Order ID: {orderData.orderId}</p>
             {orderData.qrCodeUrl && (
               <img
                 src={orderData.qrCodeUrl}
                 alt="QRIS payment code"
-                className="w-56 h-56 mx-auto rounded-xl border border-zinc-800 bg-white p-2 mb-4"
+                className="w-56 h-56 mx-auto rounded-xl border border-line bg-white p-2 mb-4"
               />
             )}
-            <p className="text-zinc-300 text-sm mb-1">Total: Rp{orderData.grossAmount?.toLocaleString('id-ID')}</p>
-            <p className="text-xs text-zinc-600">Waiting for payment confirmation. Do not close this window.</p>
+            <p className="text-ink text-sm mb-1">Total: Rp{orderData.grossAmount?.toLocaleString('id-ID')}</p>
+            <p className="text-xs text-mist">Waiting for payment confirmation. Do not close this window.</p>
           </div>
         )}
 
         {stage === 'completed' && (
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-brand/10 text-brand-light flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 rounded-full bg-indigo-soft text-indigo flex items-center justify-center mx-auto mb-4">
               <IconCheck className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-semibold text-zinc-50 mb-2">Payment confirmed</h2>
-            <p className="text-zinc-400 text-sm mb-4">Copy this now — it won't be shown again.</p>
+            <h2 className="font-display text-xl font-semibold text-ink mb-2">Payment confirmed</h2>
+            <p className="text-slate text-sm mb-4">Copy this now — it won't be shown again.</p>
             <button
               onClick={copyKey}
-              className="w-full font-mono-ui text-brand-light text-xs tracking-wide bg-black/30 border border-brand/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-brand/50 transition-colors duration-200 mb-4"
+              className="w-full font-mono-ui text-indigo-dark text-xs tracking-wide bg-indigo-soft border border-indigo/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-indigo/40 transition-colors duration-200 mb-4"
             >
               <span className="truncate">{issuedKey}</span>
               <IconCopy className="w-3.5 h-3.5 shrink-0" />
@@ -186,8 +186,8 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
 
         {stage === 'failed' && (
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-zinc-50 mb-2">Payment failed</h2>
-            <p className="text-zinc-400 text-sm mb-6">The transaction was not completed. Please try again.</p>
+            <h2 className="font-display text-xl font-semibold text-ink mb-2">Payment failed</h2>
+            <p className="text-slate text-sm mb-6">The transaction was not completed. Please try again.</p>
             <button onClick={onClose} className="btn-outline w-full">
               Close
             </button>

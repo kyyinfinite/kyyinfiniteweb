@@ -5,10 +5,10 @@ import { api } from '../lib/api.js';
 import { IconArrowRight } from '../lib/icons.jsx';
 
 const STATUS_STYLES = {
-  open: 'bg-brand/15 text-brand-light',
-  in_progress: 'bg-amber-500/15 text-amber-300',
-  resolved: 'bg-emerald-500/15 text-emerald-300',
-  closed: 'bg-zinc-800 text-zinc-500',
+  open: 'bg-indigo-soft text-indigo-dark',
+  in_progress: 'bg-amber-soft text-amber',
+  resolved: 'bg-clover-soft text-clover',
+  closed: 'bg-paper-soft text-mist',
 };
 
 export default function SupportTicketDetail() {
@@ -56,24 +56,24 @@ export default function SupportTicketDetail() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-14 pb-28">
-      <Link to="/support" className="inline-flex items-center gap-1.5 text-zinc-500 text-sm mb-6 hover:text-zinc-300">
+    <main className="theme-light max-w-2xl mx-auto px-6 py-14 pb-28">
+      <Link to="/support" className="inline-flex items-center gap-1.5 text-slate text-sm mb-6 hover:text-indigo transition-colors duration-200">
         <IconArrowRight className="w-3.5 h-3.5 rotate-180" /> Back to tickets
       </Link>
 
       {isLoadingTicket ? (
-        <p className="text-zinc-500 text-sm">Loading.</p>
+        <p className="text-slate text-sm">Loading…</p>
       ) : errorMessage && !ticket ? (
-        <p className="text-red-400 text-sm">{errorMessage}</p>
+        <p className="text-rust text-sm">{errorMessage}</p>
       ) : ticket ? (
         <>
           <div className="flex items-center justify-between gap-4 mb-1">
-            <h1 className="text-xl font-semibold text-zinc-50">{ticket.subject}</h1>
+            <h1 className="font-display text-xl font-semibold text-ink">{ticket.subject}</h1>
             <span className={`text-xs px-2.5 py-1 rounded-full shrink-0 ${STATUS_STYLES[ticket.status]}`}>
               {ticket.status.replace('_', ' ')}
             </span>
           </div>
-          <p className="text-zinc-600 text-xs mb-6 font-mono-ui">
+          <p className="text-mist text-xs mb-6 font-mono-ui">
             {ticket.ticketNumber} - {ticket.category}
           </p>
 
@@ -81,42 +81,42 @@ export default function SupportTicketDetail() {
             {ticket.replies.map((entry, index) => (
               <div
                 key={index}
-                className={`card-surface p-4 ${entry.authorType === 'admin' ? 'border-brand/30' : ''}`}
+                className={`card-surface p-4 ${entry.authorType === 'admin' ? 'border-indigo/30' : ''}`}
               >
                 <div className="flex items-center justify-between gap-3 mb-1.5">
                   <span
                     className={`text-xs font-medium ${
-                      entry.authorType === 'admin' ? 'text-brand-light' : 'text-zinc-300'
+                      entry.authorType === 'admin' ? 'text-indigo' : 'text-ink'
                     }`}
                   >
                     {entry.authorLabel}
                   </span>
-                  <span className="text-[10px] text-zinc-600">
+                  <span className="text-[10px] text-mist">
                     {new Date(entry.createdAt).toLocaleString('en-US')}
                   </span>
                 </div>
-                <p className="text-zinc-200 text-sm whitespace-pre-wrap">{entry.message}</p>
+                <p className="text-slate text-sm whitespace-pre-wrap">{entry.message}</p>
               </div>
             ))}
           </div>
 
           {ticket.status !== 'closed' ? (
             <form onSubmit={handleReply} className="card-surface p-4">
-              {errorMessage && <p className="text-red-400 text-sm mb-3">{errorMessage}</p>}
+              {errorMessage && <p className="text-rust text-sm mb-3">{errorMessage}</p>}
               <textarea
                 required
                 rows={3}
                 value={reply}
                 onChange={(event) => setReply(event.target.value)}
                 placeholder="Write a reply."
-                className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+                className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink text-sm mb-3 placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 resize-none transition-colors duration-200"
               />
               <button type="submit" disabled={isSending} className="btn-primary w-full text-sm">
-                {isSending ? 'Sending.' : 'Send reply'}
+                {isSending ? 'Sending…' : 'Send reply'}
               </button>
             </form>
           ) : (
-            <p className="text-zinc-600 text-sm text-center">This ticket is closed.</p>
+            <p className="text-mist text-sm text-center">This ticket is closed.</p>
           )}
         </>
       ) : null}

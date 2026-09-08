@@ -105,7 +105,8 @@ body {
   50% { opacity: 0; }
 }
 
-/* Markdown / README rendering — dark theme, used by ChangelogsPage (not yet migrated) */
+/* Markdown / README rendering — dark by default (still used as-is by AdminDashboard,
+   not yet migrated); .theme-light override below lights it up for ChangelogsPage */
 .kyy-markdown {
   --color-canvas-default: transparent;
   --color-canvas-subtle: rgba(255, 255, 255, 0.04);
@@ -309,6 +310,42 @@ body {
 }
 
 .theme-light .terminal-cursor { color: #7A73F0; }
+
+/* README prose goes light with the page; code fences inside it stay dark
+   via .kyy-code-block below, same "code stays dark" convention as terminal-mockup */
+.theme-light .kyy-markdown {
+  --color-canvas-default: transparent;
+  --color-canvas-subtle: #FBFAF7;
+  --color-fg-default: #1D1F1A;
+  --color-fg-muted: #6B6D64;
+  --color-fg-subtle: #9C9E93;
+  --color-border-default: #E6E3D8;
+  --color-border-muted: #EDEAE0;
+  --color-accent-fg: #5850E6;
+  --color-accent-emphasis: #5850E6;
+  --color-danger-fg: #B3453D;
+  --color-success-fg: #2F8F6B;
+  --color-attention-fg: #B7791F;
+  --color-neutral-muted: #FBFAF7;
+
+  background: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #E6E3D8;
+  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.04), 0 8px 24px rgba(29, 31, 26, 0.05);
+}
+
+.theme-light .kyy-markdown table tr:nth-child(2n) { background: #FBFAF7; }
+
+.theme-light .kyy-markdown blockquote {
+  border-left: 3px solid rgba(88, 80, 230, 0.35);
+  background: rgba(88, 80, 230, 0.06);
+}
+
+.theme-light .kyy-markdown :not(pre) > code {
+  background: #F1EFE9;
+  color: #B7791F;
+}
 
 /* Ambient hero light — low-opacity radial gradient, never motion, never on cards */
 .ambient-blob {

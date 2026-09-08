@@ -18,11 +18,6 @@ const CATEGORY_ICON = {
   plugin: IconPlugin,
 };
 
-const CATEGORY_LABEL = {
-  'whatsapp-bot': 'WhatsApp Bot',
-  plugin: 'Plugin',
-};
-
 function formatDate(value) {
   return new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
@@ -101,9 +96,9 @@ export default function ChangelogsPage() {
 
   if (errorMessage || !asset) {
     return (
-      <div className="max-w-3xl mx-auto px-6 py-24 text-center">
-        <p className="text-red-400 mb-4 font-mono-ui text-sm">{errorMessage || 'Product not found.'}</p>
-        <Link to="/showcase" className="text-brand-light text-sm">Back to Products</Link>
+      <div className="theme-light max-w-3xl mx-auto px-6 py-24 text-center">
+        <p className="text-rust mb-4 font-mono-ui text-sm">{errorMessage || 'Product not found.'}</p>
+        <Link to="/showcase" className="text-indigo text-sm">Back to Products</Link>
       </div>
     );
   }
@@ -112,30 +107,28 @@ export default function ChangelogsPage() {
   const latestChangelog = asset.changelogs && asset.changelogs[0];
 
   return (
-    <main className="min-h-screen">
-      <div className="relative overflow-hidden border-b border-zinc-800">
-        <div className="absolute inset-0 grid-overlay opacity-20 pointer-events-none" />
-
+    <main className="theme-light min-h-screen">
+      <div className="relative overflow-hidden border-b border-line">
         <div className="relative max-w-5xl mx-auto px-6 pt-10 pb-6">
-          <Link to="/showcase" className="text-zinc-500 hover:text-brand-light text-sm inline-flex items-center gap-2 mb-6">
+          <Link to="/showcase" className="text-slate hover:text-indigo text-sm inline-flex items-center gap-2 mb-6 transition-colors duration-200">
             <IconArrowRight className="w-4 h-4 rotate-180" /> Back to Products
           </Link>
 
-          <p className="font-mono-ui text-xs text-zinc-500 mb-3">
-            kyyinfinite / <span className="text-brand-light">{asset.category}</span> / {asset.slug}
+          <p className="font-mono-ui text-xs text-mist mb-3">
+            kyyinfinite / <span className="text-indigo">{asset.category}</span> / {asset.slug}
           </p>
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div className="min-w-0">
-              <h1 className="text-3xl md:text-4xl font-bold text-zinc-50 flex items-center gap-3 flex-wrap">
-                <span className="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand-light">
+              <h1 className="font-display text-3xl md:text-4xl font-semibold text-ink flex items-center gap-3 flex-wrap">
+                <span className="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl bg-indigo-soft flex items-center justify-center text-indigo">
                   <Icon className="w-5 h-5" />
                 </span>
                 {asset.name}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-4 text-sm text-zinc-500">
-                <span className="text-brand-light font-mono-ui">v{asset.currentVersion}</span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-4 text-sm text-slate">
+                <span className="text-indigo font-mono-ui">v{asset.currentVersion}</span>
                 <span>·</span>
                 <span className="flex items-center gap-1.5">
                   <IconDownload className="w-3.5 h-3.5" /> {asset.downloadCount} downloads
@@ -155,7 +148,7 @@ export default function ChangelogsPage() {
                   {asset.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs px-3 py-1 rounded-full bg-brand/10 text-brand-light border border-brand/20"
+                      className="text-xs px-3 py-1 rounded-full bg-indigo-soft text-indigo-dark"
                     >
                       {tag}
                     </span>
@@ -165,7 +158,7 @@ export default function ChangelogsPage() {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
+              whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleDownloadLatest}
               className="btn-primary shrink-0 flex items-center justify-center gap-2 whitespace-nowrap"
@@ -183,14 +176,14 @@ export default function ChangelogsPage() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`relative pb-3 text-sm font-medium transition-colors duration-200 ${
-                  activeTab === tab.key ? 'text-zinc-50' : 'text-zinc-500 hover:text-zinc-300'
+                  activeTab === tab.key ? 'text-ink' : 'text-mist hover:text-slate'
                 }`}
               >
                 {tab.label}
                 {activeTab === tab.key && (
                   <motion.span
                     layoutId="tab-underline"
-                    className="absolute left-0 right-0 -bottom-px h-0.5 bg-brand-light rounded-full shadow-glow-brand"
+                    className="absolute left-0 right-0 -bottom-px h-0.5 bg-indigo rounded-full"
                   />
                 )}
               </button>
@@ -209,14 +202,14 @@ export default function ChangelogsPage() {
             transition={{ duration: 0.25, ease: 'easeOut' }}
             className="max-w-5xl mx-auto px-4 md:px-6 py-8"
           >
-            <div className="rounded-t-xl border border-zinc-800 bg-zinc-900 px-4 py-3 flex items-center gap-2 text-sm text-zinc-400">
+            <div className="rounded-t-xl border border-line bg-paper-soft px-4 py-3 flex items-center gap-2 text-sm text-slate">
               <IconFile className="w-4 h-4" />
               README.md
             </div>
             {asset.description ? (
               <MarkdownRenderer content={asset.description} className="kyy-markdown--attached" />
             ) : (
-              <div className="kyy-markdown kyy-markdown--attached text-zinc-600 text-sm">
+              <div className="kyy-markdown kyy-markdown--attached text-mist text-sm">
                 No README provided for this product yet.
               </div>
             )}
@@ -231,7 +224,7 @@ export default function ChangelogsPage() {
             className="max-w-4xl mx-auto px-6 py-8"
           >
             <div className="relative pl-6">
-              <div className="absolute left-[7px] top-1 bottom-1 w-px bg-zinc-800" />
+              <div className="absolute left-[7px] top-1 bottom-1 w-px bg-line" />
 
               {(asset.changelogs || []).map((entry, index) => (
                 <motion.div
@@ -242,18 +235,18 @@ export default function ChangelogsPage() {
                   transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="relative mb-10 last:mb-0"
                 >
-                  <span className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-zinc-950 border-2 border-brand-light shadow-glow-brand" />
+                  <span className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-white border-2 border-indigo" />
 
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <span className="font-mono-ui text-sm text-brand-light">v{entry.version}</span>
-                    <span className="text-xs text-zinc-500">{formatDate(entry.releaseDate)}</span>
+                    <span className="font-mono-ui text-sm text-indigo">v{entry.version}</span>
+                    <span className="text-xs text-mist">{formatDate(entry.releaseDate)}</span>
                   </div>
 
                   {entry.notes && entry.notes.length > 0 && (
                     <ul className="space-y-1.5 mb-3">
                       {entry.notes.map((note, noteIndex) => (
-                        <li key={noteIndex} className="text-sm text-zinc-400 flex gap-2">
-                          <span className="text-brand">-</span>
+                        <li key={noteIndex} className="text-sm text-slate flex gap-2">
+                          <span className="text-indigo">-</span>
                           <span>{note}</span>
                         </li>
                       ))}
@@ -262,7 +255,7 @@ export default function ChangelogsPage() {
 
                   <button
                     onClick={() => handleDownloadVersion(entry._id)}
-                    className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-brand-light transition-colors duration-200"
+                    className="flex items-center gap-1.5 text-xs text-mist hover:text-indigo transition-colors duration-200"
                   >
                     <IconDownload className="w-3.5 h-3.5" /> Download this version
                   </button>

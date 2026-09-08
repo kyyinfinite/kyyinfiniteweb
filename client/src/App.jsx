@@ -40,15 +40,15 @@ export default function App() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
           <Route path="/showcase" element={<PageTransition><ShowcaseHub /></PageTransition>} />
-          <Route path="/product/:slug" element={<PageTransition><LegacyDarkShell><ChangelogsPage /></LegacyDarkShell></PageTransition>} />
+          <Route path="/product/:slug" element={<PageTransition><ChangelogsPage /></PageTransition>} />
           <Route path="/snippets" element={<PageTransition><SnippetsHub /></PageTransition>} />
           <Route path="/snippets/:id" element={<PageTransition><SnippetDetail /></PageTransition>} />
           <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
           <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
           <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />
           <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-          <Route path="/support" element={<PageTransition><LegacyDarkShell><Support /></LegacyDarkShell></PageTransition>} />
-          <Route path="/support/:id" element={<PageTransition><LegacyDarkShell><SupportTicketDetail /></LegacyDarkShell></PageTransition>} />
+          <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
+          <Route path="/support/:id" element={<PageTransition><SupportTicketDetail /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />

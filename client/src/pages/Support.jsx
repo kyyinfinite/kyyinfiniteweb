@@ -12,10 +12,10 @@ const CATEGORIES = [
 ];
 
 const STATUS_STYLES = {
-  open: 'bg-brand/15 text-brand-light',
-  in_progress: 'bg-amber-500/15 text-amber-300',
-  resolved: 'bg-emerald-500/15 text-emerald-300',
-  closed: 'bg-zinc-800 text-zinc-500',
+  open: 'bg-indigo-soft text-indigo-dark',
+  in_progress: 'bg-amber-soft text-amber',
+  resolved: 'bg-clover-soft text-clover',
+  closed: 'bg-paper-soft text-mist',
 };
 
 export default function Support() {
@@ -69,15 +69,15 @@ export default function Support() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-14 pb-28">
+    <main className="theme-light max-w-2xl mx-auto px-6 py-14 pb-28">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand-light">
+        <div className="w-10 h-10 rounded-xl bg-indigo-soft flex items-center justify-center text-indigo">
           <IconTicket className="w-5 h-5" />
         </div>
-        <h1 className="text-2xl font-semibold text-zinc-50 font-display">Support</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink">Support</h1>
       </div>
 
-      {errorMessage && <p className="text-red-400 text-sm mb-6">{errorMessage}</p>}
+      {errorMessage && <p className="text-rust text-sm mb-6">{errorMessage}</p>}
 
       {!showForm && (
         <button onClick={() => setShowForm(true)} className="btn-primary w-full mb-8">
@@ -87,18 +87,18 @@ export default function Support() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="card-surface p-6 mb-8">
-          <h2 className="text-zinc-50 font-semibold mb-4">New ticket</h2>
+          <h2 className="text-ink font-semibold mb-4">New ticket</h2>
 
-          <label className="text-sm text-zinc-400 mb-2 block">Subject</label>
+          <label className="text-sm text-slate mb-2 block">Subject</label>
           <input
             required
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
             placeholder="Briefly describe your issue"
-            className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+            className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink text-sm mb-4 placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 transition-colors duration-200"
           />
 
-          <label className="text-sm text-zinc-400 mb-2 block">Category</label>
+          <label className="text-sm text-slate mb-2 block">Category</label>
           <div className="flex flex-wrap gap-2 mb-4">
             {CATEGORIES.map((option) => (
               <button
@@ -107,8 +107,8 @@ export default function Support() {
                 onClick={() => setCategory(option.id)}
                 className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
                   category === option.id
-                    ? 'bg-brand text-white border-brand'
-                    : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+                    ? 'bg-indigo text-white border-indigo'
+                    : 'border-line text-slate hover:text-indigo'
                 }`}
               >
                 {option.label}
@@ -116,14 +116,14 @@ export default function Support() {
             ))}
           </div>
 
-          <label className="text-sm text-zinc-400 mb-2 block">Message</label>
+          <label className="text-sm text-slate mb-2 block">Message</label>
           <textarea
             required
             rows={4}
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             placeholder="Explain what's going on."
-            className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+            className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink text-sm mb-4 placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 resize-none transition-colors duration-200"
           />
 
           <div className="flex gap-3">
@@ -131,17 +131,17 @@ export default function Support() {
               Cancel
             </button>
             <button type="submit" disabled={isSaving} className="btn-primary flex-1 text-sm">
-              {isSaving ? 'Submitting.' : 'Submit ticket'}
+              {isSaving ? 'Submitting…' : 'Submit ticket'}
             </button>
           </div>
         </form>
       )}
 
-      <h2 className="text-zinc-50 font-semibold mb-4">Your tickets</h2>
+      <h2 className="text-ink font-semibold mb-4">Your tickets</h2>
       {isLoadingTickets ? (
-        <p className="text-zinc-500 text-sm">Loading.</p>
+        <p className="text-slate text-sm">Loading…</p>
       ) : tickets.length === 0 ? (
-        <p className="text-zinc-500 text-sm">No tickets yet.</p>
+        <p className="text-slate text-sm">No tickets yet.</p>
       ) : (
         <div className="space-y-3">
           {tickets.map((ticket) => (
@@ -151,8 +151,8 @@ export default function Support() {
               className="card-surface p-4 flex items-center justify-between gap-4 block"
             >
               <div className="min-w-0">
-                <p className="text-zinc-50 font-medium truncate">{ticket.subject}</p>
-                <p className="text-zinc-600 text-xs mt-1 font-mono-ui">
+                <p className="text-ink font-medium truncate">{ticket.subject}</p>
+                <p className="text-mist text-xs mt-1 font-mono-ui">
                   {ticket.ticketNumber} - {ticket.category}
                 </p>
               </div>
