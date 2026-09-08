@@ -4,6 +4,7 @@ const { API_KEY_PLANS } = require('../config/apiKeyPlans');
 const ApiKeyOrder = require('../models/ApiKeyOrder');
 const ApiKey = require('../models/ApiKey');
 const { generateApiKey } = require('../utils/apiKeyGenerator');
+const { decryptApiKey } = require('../utils/apiKeyCrypto');
 
 const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader'];
 const ORDER_ID_PREFIX = 'KYYKEY-';
@@ -87,11 +88,12 @@ async function issueApiKeyForOrder(order) {
   if (order.issuedApiKey) return; // sudah pernah diproses, jangan dobel
 
   const planConfig = API_KEY_PLANS[order.plan];
-  const { plaintext, keyId, hashedSecret } = generateApiKey();
+  const { plaintext, keyId, hashedSecret, encryptedKey } = generateApiKey();
 
   const apiKey = await ApiKey.create({
     keyId,
     hashedSecret,
+    encryptedKey,
     label: order.label,
     ownerEmail: order.ownerEmail,
     ownerType: 'user',
@@ -103,24 +105,25 @@ async function issueApiKeyForOrder(order) {
   });
 
   order.issuedApiKey = apiKey._id;
-  order.issuedPlaintext = plaintext;
   await order.save();
 
   return { apiKey, plaintext };
 }
 
-/** GET /api/user/api-key-orders/:orderId/reveal — ambil plaintext key SEKALI, lalu langsung dihapus dari DB. */
+/** GET /api/user/api-key-orders/:orderId/reveal — bisa dipanggil berkali-kali, decrypt dari encryptedKey tiap kali. */
 async function revealIssuedApiKey(req, res) {
   try {
     const order = await ApiKeyOrder.findOne({ orderId: req.params.orderId, ownerUid: req.user.uid });
-    if (!order || order.paymentStatus !== 'completed' || !order.issuedPlaintext) {
+    if (!order || order.paymentStatus !== 'completed' || !order.issuedApiKey) {
       return res.status(404).json({ message: 'No key available to reveal for this order' });
     }
 
-    const plaintext = order.issuedPlaintext;
-    order.issuedPlaintext = null;
-    await order.save();
+    const apiKey = await ApiKey.findById(order.issuedApiKey);
+    if (!apiKey || !apiKey.encryptedKey) {
+      return res.status(410).json({ message: 'This key cannot be revealed anymore. Please issue a new key.' });
+    }
 
+    const plaintext = decryptApiKey(apiKey.encryptedKey);
     return res.status(200).json({ apiKey: plaintext });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to reveal API key', error: error.message });

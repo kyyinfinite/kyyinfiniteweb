@@ -10,11 +10,12 @@ async function createApiKey(req, res) {
       return res.status(400).json({ message: 'label and at least one scope are required' });
     }
 
-    const { plaintext, keyId, hashedSecret } = generateApiKey();
+    const { plaintext, keyId, hashedSecret, encryptedKey } = generateApiKey();
 
     await ApiKey.create({
       keyId,
       hashedSecret,
+      encryptedKey,
       label,
       ownerEmail,
       scopes,
@@ -31,7 +32,7 @@ async function createApiKey(req, res) {
 /** GET /api/admin/api-keys — admin only. Tidak pernah balikin hashedSecret. */
 async function listApiKeys(req, res) {
   try {
-    const keys = await ApiKey.find({}).sort({ createdAt: -1 }).select('-hashedSecret').lean();
+    const keys = await ApiKey.find({}).sort({ createdAt: -1 }).select('-hashedSecret -encryptedKey').lean();
     return res.status(200).json(keys);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to list API keys', error: error.message });
@@ -42,7 +43,7 @@ async function listApiKeys(req, res) {
 async function revokeApiKey(req, res) {
   try {
     const key = await ApiKey.findByIdAndUpdate(req.params.id, { status: 'revoked' }, { new: true }).select(
-      '-hashedSecret'
+      '-hashedSecret -encryptedKey'
     );
     if (!key) {
       return res.status(404).json({ message: 'API key not found' });
@@ -76,7 +77,7 @@ async function updateApiKey(req, res) {
       updates.scopes = scopes;
     }
 
-    const key = await ApiKey.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-hashedSecret');
+    const key = await ApiKey.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-hashedSecret -encryptedKey');
     if (!key) {
       return res.status(404).json({ message: 'API key not found' });
     }

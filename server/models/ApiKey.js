@@ -4,6 +4,7 @@ const ApiKeySchema = new mongoose.Schema(
   {
     keyId: { type: String, required: true, unique: true, index: true },
     hashedSecret: { type: String, required: true },
+    encryptedKey: { type: String, default: null },
     label: { type: String, required: true, trim: true },
     ownerEmail: { type: String, trim: true, lowercase: true },
     ownerType: { type: String, enum: ['admin', 'user'], default: 'admin', index: true },

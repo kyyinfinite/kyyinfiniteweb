@@ -13,6 +13,7 @@ import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import ChangelogsPage from './pages/ChangelogsPage.jsx';
 import DevelopersPage from './pages/DevelopersPage.jsx';
+import DocsPage from './pages/DocsPage.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Profile from './pages/Profile.jsx';
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/snippets/:id" element={<PageTransition><SnippetDetail /></PageTransition>} />
           <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
           <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
+          <Route path="/docs" element={<PageTransition><DocsPage /></PageTransition>} />
           <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />
           <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
           <Route path="/support" element={<PageTransition><Support /></PageTransition>} />

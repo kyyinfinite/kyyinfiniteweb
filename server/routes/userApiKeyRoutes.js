@@ -1,11 +1,12 @@
 const express = require('express');
 const { userAuthMiddleware } = require('../middlewares/userAuthMiddleware');
-const { requestApiKey, listMyApiKeys, revokeMyApiKey } = require('../controllers/userApiKeyController');
+const { requestApiKey, listMyApiKeys, revokeMyApiKey, revealMyApiKey } = require('../controllers/userApiKeyController');
 
 const router = express.Router();
 
 router.post('/', userAuthMiddleware, requestApiKey);
 router.get('/', userAuthMiddleware, listMyApiKeys);
+router.get('/:id/reveal', userAuthMiddleware, revealMyApiKey);
 router.patch('/:id/revoke', userAuthMiddleware, revokeMyApiKey);
 
 module.exports = router;
