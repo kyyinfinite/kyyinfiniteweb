@@ -1,221 +1,178 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import MarkdownRenderer from '../components/MarkdownRenderer.jsx';
-import { SCOPE_INFO } from '../lib/scopes.js';
-import { IconBook, IconArrowRight } from '../lib/icons.jsx';
-
-const BASE_URL = 'https://kyyinfinite.my.id/api/v1';
-
-const scopeTable = Object.entries(SCOPE_INFO)
-  .map(([scope, info]) => `| \`${scope}\` | ${info.label} | ${info.description} |`)
-  .join('\n');
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { IconKey, IconScript, IconServer, IconTicket, IconArrowRight, IconBook } from '../lib/icons.jsx';
 
 const SECTIONS = [
-  {
-    id: 'getting-started',
-    title: 'Getting started',
-    content: `
-All endpoints are served from a single base URL:
-
-\`\`\`
-${BASE_URL}
-\`\`\`
-
-Every request needs an API key. You can create a free key from your [profile page](/profile), or check the [API playground](/developers) to browse and test every endpoint interactively.
-
-A minimal request looks like this:
-
-\`\`\`bash
-curl "${BASE_URL}/ai/chatgpt?text=halo" \\
-  -H "Authorization: Bearer YOUR_API_KEY"
-\`\`\`
-
-Responses are JSON by default, except for a few image/media endpoints that return binary data directly (these are marked in the playground).
-`,
-  },
-  {
-    id: 'authentication',
-    title: 'Authentication',
-    content: `
-Send your key as a Bearer token in the \`Authorization\` header:
-
-\`\`\`
-Authorization: Bearer kyy_xxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxx
-\`\`\`
-
-Alternatively, you can pass it as an \`x-api-key\` header instead:
-
-\`\`\`
-x-api-key: kyy_xxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxx
-\`\`\`
-
-Keys look like \`kyy_<keyId>_<secret>\`. Never share your key publicly or commit it to a public repo — treat it like a password. You can view or copy your key again anytime from your [profile page](/profile).
-
-Each key is scoped: it only works on endpoints whose scope matches one it was created with. Trying to call an endpoint outside your key's scopes returns a \`403\`.
-`,
-  },
-  {
-    id: 'scopes',
-    title: 'Scopes',
-    content: `
-When you create a key, you choose one or more scopes. Each scope unlocks a category of endpoints:
-
-| Scope | Category | Covers |
-|---|---|---|
-${scopeTable}
-
-You can select multiple scopes for a single key. The [playground](/developers) groups endpoints by category so you can see exactly which scope each one needs.
-`,
-  },
-  {
-    id: 'requests',
-    title: 'Making requests',
-    content: `
-All endpoints are called with \`GET\` and take query-string parameters. Here's the same request in a few languages:
-
-\`\`\`bash
-curl "${BASE_URL}/info/countryinfo?name=Indonesia" \\
-  -H "Authorization: Bearer YOUR_API_KEY"
-\`\`\`
-
-\`\`\`javascript
-const response = await fetch(
-  "${BASE_URL}/info/countryinfo?name=Indonesia",
-  { headers: { Authorization: "Bearer YOUR_API_KEY" } }
-);
-const data = await response.json();
-\`\`\`
-
-\`\`\`python
-import requests
-
-response = requests.get(
-    "${BASE_URL}/info/countryinfo",
-    params={"name": "Indonesia"},
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-)
-data = response.json()
-\`\`\`
-
-Binary-response endpoints (image makers, some downloaders) work the same way — just handle the response as a buffer/blob instead of JSON.
-`,
-  },
-  {
-    id: 'rate-limits',
-    title: 'Rate limits & plans',
-    content: `
-Every response includes rate-limit headers:
-
-\`\`\`
-X-RateLimit-Limit: 30
-X-RateLimit-Remaining: 27
-X-RateLimit-Reset: 2026-09-09T12:01:00.000Z
-\`\`\`
-
-**Per-minute rate limit:**
-- Free keys: 30 requests/minute
-- Premium keys: 120 requests/minute
-
-**Lifetime request quota:**
-- Free keys: 40 requests total, and you can create up to 2 free keys per account (ever — revoking a key doesn't free up a new slot)
-- Premium keys: 1,000 / 10,000 / unlimited requests total, depending on the plan you buy from your [profile page](/profile)
-
-Once a key's lifetime quota runs out, it keeps returning \`403\` until you get a new one — it doesn't reset.
-`,
-  },
-  {
-    id: 'errors',
-    title: 'Errors',
-    content: `
-Errors come back as JSON with a consistent shape:
-
-\`\`\`json
-{
-  "status": false,
-  "creator": "KyyInfinite",
-  "message": "Invalid API key"
-}
-\`\`\`
-
-Common status codes:
-
-| Code | Meaning |
-|---|---|
-| \`400\` | Missing or invalid parameter |
-| \`401\` | Missing, malformed, invalid, or expired API key |
-| \`403\` | Key doesn't have the required scope, or its lifetime quota is used up |
-| \`404\` | Endpoint or resource not found |
-| \`429\` | You've hit the per-minute rate limit — slow down and retry after \`X-RateLimit-Reset\` |
-| \`500\` | Something broke upstream or on our side |
-
-Successful JSON responses use the shape \`{ "status": true, "creator": "KyyInfinite", "result": ... }\`.
-`,
-  },
-  {
-    id: 'reference',
-    title: 'Endpoint reference',
-    content: `
-The full, always up-to-date list of endpoints — with live request testing right in your browser — lives in the [API playground](/developers). Search by name, filter by category, and copy a ready-to-run \`curl\` command for anything you find there.
-`,
-  },
+  { id: 'getting-started', label: 'Getting Started' },
+  { id: 'authentication', label: 'Authentication' },
+  { id: 'quotas', label: 'Quotas & Rate Limits' },
+  { id: 'snippets', label: 'Snippets & Raw URLs' },
+  { id: 'submitting', label: 'Submitting a Snippet' },
+  { id: 'hosting', label: 'Hosting' },
+  { id: 'support', label: 'Support' },
 ];
 
+function CodeBlock({ language = 'bash', children }) {
+  return (
+    <div className="rounded-xl overflow-hidden border border-line my-4">
+      <SyntaxHighlighter
+        language={language}
+        style={oneLight}
+        customStyle={{ margin: 0, background: '#FBFAF7', padding: 16, fontSize: 12.5 }}
+      >
+        {children}
+      </SyntaxHighlighter>
+    </div>
+  );
+}
+
+function Section({ id, title, children }) {
+  return (
+    <section id={id} className="scroll-mt-24 mb-14">
+      <h2 className="font-display text-xl font-semibold text-ink mb-4">{title}</h2>
+      <div className="space-y-4 text-slate leading-relaxed">{children}</div>
+    </section>
+  );
+}
+
 export default function DocsPage() {
-  const [activeId, setActiveId] = useState(SECTIONS[0].id);
-  const active = SECTIONS.find((section) => section.id === activeId) || SECTIONS[0];
+  const [activeSection, setActiveSection] = useState('getting-started');
 
   return (
-    <main className="theme-light max-w-4xl mx-auto px-6 py-14 min-h-screen">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-9 h-9 rounded-xl bg-indigo-soft flex items-center justify-center text-indigo">
-          <IconBook className="w-4.5 h-4.5" />
+    <main className="theme-light max-w-6xl mx-auto px-6 py-14 md:flex md:gap-12">
+      {/* Sidebar — desktop only, mobile relies on Navbar/BottomNav + in-page links */}
+      <aside className="hidden md:block w-56 shrink-0">
+        <div className="sticky top-24">
+          <p className="text-xs font-semibold text-mist uppercase tracking-wider mb-3">On this page</p>
+          <nav className="space-y-1">
+            {SECTIONS.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                onClick={() => setActiveSection(section.id)}
+                className={`block text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  activeSection === section.id
+                    ? 'bg-indigo-soft text-indigo-dark font-medium'
+                    : 'text-slate hover:text-ink hover:bg-paper-soft'
+                }`}
+              >
+                {section.label}
+              </a>
+            ))}
+          </nav>
         </div>
-        <h1 className="text-2xl font-semibold text-ink font-display">Documentation</h1>
-      </div>
-      <p className="text-slate text-sm mb-8">
-        Everything you need to authenticate and start calling the API.{' '}
-        <Link to="/developers" className="text-indigo hover:underline inline-flex items-center gap-1">
-          Try it live in the playground <IconArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </p>
+      </aside>
 
-      <div className="md:hidden mb-6 -mx-6 px-6 overflow-x-auto">
-        <div className="flex gap-2 w-max">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-indigo-soft flex items-center justify-center text-indigo">
+            <IconBook className="w-5 h-5" />
+          </div>
+          <h1 className="font-display text-3xl font-semibold text-ink">Documentation</h1>
+        </div>
+        <p className="text-slate mb-4 max-w-2xl">
+          Everything you need to use the KyyInfinite API, browse and submit code snippets, and deploy
+          hosting — one growing ecosystem, not just a single curated catalog.
+        </p>
+
+        {/* Mobile section jump list */}
+        <div className="md:hidden flex gap-2 overflow-x-auto pb-4 mb-6 -mx-6 px-6">
           {SECTIONS.map((section) => (
-            <button
+            <a
               key={section.id}
-              onClick={() => setActiveId(section.id)}
-              className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors duration-200 ${
-                activeId === section.id
-                  ? 'bg-indigo text-white border-indigo font-medium'
-                  : 'border-line text-slate hover:border-indigo/40 hover:text-indigo'
-              }`}
+              href={`#${section.id}`}
+              className="shrink-0 text-xs px-3 py-1.5 rounded-full border border-line text-slate whitespace-nowrap"
             >
-              {section.title}
-            </button>
+              {section.label}
+            </a>
           ))}
         </div>
-      </div>
 
-      <div className="flex gap-10 items-start">
-        <nav className="hidden md:block w-48 shrink-0 sticky top-24 space-y-1">
-          {SECTIONS.map((section) => (
-            <button
-              key={section.id}
-              onClick={() => setActiveId(section.id)}
-              className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
-                activeId === section.id
-                  ? 'bg-indigo-soft text-indigo-dark font-medium'
-                  : 'text-slate hover:text-ink hover:bg-paper-soft'
-              }`}
-            >
-              {section.title}
-            </button>
+        <Section id="getting-started" title="Getting Started">
+          <p>
+            KyyInfinite is a small ecosystem: a REST API for downloader/maker/utility tools, a library of
+            reusable code snippets (now open to community submissions), and one-click Pterodactyl panel
+            hosting. Start with an API key from your{' '}
+            <Link to="/profile" className="text-indigo hover:underline">profile</Link>, or browse what's
+            already built in <Link to="/showcase" className="text-indigo hover:underline">Products</Link>{' '}
+            and <Link to="/snippets" className="text-indigo hover:underline">Snippets</Link>.
+          </p>
+        </Section>
+
+        <Section id="authentication" title="Authentication">
+          <p>
+            Every API request needs a key, sent as a bearer token. Free keys come with a lifetime request
+            quota and can be created from your profile once you're signed in.
+          </p>
+          <CodeBlock language="bash">
+            {`curl https://kyyinfinite.my.id/api/v1/downloader/tiktok \\\n  -H "Authorization: Bearer kyy_xxxxxxxxxxxxxxxxxxxx" \\\n  -G --data-urlencode "url=https://tiktok.com/..."`}
+          </CodeBlock>
+          <p>
+            You can also test any endpoint without writing code from the{' '}
+            <Link to="/developers" className="text-indigo hover:underline">API playground</Link>.
+          </p>
+        </Section>
+
+        <Section id="quotas" title="Quotas & Rate Limits">
+          <p>These are two different things, and it's worth knowing the difference:</p>
+          <ul className="list-disc pl-5 space-y-1.5">
+            <li><strong className="text-ink">Lifetime quota</strong> — the total number of requests a key can ever make (e.g. 1,000 total). Shown as a progress bar on your key.</li>
+            <li><strong className="text-ink">Rate limit</strong> — how many requests per minute a key can make (30/min on the free tier, 120/min on premium). Resets every minute regardless of your lifetime quota.</li>
+          </ul>
+          <p>A key can hit its rate limit long before it runs out of lifetime quota, and vice versa — both are enforced independently.</p>
+        </Section>
+
+        <Section id="snippets" title="Snippets & Raw URLs">
+          <p>
+            Every snippet page has a <strong className="text-ink">Raw</strong> link — a plain-text URL you
+            can fetch directly, with no HTML around it, similar to a Pastebin raw link:
+          </p>
+          <CodeBlock language="bash">{`curl https://kyyinfinite.my.id/raw/<snippet-id>`}</CodeBlock>
+          <p>That makes it easy to pull a snippet straight into a script without opening a browser or copy-pasting.</p>
+        </Section>
+
+        <Section id="submitting" title="Submitting a Snippet">
+          <p>
+            KyyInfinite isn't just admin-curated anymore — anyone signed in can submit a snippet from{' '}
+            <Link to="/snippets/new" className="text-indigo hover:underline">Snippets → Submit a snippet</Link>.
+            New submissions are reviewed before they go public, so there may be a short wait between
+            submitting and seeing it listed. You can track the status of your submissions from your profile.
+          </p>
+        </Section>
+
+        <Section id="hosting" title="Hosting">
+          <p>
+            The <Link to="/marketplace" className="text-indigo hover:underline">marketplace</Link> lets you
+            deploy a Pterodactyl panel server instantly after payment — no manual provisioning wait.
+          </p>
+        </Section>
+
+        <Section id="support" title="Support">
+          <p>
+            Something not covered here? <Link to="/support" className="text-indigo hover:underline">Open a support ticket</Link>{' '}
+            and it'll go straight to the team.
+          </p>
+        </Section>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          {[
+            { to: '/developers', label: 'API Playground', icon: IconKey },
+            { to: '/snippets', label: 'Browse Snippets', icon: IconScript },
+            { to: '/marketplace', label: 'Hosting', icon: IconServer },
+            { to: '/support', label: 'Support', icon: IconTicket },
+          ].map((item) => (
+            <Link key={item.to} to={item.to} className="card-surface p-4 flex items-center justify-between gap-3 hover:border-indigo/30">
+              <span className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-lg bg-indigo-soft flex items-center justify-center text-indigo shrink-0">
+                  <item.icon className="w-4 h-4" />
+                </span>
+                <span className="text-ink text-sm font-medium">{item.label}</span>
+              </span>
+              <IconArrowRight className="w-4 h-4 text-mist shrink-0" />
+            </Link>
           ))}
-        </nav>
-
-        <div className="min-w-0 flex-1 card-surface p-6">
-          <MarkdownRenderer content={active.content} />
         </div>
       </div>
     </main>

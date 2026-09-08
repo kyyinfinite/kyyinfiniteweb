@@ -872,6 +872,14 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  await loadSnippets();
  }
 
+ async function handleModerate(id, status) {
+ const token = (await refreshToken()) || idToken;
+ await api.updateSnippet(token, id, { status });
+ await loadSnippets();
+ }
+
+ const pendingCount = snippets.filter((snippet) => snippet.status === 'pending').length;
+
  return (
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
@@ -935,18 +943,64 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  </form>
 
  <div className="lg:col-span-3 space-y-4">
- {snippets.map((snippet) => (
- <div key={snippet._id} className="card-surface p-5 flex items-center justify-between gap-4">
- <div>
- <p className="text-ink font-medium">{snippet.title}</p>
- <p className="text-mist text-xs mt-1 uppercase">{snippet.language}</p>
+ {pendingCount > 0 && (
+ <div className="rounded-xl border border-amber/30 bg-amber-soft text-amber text-sm px-4 py-3">
+ {pendingCount} community submission{pendingCount > 1 ? 's' : ''} waiting for review
  </div>
+ )}
+ {snippets.map((snippet) => (
+ <div key={snippet._id} className="card-surface p-5">
+ <div className="flex items-start justify-between gap-4">
+ <div className="min-w-0">
+ <div className="flex items-center gap-2 flex-wrap">
+ <p className="text-ink font-medium">{snippet.title}</p>
+ {snippet.source === 'community' && (
+ <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-soft text-indigo-dark font-medium">
+ Community
+ </span>
+ )}
+ <span
+ className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+ snippet.status === 'pending'
+ ? 'bg-amber-soft text-amber'
+ : snippet.status === 'rejected'
+ ? 'bg-rust-soft text-rust'
+ : 'bg-clover-soft text-clover'
+ }`}
+ >
+ {snippet.status}
+ </span>
+ </div>
+ <p className="text-mist text-xs mt-1 uppercase">{snippet.language}</p>
+ {snippet.ownerLabel && (
+ <p className="text-mist text-xs mt-1">Submitted by {snippet.ownerLabel}</p>
+ )}
+ </div>
+ <div className="flex items-center gap-3 shrink-0">
+ {snippet.status === 'pending' && (
+ <>
+ <button
+ onClick={() => handleModerate(snippet._id, 'approved')}
+ className="text-clover hover:text-clover/70 text-sm font-medium"
+ >
+ Approve
+ </button>
+ <button
+ onClick={() => handleModerate(snippet._id, 'rejected')}
+ className="text-mist hover:text-ink text-sm font-medium"
+ >
+ Reject
+ </button>
+ </>
+ )}
  <button
  onClick={() => handleDelete(snippet._id)}
  className="text-rust hover:text-rust/70 text-sm font-medium"
  >
  Delete
  </button>
+ </div>
+ </div>
  </div>
  ))}
  </div>

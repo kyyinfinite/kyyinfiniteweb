@@ -41,9 +41,14 @@ export default function SnippetsHub() {
 
   return (
     <main className="theme-light max-w-6xl mx-auto px-6 py-16">
-      <div className="mb-10">
-        <h1 className="font-display text-3xl font-semibold text-ink">Code Snippets</h1>
-        <p className="text-slate mt-2">Reusable pieces of code from the KyyInfinite ecosystem.</p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+        <div>
+          <h1 className="font-display text-3xl font-semibold text-ink">Code Snippets</h1>
+          <p className="text-slate mt-2">Reusable pieces of code from the KyyInfinite ecosystem — including submissions from the community.</p>
+        </div>
+        <Link to="/snippets/new" className="btn-primary text-sm inline-flex items-center gap-2 shrink-0 w-fit">
+          <IconScript className="w-4 h-4" /> Submit a snippet
+        </Link>
       </div>
 
       {errorMessage && <p className="text-rust mb-6">{errorMessage}</p>}
@@ -72,7 +77,14 @@ export default function SnippetsHub() {
                     <IconScript className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-ink font-semibold truncate">{snippet.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-ink font-semibold truncate">{snippet.title}</h3>
+                      {snippet.source === 'community' && (
+                        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-clover-soft text-clover font-medium">
+                          Community
+                        </span>
+                      )}
+                    </div>
                     <p className="text-slate text-xs mt-0.5 truncate">{snippet.description}</p>
                   </div>
                 </div>

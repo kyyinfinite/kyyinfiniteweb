@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const { language, search } = req.query;
-    const query = { isPublished: true };
+    const query = { isPublished: true, status: 'approved' };
     if (language) query.language = language;
     if (search) query.$text = { $search: search };
 
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const snippet = await Snippet.findById(req.params.id).lean();
-    if (!snippet || !snippet.isPublished) {
+    if (!snippet || !snippet.isPublished || snippet.status !== 'approved') {
       return res.status(404).json({ message: 'Snippet not found' });
     }
     return res.status(200).json(snippet);

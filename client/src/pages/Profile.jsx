@@ -4,7 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useUser } from '../context/UserContext.jsx';
 import { api } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
-import { IconKey, IconCopy, IconQr, IconTicket } from '../lib/icons.jsx';
+import { IconKey, IconCopy, IconQr, IconTicket, IconScript } from '../lib/icons.jsx';
 import ApiKeyPurchaseModal from '../components/ApiKeyPurchaseModal.jsx';
 import Badge from '../components/ui/Badge.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
@@ -48,6 +48,12 @@ function quotaTone(percentage) {
   return 'indigo';
 }
 
+function snippetStatusTone(status) {
+  if (status === 'approved') return 'indigo';
+  if (status === 'rejected') return 'danger';
+  return 'warning';
+}
+
 export default function Profile() {
   const { user, idToken, isLoading, refreshToken, logout } = useUser();
   const location = useLocation();
@@ -56,6 +62,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [usage, setUsage] = useState(null);
   const [keys, setKeys] = useState([]);
+  const [mySnippets, setMySnippets] = useState([]);
   const [limit, setLimit] = useState(2);
   const [freePlanRequestLimit, setFreePlanRequestLimit] = useState(40);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -69,16 +76,18 @@ export default function Profile() {
 
   async function loadAll() {
     const token = (await refreshToken()) || idToken;
-    const [profileData, usageData, keysData] = await Promise.all([
+    const [profileData, usageData, keysData, snippetsData] = await Promise.all([
       api.getMyProfile(token),
       api.getMyUsage(token),
       api.listMyApiKeys(token),
+      api.listMySnippets(token),
     ]);
     setProfile(profileData);
     setUsage(usageData);
     setKeys(keysData.keys);
     setLimit(keysData.limit);
     setFreePlanRequestLimit(keysData.freePlanRequestLimit);
+    setMySnippets(snippetsData.snippets);
   }
 
   useEffect(() => {
@@ -129,6 +138,12 @@ export default function Profile() {
   async function handleRevoke(id) {
     const token = (await refreshToken()) || idToken;
     await api.revokeMyApiKey(token, id);
+    await loadAll();
+  }
+
+  async function handleWithdrawSnippet(id) {
+    const token = (await refreshToken()) || idToken;
+    await api.withdrawMySnippet(token, id);
     await loadAll();
   }
 
@@ -353,6 +368,37 @@ export default function Profile() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Snippet submissions */}
+          <div className="flex items-center justify-between mb-4 mt-8">
+            <h2 className="font-display text-ink font-semibold">Your snippets</h2>
+            <Link to="/snippets/new" className="text-indigo hover:text-indigo-dark text-sm font-medium flex items-center gap-1.5 transition-colors duration-200">
+              <IconScript className="w-3.5 h-3.5" /> Submit new
+            </Link>
+          </div>
+          {mySnippets.length === 0 ? (
+            <p className="text-slate text-sm">You haven't submitted any snippets yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {mySnippets.map((snippet) => (
+                <div key={snippet._id} className="card-surface p-4 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-ink font-medium truncate">{snippet.title}</p>
+                    <p className="text-mist text-xs mt-1 uppercase font-mono-ui">{snippet.language}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Badge tone={snippetStatusTone(snippet.status)}>{snippet.status}</Badge>
+                    <button
+                      onClick={() => handleWithdrawSnippet(snippet._id)}
+                      className="text-rust hover:text-rust/80 text-sm font-medium transition-colors duration-200"
+                    >
+                      Withdraw
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </>

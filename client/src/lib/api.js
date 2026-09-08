@@ -109,6 +109,10 @@ export const api = {
   updateSnippet: (token, id, body) => request(`/snippets/${id}`, { method: 'PUT', body, token }),
   deleteSnippet: (token, id) => request(`/snippets/${id}`, { method: 'DELETE', token }),
 
+  submitMySnippet: (token, body) => request('/user/snippets', { method: 'POST', body, token }),
+  listMySnippets: (token) => request('/user/snippets', { token }),
+  withdrawMySnippet: (token, id) => request(`/user/snippets/${id}`, { method: 'DELETE', token }),
+
   listApiKeys: (token) => request('/admin/api-keys', { token }),
   createApiKey: (token, body) => request('/admin/api-keys', { method: 'POST', body, token }),
   revokeApiKey: (token, id) => request(`/admin/api-keys/${id}/revoke`, { method: 'PATCH', token }),

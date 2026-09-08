@@ -118,7 +118,14 @@ export default function SnippetDetail() {
         <div className="card-surface p-6 md:p-7 mb-5">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="min-w-0">
-              <h1 className="font-display text-2xl font-semibold text-ink">{snippet.title}</h1>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="font-display text-2xl font-semibold text-ink">{snippet.title}</h1>
+                {snippet.source === 'community' && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-clover-soft text-clover font-medium">
+                    Community{snippet.ownerLabel ? ` · ${snippet.ownerLabel}` : ''}
+                  </span>
+                )}
+              </div>
               {snippet.description && (
                 <p className="text-slate mt-2 leading-relaxed">{snippet.description}</p>
               )}
