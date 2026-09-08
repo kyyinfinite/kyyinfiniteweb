@@ -12,8 +12,6 @@ const ALLOWED_USER_SCOPES = [
   'tools:primbon',
   'tools:random',
   'tools:stalker',
-  'tools:ai',
-  'tools:anime',
 ];
 const USER_RATE_LIMIT_TIER = 'default';
 const FREE_PLAN_REQUEST_LIMIT = 40;
