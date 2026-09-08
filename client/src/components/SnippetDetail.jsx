@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api } from '../lib/api.js';
 import { IconArrowRight, IconCheck } from '../lib/icons.jsx';
 
@@ -71,11 +71,10 @@ export default function SnippetDetail() {
           )}
         </div>
 
-        {/* Code stays dark — deliberate contrast, same convention as the terminal mockup */}
-        <div className="relative">
+        <div className="relative border-t border-line">
           <button
             onClick={handleCopy}
-            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors duration-200"
+            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-white border border-line text-slate hover:text-indigo hover:border-indigo/40 transition-colors duration-200"
           >
             {isCopied ? (
               <>
@@ -87,8 +86,8 @@ export default function SnippetDetail() {
           </button>
           <SyntaxHighlighter
             language={snippet.language}
-            style={oneDark}
-            customStyle={{ margin: 0, borderRadius: 0, fontSize: 13, padding: 24 }}
+            style={oneLight}
+            customStyle={{ margin: 0, borderRadius: 0, fontSize: 13, padding: 24, background: '#FBFAF7' }}
             showLineNumbers
           >
             {snippet.code}

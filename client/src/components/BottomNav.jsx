@@ -36,21 +36,24 @@ export default function BottomNav() {
   const tabs = [...STATIC_TABS.slice(0, 2), profileTab, ...STATIC_TABS.slice(2)];
 
   return (
-    <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
-      <div className="bg-paper/95 backdrop-blur-xl border border-line shadow-raised rounded-2xl flex items-center justify-around px-2 py-2">
+    <nav
+      className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-xl border-t border-line"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className="flex items-center justify-around max-w-lg mx-auto px-2 py-1.5">
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
             to={tab.to}
             end={tab.end}
-            className="relative flex-1 flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl z-10 tap-highlight-transparent"
+            className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl z-10 tap-highlight-transparent"
           >
             {({ isActive }) => (
               <>
                 {isActive && (
                   <motion.div
                     layoutId="nav-pill"
-                    className="absolute inset-0 bg-indigo-soft rounded-xl -z-10"
+                    className="absolute inset-1.5 bg-indigo-soft rounded-xl -z-10"
                     transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   />
                 )}

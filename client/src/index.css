@@ -105,8 +105,9 @@ body {
   50% { opacity: 0; }
 }
 
-/* Markdown / README rendering — dark by default (still used as-is by AdminDashboard,
-   not yet migrated); .theme-light override below lights it up for ChangelogsPage */
+/* Markdown / README rendering — dark by default (only reached by the orphaned,
+   unrouted files noted in tailwind.config.js); .theme-light override below is
+   what every real page actually uses, and it's light end-to-end including code fences */
 .kyy-markdown {
   --color-canvas-default: transparent;
   --color-canvas-subtle: rgba(255, 255, 255, 0.04);
@@ -299,20 +300,20 @@ body {
 }
 .theme-light .btn-ghost:hover { color: #1D1F1A; }
 
-/* Code / response panels stay a dark charcoal even inside the light theme —
-   deliberate contrast for "this is code", same idea as most docs sites */
+/* Code / terminal panels now go light with the rest of the page — no more
+   dark-charcoal contrast block, per feedback that it didn't read as part of
+   the same design. */
 .theme-light .terminal-mockup {
-  background: #1B1C22;
+  background: #FBFAF7;
   backdrop-filter: none;
-  border: 1px solid #2A2B33;
+  border: 1px solid #E6E3D8;
   border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.04), 0 20px 48px rgba(29, 31, 26, 0.10);
+  box-shadow: 0 1px 2px rgba(29, 31, 26, 0.04), 0 20px 48px rgba(29, 31, 26, 0.08);
 }
 
-.theme-light .terminal-cursor { color: #7A73F0; }
+.theme-light .terminal-cursor { color: #5850E6; }
 
-/* README prose goes light with the page; code fences inside it stay dark
-   via .kyy-code-block below, same "code stays dark" convention as terminal-mockup */
+/* README prose and its code fences both go light with the page */
 .theme-light .kyy-markdown {
   --color-canvas-default: transparent;
   --color-canvas-subtle: #FBFAF7;
@@ -345,6 +346,35 @@ body {
 .theme-light .kyy-markdown :not(pre) > code {
   background: #F1EFE9;
   color: #B7791F;
+}
+
+.theme-light .kyy-code-block {
+  border: 1px solid #E6E3D8;
+  background: #FBFAF7;
+}
+
+.theme-light .kyy-code-block-header {
+  border-bottom: 1px solid #E6E3D8;
+  background: #F1EFE9;
+}
+
+.theme-light .kyy-code-block-lang { color: #9C9E93; }
+
+.theme-light .kyy-code-copy {
+  color: #6B6D64;
+  border: 1px solid #E6E3D8;
+}
+
+.theme-light .kyy-code-copy:hover {
+  color: #5850E6;
+  border-color: rgba(88, 80, 230, 0.4);
+  background: rgba(88, 80, 230, 0.08);
+}
+
+.theme-light .kyy-code-copy--done {
+  color: #2F8F6B;
+  border-color: rgba(47, 143, 107, 0.4);
+  background: rgba(47, 143, 107, 0.08);
 }
 
 /* Ambient hero light — low-opacity radial gradient, never motion, never on cards */

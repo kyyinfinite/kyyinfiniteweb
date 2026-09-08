@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import 'github-markdown-css/github-markdown-dark.css';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import 'github-markdown-css/github-markdown-light.css';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -72,7 +72,7 @@ function CodeBlock({ inline, className, children, ...props }) {
       </div>
       <SyntaxHighlighter
         language={match ? match[1] : 'text'}
-        style={oneDark}
+        style={oneLight}
         customStyle={{
           margin: 0,
           borderRadius: 0,

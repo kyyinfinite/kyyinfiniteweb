@@ -132,12 +132,12 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
 
           {result && (
             <div className="terminal-mockup overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
-                <span className="text-[11px] text-zinc-400 font-mono-ui">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-line">
+                <span className="text-[11px] text-slate font-mono-ui">
                   Response · {result.status || (result.ok ? 200 : 'error')}
                 </span>
                 {result.rateLimit?.remaining !== null && result.rateLimit?.remaining !== undefined && (
-                  <span className="ml-auto text-[10px] text-zinc-500 font-mono-ui">
+                  <span className="ml-auto text-[10px] text-mist font-mono-ui">
                     {result.rateLimit.remaining}/{result.rateLimit.limit} left
                   </span>
                 )}
@@ -146,17 +146,17 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
                 {result.kind === 'binary' ? (
                   <div className="space-y-3">
                     {result.contentType?.startsWith('image/') && (
-                      <img src={result.blobUrl} alt="Response preview" className="max-w-full rounded-lg border border-white/10" />
+                      <img src={result.blobUrl} alt="Response preview" className="max-w-full rounded-lg border border-line" />
                     )}
                     {result.contentType?.startsWith('video/') && (
-                      <video src={result.blobUrl} controls className="max-w-full rounded-lg border border-white/10" />
+                      <video src={result.blobUrl} controls className="max-w-full rounded-lg border border-line" />
                     )}
-                    <a href={result.blobUrl} download className="inline-flex items-center gap-1.5 text-[#8B84F5] text-xs">
+                    <a href={result.blobUrl} download className="inline-flex items-center gap-1.5 text-indigo-dark text-xs">
                       <IconDownload className="w-3.5 h-3.5" /> Download response
                     </a>
                   </div>
                 ) : (
-                  <pre className="text-zinc-300 whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
+                  <pre className="text-ink whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
                     {JSON.stringify(result.data, null, 2)}
                   </pre>
                 )}

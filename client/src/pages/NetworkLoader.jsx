@@ -26,13 +26,13 @@ export default function NetworkLoader({ loadingData, label = 'kyyinfinite@cdn' }
 
   return (
     <div className="theme-light w-full max-w-lg mx-auto py-16 px-6">
-      {/* Loader is a faux terminal — deliberate dark contrast, same convention as LiveTerminal */}
+      {/* Loader is a faux terminal, light-themed to match the rest of the app */}
       <div className="terminal-mockup overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-line">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
           <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
           <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-          <span className="ml-3 text-xs text-zinc-500 font-mono-ui">{label} — zsh</span>
+          <span className="ml-3 text-xs text-slate font-mono-ui">{label} — zsh</span>
         </div>
 
         <div className="p-4 font-mono-ui text-xs leading-relaxed min-h-[190px]">
@@ -43,7 +43,7 @@ export default function NetworkLoader({ loadingData, label = 'kyyinfinite@cdn' }
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className={step.prefix === '#' ? 'text-[#8B84F5] mt-1' : 'text-zinc-400'}
+                className={step.prefix === '#' ? 'text-indigo-dark mt-1' : 'text-ink'}
               >
                 <span className="text-indigo mr-1.5">{step.prefix}</span>
                 {step.text}
@@ -51,11 +51,11 @@ export default function NetworkLoader({ loadingData, label = 'kyyinfinite@cdn' }
             ))}
           </AnimatePresence>
 
-          <p className="text-[#8B84F5] mt-3 flex items-center">
+          <p className="text-indigo-dark mt-3 flex items-center">
             {buildAsciiBar(progress)}
             {!isDone && (
               <motion.span
-                className="inline-block w-1.5 h-3 bg-[#8B84F5] ml-2"
+                className="inline-block w-1.5 h-3 bg-indigo ml-2"
                 animate={{ opacity: [1, 0] }}
                 transition={{ duration: 0.7, repeat: Infinity, repeatType: 'reverse' }}
               />

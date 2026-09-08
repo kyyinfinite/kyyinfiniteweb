@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api } from '../lib/api.js';
 import { IconScript, IconArrowRight } from '../lib/icons.jsx';
 import { SkeletonGrid, EmptyState } from './Skeleton.jsx';
@@ -101,21 +101,20 @@ export default function SnippetsHub() {
                 </span>
               </div>
 
-              {/* Code preview stays dark — deliberate contrast, same as the terminal mockup */}
-              <div className="relative mx-5 mb-5 rounded-xl overflow-hidden border border-white/5">
-                <div className="flex items-center gap-1.5 px-3 py-2 bg-black/30 border-b border-white/5">
-                  <span className="w-2 h-2 rounded-full bg-red-500/60" />
-                  <span className="w-2 h-2 rounded-full bg-yellow-500/60" />
-                  <span className="w-2 h-2 rounded-full bg-green-500/60" />
-                  <span className="ml-2 text-[10px] text-zinc-600 font-mono-ui truncate">{fileName(snippet)}</span>
+              <div className="relative mx-5 mb-5 rounded-xl overflow-hidden border border-line">
+                <div className="flex items-center gap-1.5 px-3 py-2 bg-paper-soft border-b border-line">
+                  <span className="w-2 h-2 rounded-full bg-rust/50" />
+                  <span className="w-2 h-2 rounded-full bg-amber/50" />
+                  <span className="w-2 h-2 rounded-full bg-clover/50" />
+                  <span className="ml-2 text-[10px] text-mist font-mono-ui truncate">{fileName(snippet)}</span>
                 </div>
                 <div className="relative">
                   <SyntaxHighlighter
                     language={snippet.language}
-                    style={oneDark}
+                    style={oneLight}
                     customStyle={{
                       margin: 0,
-                      background: '#0c0c10',
+                      background: '#FBFAF7',
                       padding: '14px',
                       maxHeight: 190,
                       fontSize: 12,
@@ -123,7 +122,7 @@ export default function SnippetsHub() {
                   >
                     {snippet.code}
                   </SyntaxHighlighter>
-                  <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-[#0c0c10] to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-[#FBFAF7] to-transparent pointer-events-none" />
                 </div>
               </div>
 
