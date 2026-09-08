@@ -18,6 +18,7 @@ const ApiKeyOrderSchema = new mongoose.Schema(
     qrCodeUrl: { type: String },
     midtransTransactionId: { type: String },
     issuedApiKey: { type: mongoose.Schema.Types.ObjectId, ref: 'ApiKey', default: null },
+    issuedPlaintext: { type: String, default: null }, // dihapus setelah user ambil sekali (lihat reveal endpoint)
     rawWebhookData: { type: mongoose.Schema.Types.Mixed },
   },
   { timestamps: true }

@@ -170,7 +170,7 @@ export default function ApiKeyPurchaseModal({ onClose, onIssued }) {
               <IconCheck className="w-6 h-6" />
             </div>
             <h2 className="font-display text-xl font-semibold text-ink mb-2">Payment confirmed</h2>
-            <p className="text-slate text-sm mb-4">Copy this now, or view it again anytime from your key list.</p>
+            <p className="text-slate text-sm mb-4">Copy this now — it won't be shown again.</p>
             <button
               onClick={copyKey}
               className="w-full font-mono-ui text-indigo-dark text-xs tracking-wide bg-indigo-soft border border-indigo/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-indigo/40 transition-colors duration-200 mb-4"

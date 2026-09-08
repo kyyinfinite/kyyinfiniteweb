@@ -170,16 +170,6 @@ export function IconTerminal({ className = 'w-5 h-5' }) {
   );
 }
 
-export function IconBook({ className = 'w-5 h-5' }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} {...base}>
-      <path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0 0 4h13" />
-      <path d="M8 6.5h9" />
-      <path d="M8 10h9" />
-    </svg>
-  );
-}
-
 export function IconGamepad({ className = 'w-5 h-5' }) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...base}>

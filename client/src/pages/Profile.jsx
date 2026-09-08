@@ -8,7 +8,30 @@ import { IconKey, IconCopy, IconQr, IconTicket } from '../lib/icons.jsx';
 import ApiKeyPurchaseModal from '../components/ApiKeyPurchaseModal.jsx';
 import Badge from '../components/ui/Badge.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
-import { ALLOWED_USER_SCOPES, SCOPE_INFO } from '../lib/scopes.js';
+
+const ALLOWED_USER_SCOPES = [
+  'tools:search',
+  'tools:maker',
+  'tools:downloader',
+  'tools:utility',
+  'tools:news',
+  'tools:info',
+  'tools:primbon',
+  'tools:random',
+  'tools:stalker',
+];
+
+const SCOPE_INFO = {
+  'tools:search': { label: 'Search', description: 'Spotify, TikTok, YouTube, Apple Music search' },
+  'tools:maker': { label: 'Image Maker', description: 'Brat, lobby fakes, memes, text effects, quote cards' },
+  'tools:downloader': { label: 'Downloader', description: 'TikTok, Instagram, YouTube, Spotify, and more' },
+  'tools:utility': { label: 'Utility', description: 'Translate, text-to-speech, image unblur' },
+  'tools:news': { label: 'News', description: 'Kompas, CNN, Tribunnews, and other feeds' },
+  'tools:info': { label: 'Info', description: 'Weather, earthquakes, TV schedules' },
+  'tools:primbon': { label: 'Primbon', description: 'Name meaning, lucky numbers, dream readings' },
+  'tools:random': { label: 'Random', description: 'Random anime and Blue Archive images' },
+  'tools:stalker': { label: 'Profile Lookup', description: 'Public profile info from TikTok, YouTube, GitHub, and more' },
+};
 
 function initialsOf(username, email) {
   const source = username || email?.split('@')[0] || '??';
@@ -43,8 +66,6 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
   const [showPurchase, setShowPurchase] = useState(false);
-  const [revealedKeys, setRevealedKeys] = useState({});
-  const [revealingId, setRevealingId] = useState(null);
 
   async function loadAll() {
     const token = (await refreshToken()) || idToken;
@@ -113,32 +134,6 @@ export default function Profile() {
 
   function copyKey() {
     navigator.clipboard.writeText(newlyCreatedKey);
-    showToast('API key copied', { type: 'success' });
-  }
-
-  async function handleToggleReveal(id) {
-    if (revealedKeys[id]) {
-      setRevealedKeys((current) => {
-        const next = { ...current };
-        delete next[id];
-        return next;
-      });
-      return;
-    }
-    setRevealingId(id);
-    try {
-      const token = (await refreshToken()) || idToken;
-      const result = await api.revealMyApiKey(token, id);
-      setRevealedKeys((current) => ({ ...current, [id]: result.apiKey }));
-    } catch (error) {
-      showToast(error.message, { type: 'error' });
-    } finally {
-      setRevealingId(null);
-    }
-  }
-
-  function copyRevealedKey(plaintext) {
-    navigator.clipboard.writeText(plaintext);
     showToast('API key copied', { type: 'success' });
   }
 
@@ -269,7 +264,7 @@ export default function Profile() {
 
               {newlyCreatedKey && (
                 <div className="mt-4 pt-4 border-t border-line">
-                  <p className="text-xs text-amber mb-2">Copy this now, or view it again anytime from your key list below.</p>
+                  <p className="text-xs text-amber mb-2">Copy this now — it won't be shown again.</p>
                   <button
                     onClick={copyKey}
                     className="w-full font-mono-ui text-indigo-dark text-xs tracking-wide bg-indigo-soft border border-indigo/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-indigo/40 transition-colors duration-200"
@@ -329,15 +324,6 @@ export default function Profile() {
                         <Badge tone={key.status === 'active' ? 'indigo' : 'danger'}>{key.status}</Badge>
                         {key.status === 'active' && (
                           <button
-                            onClick={() => handleToggleReveal(key._id)}
-                            disabled={revealingId === key._id}
-                            className="text-indigo hover:text-indigo/80 text-sm font-medium transition-colors duration-200"
-                          >
-                            {revealingId === key._id ? 'Loading…' : revealedKeys[key._id] ? 'Hide' : 'Show'}
-                          </button>
-                        )}
-                        {key.status === 'active' && (
-                          <button
                             onClick={() => handleRevoke(key._id)}
                             className="text-rust hover:text-rust/80 text-sm font-medium transition-colors duration-200"
                           >
@@ -346,16 +332,6 @@ export default function Profile() {
                         )}
                       </div>
                     </div>
-
-                    {revealedKeys[key._id] && (
-                      <button
-                        onClick={() => copyRevealedKey(revealedKeys[key._id])}
-                        className="mt-3 w-full font-mono-ui text-indigo-dark text-xs tracking-wide bg-indigo-soft border border-indigo/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-indigo/40 transition-colors duration-200"
-                      >
-                        <span className="truncate">{revealedKeys[key._id]}</span>
-                        <IconCopy className="w-3.5 h-3.5 shrink-0" />
-                      </button>
-                    )}
 
                     <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>

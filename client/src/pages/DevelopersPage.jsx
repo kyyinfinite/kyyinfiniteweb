@@ -22,14 +22,6 @@ const CATEGORY_LABELS = {
   search: 'Search',
   maker: 'Maker',
   downloader: 'Downloader',
-  ai: 'AI',
-  anime: 'Anime',
-  stalker: 'Profile Lookup',
-  info: 'Info',
-  news: 'News',
-  primbon: 'Primbon',
-  random: 'Random',
-  tools: 'Utility',
 };
 
 function categoryOf(endpoint) {
