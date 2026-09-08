@@ -44,7 +44,7 @@ async function getUsageStats(req, res) {
           },
         },
       ]),
-      ApiKey.find({ ownerUid: req.user.uid }).select('-hashedSecret -encryptedKey').lean(),
+      ApiKey.find({ ownerUid: req.user.uid }).select('-hashedSecret').lean(),
     ]);
 
     const dayMap = new Map(dailyAgg.map((row) => [row._id, row.count]));

@@ -1,6 +1,5 @@
 const ApiKey = require('../models/ApiKey');
 const { generateApiKey } = require('../utils/apiKeyGenerator');
-const { decryptApiKey } = require('../utils/apiKeyCrypto');
 
 const MAX_KEYS_PER_USER = 2;
 const ALLOWED_USER_SCOPES = [
@@ -13,8 +12,6 @@ const ALLOWED_USER_SCOPES = [
   'tools:primbon',
   'tools:random',
   'tools:stalker',
-  'tools:ai',
-  'tools:anime',
 ];
 const USER_RATE_LIMIT_TIER = 'default';
 const FREE_PLAN_REQUEST_LIMIT = 40;
@@ -41,12 +38,11 @@ async function requestApiKey(req, res) {
       });
     }
 
-    const { plaintext, keyId, hashedSecret, encryptedKey } = generateApiKey();
+    const { plaintext, keyId, hashedSecret } = generateApiKey();
 
     await ApiKey.create({
       keyId,
       hashedSecret,
-      encryptedKey,
       label: label.trim(),
       ownerEmail: req.user.email,
       ownerType: 'user',
@@ -68,7 +64,7 @@ async function listMyApiKeys(req, res) {
   try {
     const keys = await ApiKey.find({ ownerUid: req.user.uid })
       .sort({ createdAt: -1 })
-      .select('-hashedSecret -encryptedKey')
+      .select('-hashedSecret')
       .lean();
     return res.status(200).json({
       keys,
@@ -96,21 +92,4 @@ async function revokeMyApiKey(req, res) {
   }
 }
 
-/** GET /api/user/api-keys/:id/reveal — balikin plaintext key milik user sendiri, buat kasus lupa key. */
-async function revealMyApiKey(req, res) {
-  try {
-    const key = await ApiKey.findOne({ _id: req.params.id, ownerUid: req.user.uid });
-    if (!key) {
-      return res.status(404).json({ message: 'API key not found' });
-    }
-    if (!key.encryptedKey) {
-      return res.status(410).json({ message: 'This key was created before reveal support was added and cannot be shown again. Please create a new key.' });
-    }
-    const plaintext = decryptApiKey(key.encryptedKey);
-    return res.status(200).json({ apiKey: plaintext, keyId: key.keyId });
-  } catch (error) {
-    return res.status(500).json({ message: 'Failed to reveal API key', error: error.message });
-  }
-}
-
-module.exports = { requestApiKey, listMyApiKeys, revokeMyApiKey, revealMyApiKey, MAX_KEYS_PER_USER, ALLOWED_USER_SCOPES };
+module.exports = { requestApiKey, listMyApiKeys, revokeMyApiKey, MAX_KEYS_PER_USER, ALLOWED_USER_SCOPES };
