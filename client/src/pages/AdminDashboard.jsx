@@ -39,7 +39,11 @@ export default function AdminDashboard() {
  const [activeTab, setActiveTab] = useState('metrics');
 
  if (isLoading) {
- return <p className="text-center py-24 text-zinc-400">Verifying admin session.</p>;
+ return (
+ <div className="theme-light min-h-screen flex items-center justify-center">
+ <p className="text-slate">Verifying admin session…</p>
+ </div>
+ );
  }
 
  if (!adminUser) {
@@ -51,11 +55,11 @@ export default function AdminDashboard() {
  }
 
  return (
- <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 md:flex md:gap-8">
+ <div className="theme-light max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 md:flex md:gap-8">
  <aside className="hidden md:flex md:w-64 md:flex-col md:shrink-0">
  <div className="card-surface p-5 sticky top-24">
- <p className="text-zinc-50 font-semibold">Admin Dashboard</p>
- <p className="text-zinc-500 text-xs mt-1 truncate">{adminUser.email}</p>
+ <p className="text-ink font-semibold">Admin Dashboard</p>
+ <p className="text-mist text-xs mt-1 truncate">{adminUser.email}</p>
 
  <nav className="flex flex-col gap-1 mt-6">
  {TABS.map((tab) => (
@@ -64,14 +68,14 @@ export default function AdminDashboard() {
  onClick={() => setActiveTab(tab.key)}
  className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-left transition-all duration-200 ${
  activeTab === tab.key
- ? 'bg-brand/15 text-brand-light'
- : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
+ ? 'bg-indigo-soft text-indigo'
+ : 'text-slate hover:text-ink hover:bg-indigo-soft'
  }`}
  >
  {activeTab === tab.key && (
  <motion.span
  layoutId="admin-sidebar-active"
- className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full bg-brand-light shadow-glow-brand"
+ className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full bg-indigo"
  />
  )}
  <tab.icon className="w-4 h-4 shrink-0" />
@@ -88,8 +92,8 @@ export default function AdminDashboard() {
 
  <div className="md:hidden flex items-center justify-between gap-4 mb-6">
  <div>
- <h1 className="text-2xl font-semibold text-zinc-50">Admin Dashboard</h1>
- <p className="text-zinc-400 mt-1 text-xs truncate">{adminUser.email}</p>
+ <h1 className="text-2xl font-semibold text-ink">Admin Dashboard</h1>
+ <p className="text-slate mt-1 text-xs truncate">{adminUser.email}</p>
  </div>
  <button onClick={logout} className="btn-outline text-sm shrink-0">
  Sign out
@@ -103,8 +107,8 @@ export default function AdminDashboard() {
  onClick={() => setActiveTab(tab.key)}
  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
  activeTab === tab.key
- ? 'bg-brand text-white'
- : 'border border-zinc-800 text-zinc-400 hover:text-brand-light'
+ ? 'bg-indigo text-white'
+ : 'border border-line text-slate hover:text-indigo'
  }`}
  >
  <tab.icon className="w-4 h-4" /> {tab.label}
@@ -114,7 +118,7 @@ export default function AdminDashboard() {
 
  <main className="min-w-0 flex-1">
  <div className="hidden md:block mb-8">
- <h1 className="text-2xl font-semibold text-zinc-50">
+ <h1 className="text-2xl font-semibold text-ink">
  {TABS.find((tab) => tab.key === activeTab)?.label}
  </h1>
  </div>
@@ -163,17 +167,17 @@ function VerifyEmailGate({ adminUser, logout, refreshAdminUser, sendVerification
  }
 
  return (
- <main className="min-h-[70vh] flex items-center justify-center px-6">
+ <main className="theme-light min-h-[70vh] flex items-center justify-center px-6">
  <div className="card-surface w-full max-w-sm p-8 text-center">
- <h1 className="text-xl font-semibold text-zinc-50 mb-2">Verify your email</h1>
- <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+ <h1 className="text-xl font-semibold text-ink mb-2">Verify your email</h1>
+ <p className="text-slate text-sm leading-relaxed mb-6">
  {adminUser.email} is signed in, but Firebase hasn't verified this email yet. Send a
  verification link, click it from your inbox, then come back and continue.
  </p>
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
  {status === 'sent' && (
- <p className="text-brand-light text-sm mb-4">Verification email sent. Check your inbox.</p>
+ <p className="text-indigo text-sm mb-4">Verification email sent. Check your inbox.</p>
  )}
 
  <button
@@ -192,7 +196,7 @@ function VerifyEmailGate({ adminUser, logout, refreshAdminUser, sendVerification
  {isChecking ? 'Checking.' : "I've verified, continue"}
  </button>
 
- <button onClick={logout} className="text-zinc-500 hover:text-zinc-300 text-sm">
+ <button onClick={logout} className="text-mist hover:text-slate text-sm">
  Sign out
  </button>
  </div>
@@ -228,7 +232,7 @@ function MetricsPanel({ idToken, refreshToken }) {
  };
  }, [idToken, refreshToken]);
 
- if (errorMessage) return <p className="text-red-400">{errorMessage}</p>;
+ if (errorMessage) return <p className="text-rust">{errorMessage}</p>;
 
  if (!metrics || !series) {
  return (
@@ -236,9 +240,9 @@ function MetricsPanel({ idToken, refreshToken }) {
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
  {Array.from({ length: 5 }).map((_, index) => (
  <div key={index} className="card-surface p-6 animate-pulse">
- <div className="w-10 h-10 rounded-lg bg-white/5 mb-4" />
- <div className="w-2/3 h-3 rounded bg-white/5 mb-3" />
- <div className="w-1/3 h-6 rounded bg-white/5" />
+ <div className="w-10 h-10 rounded-lg bg-line mb-4" />
+ <div className="w-2/3 h-3 rounded bg-line mb-3" />
+ <div className="w-1/3 h-6 rounded bg-line" />
  </div>
  ))}
  </div>
@@ -268,76 +272,78 @@ function MetricsPanel({ idToken, refreshToken }) {
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
  {cards.map((card) => (
  <div key={card.label} className="card-surface p-6">
- <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center text-brand-light mb-4">
+ <div className="w-10 h-10 rounded-lg bg-indigo-soft flex items-center justify-center text-indigo mb-4">
  <card.icon className="w-5 h-5" />
  </div>
- <p className="text-zinc-400 text-sm">{card.label}</p>
- <p className="text-2xl font-semibold text-zinc-50 mt-1">{card.value}</p>
+ <p className="text-slate text-sm">{card.label}</p>
+ <p className="text-2xl font-semibold text-ink mt-1">{card.value}</p>
  </div>
  ))}
  </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
  <div className="card-surface p-6">
- <p className="text-zinc-50 font-semibold mb-1">Downloads</p>
- <p className="text-zinc-500 text-xs mb-4">Last 30 days</p>
+ <p className="text-ink font-semibold mb-1">Downloads</p>
+ <p className="text-mist text-xs mb-4">Last 30 days</p>
  <ResponsiveContainer width="100%" height={220}>
  <AreaChart data={chartData}>
  <defs>
  <linearGradient id="downloadsGradient" x1="0" y1="0" x2="0" y2="1">
- <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
- <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+ <stop offset="5%" stopColor="#5850E6" stopOpacity={0.4} />
+ <stop offset="95%" stopColor="#5850E6" stopOpacity={0} />
  </linearGradient>
  </defs>
- <XAxis dataKey="label" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
- <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} width={30} allowDecimals={false} />
- <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+ <XAxis dataKey="label" stroke="#9C9E93" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
+ <YAxis stroke="#9C9E93" fontSize={11} tickLine={false} axisLine={false} width={30} allowDecimals={false} />
+ <CartesianGrid stroke="#E6E3D8" vertical={false} />
  <Tooltip
  contentStyle={{
- background: 'rgba(9,9,11,0.9)',
- border: '1px solid rgba(255,255,255,0.1)',
+ background: '#FFFFFF',
+ border: '1px solid #E6E3D8',
+ boxShadow: '0 8px 24px rgba(29,31,26,0.08)',
  borderRadius: 12,
  fontSize: 12,
  }}
- labelStyle={{ color: '#a1a1aa' }}
+ labelStyle={{ color: '#6B6D64' }}
  />
- <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fill="url(#downloadsGradient)" />
+ <Area type="monotone" dataKey="downloads" stroke="#5850E6" strokeWidth={2} fill="url(#downloadsGradient)" />
  </AreaChart>
  </ResponsiveContainer>
  </div>
 
  <div className="card-surface p-6">
- <p className="text-zinc-50 font-semibold mb-1">Revenue</p>
- <p className="text-zinc-500 text-xs mb-4">Last 30 days, completed orders</p>
+ <p className="text-ink font-semibold mb-1">Revenue</p>
+ <p className="text-mist text-xs mb-4">Last 30 days, completed orders</p>
  <ResponsiveContainer width="100%" height={220}>
  <AreaChart data={chartData}>
  <defs>
  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
- <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4} />
- <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+ <stop offset="5%" stopColor="#2F8F6B" stopOpacity={0.4} />
+ <stop offset="95%" stopColor="#2F8F6B" stopOpacity={0} />
  </linearGradient>
  </defs>
- <XAxis dataKey="label" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
+ <XAxis dataKey="label" stroke="#9C9E93" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
  <YAxis
- stroke="#71717a"
+ stroke="#9C9E93"
  fontSize={11}
  tickLine={false}
  axisLine={false}
  width={44}
  tickFormatter={(value) => `${Math.round(value / 1000)}k`}
  />
- <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+ <CartesianGrid stroke="#E6E3D8" vertical={false} />
  <Tooltip
  contentStyle={{
- background: 'rgba(9,9,11,0.9)',
- border: '1px solid rgba(255,255,255,0.1)',
+ background: '#FFFFFF',
+ border: '1px solid #E6E3D8',
+ boxShadow: '0 8px 24px rgba(29,31,26,0.08)',
  borderRadius: 12,
  fontSize: 12,
  }}
- labelStyle={{ color: '#a1a1aa' }}
+ labelStyle={{ color: '#6B6D64' }}
  formatter={(value) => [`Rp ${Number(value).toLocaleString('id-ID')}`, 'Revenue']}
  />
- <Area type="monotone" dataKey="revenue" stroke="#22d3ee" strokeWidth={2} fill="url(#revenueGradient)" />
+ <Area type="monotone" dataKey="revenue" stroke="#2F8F6B" strokeWidth={2} fill="url(#revenueGradient)" />
  </AreaChart>
  </ResponsiveContainer>
  </div>
@@ -510,30 +516,30 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  return (
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleUpload} className="card-surface p-6 lg:col-span-2 h-fit">
- <h2 className="text-zinc-50 font-semibold mb-5">Publish New Product</h2>
+ <h2 className="text-ink font-semibold mb-5">Publish New Product</h2>
 
- <label className="text-sm text-zinc-400 mb-2 block">Name</label>
+ <label className="text-sm text-slate mb-2 block">Name</label>
  <input
  required
  value={name}
  onChange={(event) => setName(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
  <div className="flex items-center justify-between mb-2">
- <label className="text-sm text-zinc-400 block">Description (Markdown supported)</label>
+ <label className="text-sm text-slate block">Description (Markdown supported)</label>
  <div className="flex gap-1 text-xs">
  <button
  type="button"
  onClick={() => setDescriptionTab('write')}
- className={`px-2.5 py-1 rounded-md ${descriptionTab === 'write' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
+ className={`px-2.5 py-1 rounded-md ${descriptionTab === 'write' ? 'bg-paper-soft text-indigo' : 'text-mist'}`}
  >
  Write
  </button>
  <button
  type="button"
  onClick={() => setDescriptionTab('preview')}
- className={`px-2.5 py-1 rounded-md ${descriptionTab === 'preview' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
+ className={`px-2.5 py-1 rounded-md ${descriptionTab === 'preview' ? 'bg-paper-soft text-indigo' : 'text-mist'}`}
  >
  Preview
  </button>
@@ -546,33 +552,33 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  value={description}
  onChange={(event) => setDescription(event.target.value)}
  placeholder="Supports full Markdown: headings, lists, tables, fenced code blocks."
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  ) : (
  <div className="mb-4">
  {description ? (
  <MarkdownRenderer content={description} />
  ) : (
- <p className="text-zinc-600 text-sm px-4 py-6 border border-zinc-800 rounded-xl">Nothing to preview yet.</p>
+ <p className="text-mist text-sm px-4 py-6 border border-line rounded-xl">Nothing to preview yet.</p>
  )}
  </div>
  )}
 
  <div className="grid grid-cols-2 gap-4 mb-4">
  <div>
- <label className="text-sm text-zinc-400 mb-2 block">Version</label>
+ <label className="text-sm text-slate mb-2 block">Version</label>
  <input
  value={currentVersion}
  onChange={(event) => setCurrentVersion(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  <div>
- <label className="text-sm text-zinc-400 mb-2 block">Category</label>
+ <label className="text-sm text-slate mb-2 block">Category</label>
  <select
  value={category}
  onChange={(event) => setCategory(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  >
  <option value="whatsapp-bot">WhatsApp Bot</option>
  <option value="plugin">Plugin</option>
@@ -580,39 +586,39 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  </div>
  </div>
 
- <label className="text-sm text-zinc-400 mb-2 block">Tags (comma separated)</label>
+ <label className="text-sm text-slate mb-2 block">Tags (comma separated)</label>
  <input
  value={tags}
  onChange={(event) => setTags(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">File</label>
+ <label className="text-sm text-slate mb-2 block">File</label>
  <input
  type="file"
  required
  onChange={(event) => setFile(event.target.files?.[0] || null)}
- className="w-full text-sm text-zinc-400 mb-4"
+ className="w-full text-sm text-slate mb-4"
  />
 
  {isUploading && (
  <div className="mb-4">
- <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
+ <div className="w-full h-2 rounded-full bg-paper-soft overflow-hidden">
  <div
- className="h-full bg-brand-light shadow-glow-brand transition-all duration-300"
+ className="h-full bg-indigo transition-all duration-300"
  style={{ width: `${uploadProgress}%` }}
  />
  </div>
  <div className="flex items-center justify-between mt-2">
- <span className="text-xs text-zinc-500 font-mono-ui">{uploadProgress}% uploaded</span>
- <button type="button" onClick={handleCancelUpload} className="text-xs text-red-400 hover:text-red-300">
+ <span className="text-xs text-mist font-mono-ui">{uploadProgress}% uploaded</span>
+ <button type="button" onClick={handleCancelUpload} className="text-xs text-rust hover:text-rust/70">
  Cancel upload
  </button>
  </div>
  </div>
  )}
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <button type="submit" disabled={isUploading} className="btn-primary w-full flex items-center justify-center gap-2">
  <IconUpload className="w-4 h-4" /> {isUploading ? 'Uploading.' : 'Publish product'}
@@ -624,27 +630,27 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  <div key={asset._id} className="card-surface p-5">
  <div className="flex items-center justify-between gap-4">
  <div>
- <p className="text-zinc-50 font-medium">{asset.name}</p>
- <p className="text-zinc-500 text-xs mt-1">
+ <p className="text-ink font-medium">{asset.name}</p>
+ <p className="text-mist text-xs mt-1">
  {asset.category} - v{asset.currentVersion} - {asset.downloadCount} downloads
  </p>
  </div>
  <div className="flex items-center gap-4">
  <button
  onClick={() => openEditPanel(asset)}
- className="text-zinc-400 hover:text-brand-light text-sm font-medium"
+ className="text-slate hover:text-indigo text-sm font-medium"
  >
  {expandedAssetId === asset._id && panelMode === 'edit' ? 'Close' : 'Edit'}
  </button>
  <button
  onClick={() => openVersionPanel(asset._id)}
- className="text-brand-light hover:text-cyan-300 text-sm font-medium"
+ className="text-indigo hover:text-indigo-dark text-sm font-medium"
  >
  {expandedAssetId === asset._id && panelMode === 'version' ? 'Close' : 'Add version'}
  </button>
  <button
  onClick={() => handleDelete(asset._id)}
- className="text-red-400 hover:text-red-300 text-sm font-medium"
+ className="text-rust hover:text-rust/70 text-sm font-medium"
  >
  Delete
  </button>
@@ -652,29 +658,29 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  </div>
 
  {expandedAssetId === asset._id && panelMode === 'edit' && (
- <form onSubmit={(event) => handleSaveEdit(event, asset._id)} className="mt-5 pt-5 border-t border-zinc-800">
- <label className="text-sm text-zinc-400 mb-2 block">Name</label>
+ <form onSubmit={(event) => handleSaveEdit(event, asset._id)} className="mt-5 pt-5 border-t border-line">
+ <label className="text-sm text-slate mb-2 block">Name</label>
  <input
  required
  value={editName}
  onChange={(event) => setEditName(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2 text-sm text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
  <div className="flex items-center justify-between mb-2">
- <label className="text-sm text-zinc-400 block">Description (Markdown supported)</label>
+ <label className="text-sm text-slate block">Description (Markdown supported)</label>
  <div className="flex gap-1 text-xs">
  <button
  type="button"
  onClick={() => setEditDescriptionTab('write')}
- className={`px-2.5 py-1 rounded-md ${editDescriptionTab === 'write' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
+ className={`px-2.5 py-1 rounded-md ${editDescriptionTab === 'write' ? 'bg-paper-soft text-indigo' : 'text-mist'}`}
  >
  Write
  </button>
  <button
  type="button"
  onClick={() => setEditDescriptionTab('preview')}
- className={`px-2.5 py-1 rounded-md ${editDescriptionTab === 'preview' ? 'bg-zinc-800 text-brand-light' : 'text-zinc-500'}`}
+ className={`px-2.5 py-1 rounded-md ${editDescriptionTab === 'preview' ? 'bg-paper-soft text-indigo' : 'text-mist'}`}
  >
  Preview
  </button>
@@ -687,23 +693,23 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  rows={10}
  value={editDescription}
  onChange={(event) => setEditDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  ) : (
  <div className="mb-4">
  {editDescription ? (
  <MarkdownRenderer content={editDescription} />
  ) : (
- <p className="text-zinc-600 text-sm px-4 py-6 border border-zinc-800 rounded-xl">Nothing to preview yet.</p>
+ <p className="text-mist text-sm px-4 py-6 border border-line rounded-xl">Nothing to preview yet.</p>
  )}
  </div>
  )}
 
- <label className="text-sm text-zinc-400 mb-2 block">Tags (comma separated)</label>
+ <label className="text-sm text-slate mb-2 block">Tags (comma separated)</label>
  <input
  value={editTags}
  onChange={(event) => setEditTags(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2 text-sm text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
  <button type="submit" disabled={isSavingEdit} className="btn-primary text-sm">
@@ -713,20 +719,20 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  )}
 
  {expandedAssetId === asset._id && panelMode === 'version' && (
- <form onSubmit={(event) => handleAddChangelog(event, asset._id)} className="mt-5 pt-5 border-t border-zinc-800">
+ <form onSubmit={(event) => handleAddChangelog(event, asset._id)} className="mt-5 pt-5 border-t border-line">
  <div className="grid grid-cols-2 gap-4 mb-3">
  <input
  required
  placeholder="New version, e.g. 1.1.0"
  value={newVersion}
  onChange={(event) => setNewVersion(event.target.value)}
- className="rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="rounded-xl border border-line bg-transparent px-4 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  <input
  type="file"
  required
  onChange={(event) => setNewFile(event.target.files?.[0] || null)}
- className="text-xs text-zinc-400 self-center"
+ className="text-xs text-slate self-center"
  />
  </div>
  <textarea
@@ -734,12 +740,12 @@ function AssetManagerPanel({ idToken, refreshToken }) {
  placeholder="Release notes, one per line"
  value={newNotes}
  onChange={(event) => setNewNotes(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-sm text-zinc-100 mb-3 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2 text-sm text-ink mb-3 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  {isSavingChangelog && (
- <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-3">
+ <div className="w-full h-1.5 rounded-full bg-paper-soft overflow-hidden mb-3">
  <div
- className="h-full bg-brand-light shadow-glow-brand transition-all duration-300"
+ className="h-full bg-indigo transition-all duration-300"
  style={{ width: `${newVersionProgress}%` }}
  />
  </div>
@@ -869,59 +875,59 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  return (
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
- <h2 className="text-zinc-50 font-semibold mb-5">Publish Snippet</h2>
+ <h2 className="text-ink font-semibold mb-5">Publish Snippet</h2>
 
- <label className="text-sm text-zinc-400 mb-2 block">Load from file (optional)</label>
+ <label className="text-sm text-slate mb-2 block">Load from file (optional)</label>
  <input
  type="file"
  onChange={handleFileChosen}
- className="w-full text-xs text-zinc-400 mb-4"
+ className="w-full text-xs text-slate mb-4"
  />
- {isReadingFile && <p className="text-xs text-brand-light mb-4">Reading file.</p>}
+ {isReadingFile && <p className="text-xs text-indigo mb-4">Reading file.</p>}
 
- <label className="text-sm text-zinc-400 mb-2 block">Title</label>
+ <label className="text-sm text-slate mb-2 block">Title</label>
  <input
  required
  value={title}
  onChange={(event) => setTitle(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Description</label>
+ <label className="text-sm text-slate mb-2 block">Description</label>
  <textarea
  required
  rows={2}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Language</label>
+ <label className="text-sm text-slate mb-2 block">Language</label>
  <input
  required
  value={language}
  onChange={(event) => setLanguage(event.target.value)}
  placeholder="javascript"
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Code</label>
+ <label className="text-sm text-slate mb-2 block">Code</label>
  <textarea
  required
  rows={8}
  value={code}
  onChange={(event) => setCode(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Tags (comma separated)</label>
+ <label className="text-sm text-slate mb-2 block">Tags (comma separated)</label>
  <input
  value={tags}
  onChange={(event) => setTags(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <button type="submit" disabled={isSaving} className="btn-primary w-full">
  {isSaving ? 'Publishing.' : 'Publish snippet'}
@@ -932,12 +938,12 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  {snippets.map((snippet) => (
  <div key={snippet._id} className="card-surface p-5 flex items-center justify-between gap-4">
  <div>
- <p className="text-zinc-50 font-medium">{snippet.title}</p>
- <p className="text-zinc-600 text-xs mt-1 uppercase">{snippet.language}</p>
+ <p className="text-ink font-medium">{snippet.title}</p>
+ <p className="text-mist text-xs mt-1 uppercase">{snippet.language}</p>
  </div>
  <button
  onClick={() => handleDelete(snippet._id)}
- className="text-red-400 hover:text-red-300 text-sm font-medium"
+ className="text-rust hover:text-rust/70 text-sm font-medium"
  >
  Delete
  </button>
@@ -1012,106 +1018,106 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  return (
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
- <h2 className="text-zinc-50 font-semibold mb-5">Add Hosting Product</h2>
+ <h2 className="text-ink font-semibold mb-5">Add Hosting Product</h2>
 
- <label className="text-sm text-zinc-400 mb-2 block">Name</label>
+ <label className="text-sm text-slate mb-2 block">Name</label>
  <input
  required
  value={name}
  onChange={(event) => setName(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Description</label>
+ <label className="text-sm text-slate mb-2 block">Description</label>
  <textarea
  required
  rows={2}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Price (IDR)</label>
+ <label className="text-sm text-slate mb-2 block">Price (IDR)</label>
  <input
  required
  type="number"
  min="0"
  value={price}
  onChange={(event) => setPrice(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
  <div className="grid grid-cols-3 gap-3 mb-4">
  <div>
- <label className="text-xs text-zinc-400 mb-2 block">CPU %</label>
+ <label className="text-xs text-slate mb-2 block">CPU %</label>
  <input
  required
  type="number"
  min="0"
  value={cpuLimit}
  onChange={(event) => setCpuLimit(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  <div>
- <label className="text-xs text-zinc-400 mb-2 block">RAM MB</label>
+ <label className="text-xs text-slate mb-2 block">RAM MB</label>
  <input
  required
  type="number"
  min="0"
  value={ramLimit}
  onChange={(event) => setRamLimit(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  <div>
- <label className="text-xs text-zinc-400 mb-2 block">Disk MB</label>
+ <label className="text-xs text-slate mb-2 block">Disk MB</label>
  <input
  required
  type="number"
  min="0"
  value={diskLimit}
  onChange={(event) => setDiskLimit(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  </div>
 
- <p className="text-xs text-zinc-500 mb-2">Pterodactyl identifiers, from your panel's admin area</p>
+ <p className="text-xs text-mist mb-2">Pterodactyl identifiers, from your panel's admin area</p>
  <div className="grid grid-cols-3 gap-3 mb-4">
  <div>
- <label className="text-xs text-zinc-400 mb-2 block">Egg ID</label>
+ <label className="text-xs text-slate mb-2 block">Egg ID</label>
  <input
  required
  type="number"
  value={eggId}
  onChange={(event) => setEggId(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  <div>
- <label className="text-xs text-zinc-400 mb-2 block">Nest ID</label>
+ <label className="text-xs text-slate mb-2 block">Nest ID</label>
  <input
  required
  type="number"
  value={nestId}
  onChange={(event) => setNestId(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  <div>
- <label className="text-xs text-zinc-400 mb-2 block">Location ID</label>
+ <label className="text-xs text-slate mb-2 block">Location ID</label>
  <input
  required
  type="number"
  value={locationId}
  onChange={(event) => setLocationId(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-indigo"
  />
  </div>
  </div>
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <button type="submit" disabled={isSaving} className="btn-primary w-full">
  {isSaving ? 'Saving.' : 'Add product'}
@@ -1122,18 +1128,18 @@ function HostingProductsPanel({ idToken, refreshToken }) {
  {products.map((product) => (
  <div key={product._id} className="card-surface p-5 flex items-center justify-between gap-4">
  <div>
- <p className="text-zinc-50 font-medium">{product.name}</p>
- <p className="text-zinc-500 text-xs mt-1">
+ <p className="text-ink font-medium">{product.name}</p>
+ <p className="text-mist text-xs mt-1">
  Rp {product.price.toLocaleString('id-ID')} - {product.cpuLimit}% CPU - {product.ramLimit}MB RAM - {product.diskLimit}MB Disk
  </p>
- <p className="text-zinc-600 text-xs mt-1">
+ <p className="text-mist text-xs mt-1">
  egg {product.eggId} - nest {product.nestId} - location {product.locationId}
  </p>
  </div>
  <button
  onClick={() => handleToggleActive(product)}
  className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
- product.isActive ? 'bg-brand/10 text-brand-light' : 'bg-zinc-800 text-zinc-500'
+ product.isActive ? 'bg-indigo-soft text-indigo' : 'bg-paper-soft text-mist'
  }`}
  >
  {product.isActive ? 'Active' : 'Inactive'}
@@ -1234,26 +1240,26 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  <>
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
- <h2 className="text-zinc-50 font-semibold mb-5">Create API Key</h2>
+ <h2 className="text-ink font-semibold mb-5">Create API Key</h2>
 
- <label className="text-sm text-zinc-400 mb-2 block">Label</label>
+ <label className="text-sm text-slate mb-2 block">Label</label>
  <input
  required
  value={label}
  onChange={(event) => setLabel(event.target.value)}
  placeholder="e.g. my-whatsapp-bot"
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Owner email (optional)</label>
+ <label className="text-sm text-slate mb-2 block">Owner email (optional)</label>
  <input
  type="email"
  value={ownerEmail}
  onChange={(event) => setOwnerEmail(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Scopes</label>
+ <label className="text-sm text-slate mb-2 block">Scopes</label>
  <div className="flex flex-wrap gap-2 mb-4">
  {SCOPE_OPTIONS.map((scope) => (
  <button
@@ -1262,8 +1268,8 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  onClick={() => toggleScope(scope)}
  className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
  scopes.includes(scope)
- ? 'bg-brand text-white border-brand'
- : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+ ? 'bg-indigo text-white border-indigo'
+ : 'border-line text-slate hover:text-indigo'
  }`}
  >
  {scope}
@@ -1271,30 +1277,30 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  ))}
  </div>
 
- <label className="text-sm text-zinc-400 mb-2 block">Rate limit tier</label>
+ <label className="text-sm text-slate mb-2 block">Rate limit tier</label>
  <select
  value={rateLimitTier}
  onChange={(event) => setRateLimitTier(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  >
  <option value="default">Default (30/min)</option>
  <option value="pro">Pro (120/min)</option>
  </select>
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <button type="submit" disabled={isSaving} className="btn-primary w-full">
  {isSaving ? 'Creating.' : 'Create key'}
  </button>
 
  {newlyCreatedKey && (
- <div className="mt-5 pt-5 border-t border-zinc-800">
- <p className="text-xs text-yellow-400 mb-2">
+ <div className="mt-5 pt-5 border-t border-line">
+ <p className="text-xs text-amber mb-2">
  Copy this now — it won't be shown again.
  </p>
  <button
  onClick={copyKey}
- className="w-full font-mono-ui text-brand-light text-xs tracking-wide bg-black/30 border border-brand/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-brand/50 transition-colors duration-200"
+ className="w-full font-mono-ui text-indigo text-xs tracking-wide bg-indigo-soft border border-indigo/20 rounded-xl py-3 px-3 flex items-center justify-between gap-2 hover:border-indigo/50 transition-colors duration-200"
  >
  <span className="truncate">{newlyCreatedKey}</span>
  <IconCopy className="w-3.5 h-3.5 shrink-0" />
@@ -1310,30 +1316,30 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  <SkeletonRow />
  </>
  ) : keys.length === 0 ? (
- <p className="text-zinc-500 text-sm">No API keys created yet.</p>
+ <p className="text-mist text-sm">No API keys created yet.</p>
  ) : (
  keys.map((key) => (
  <div key={key._id} className="card-surface p-5 flex items-center justify-between gap-4">
  <div className="min-w-0">
  <div className="flex items-center gap-2 flex-wrap">
- <p className="text-zinc-50 font-medium">{key.label}</p>
+ <p className="text-ink font-medium">{key.label}</p>
  <span
  className={`text-[10px] px-2 py-0.5 rounded-full border ${
  key.ownerType === 'user'
- ? 'border-purple-500/30 bg-purple-500/10 text-purple-300'
- : 'border-zinc-700 bg-zinc-800/60 text-zinc-400'
+ ? 'border-indigo/30 bg-indigo-soft text-indigo-dark'
+ : 'border-line bg-paper-soft text-slate'
  }`}
  >
  {key.ownerType === 'user' ? 'Self-serve' : 'Admin-issued'}
  </span>
  </div>
- <p className="text-zinc-500 text-xs mt-1 font-mono-ui">
+ <p className="text-mist text-xs mt-1 font-mono-ui">
  kyy_{key.keyId}... - {key.scopes.join(', ')} - {key.rateLimitTier}
  </p>
  {key.ownerEmail && (
- <p className="text-zinc-600 text-xs mt-1">Owner: {key.ownerEmail}</p>
+ <p className="text-mist text-xs mt-1">Owner: {key.ownerEmail}</p>
  )}
- <p className="text-zinc-600 text-xs mt-1">
+ <p className="text-mist text-xs mt-1">
  {key.requestCount} requests
  {key.lastUsedAt ? ` - last used ${new Date(key.lastUsedAt).toLocaleDateString('en-US')}` : ' - never used'}
  </p>
@@ -1341,7 +1347,7 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  <div className="flex items-center gap-3 shrink-0">
  <span
  className={`text-xs px-2.5 py-1 rounded-full ${
- key.status === 'active' ? 'bg-brand/15 text-brand-light' : 'bg-red-500/10 text-red-400'
+ key.status === 'active' ? 'bg-indigo-soft text-indigo' : 'bg-rust-soft text-rust'
  }`}
  >
  {key.status}
@@ -1349,20 +1355,20 @@ function ApiKeysPanel({ idToken, refreshToken }) {
  {key.status === 'active' && (
  <button
  onClick={() => handleRevoke(key._id)}
- className="text-red-400 hover:text-red-300 text-sm font-medium"
+ className="text-rust hover:text-rust/70 text-sm font-medium"
  >
  Revoke
  </button>
  )}
  <button
  onClick={() => setEditingKey(key)}
- className="text-zinc-400 hover:text-brand-light text-sm font-medium"
+ className="text-slate hover:text-indigo text-sm font-medium"
  >
  Edit
  </button>
  <button
  onClick={() => setDeletingKey(key)}
- className="text-zinc-500 hover:text-red-400 text-sm font-medium"
+ className="text-mist hover:text-rust text-sm font-medium"
  >
  Delete
  </button>
@@ -1426,7 +1432,7 @@ function EditApiKeyModal({ apiKey, onClose, onSave }) {
 
  return (
  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
- <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+ <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
  <motion.div
  initial={{ opacity: 0, scale: 0.96, y: 8 }}
  animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1436,31 +1442,31 @@ function EditApiKeyModal({ apiKey, onClose, onSave }) {
  >
  <button
  onClick={onClose}
- className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-200"
+ className="absolute right-4 top-4 text-mist hover:text-ink"
  >
  <IconClose className="w-5 h-5" />
  </button>
 
- <h2 className="text-zinc-50 font-semibold mb-5">Edit API Key</h2>
+ <h2 className="text-ink font-semibold mb-5">Edit API Key</h2>
 
  <form onSubmit={handleSubmit}>
- <label className="text-sm text-zinc-400 mb-2 block">Label</label>
+ <label className="text-sm text-slate mb-2 block">Label</label>
  <input
  required
  value={label}
  onChange={(event) => setLabel(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Owner email</label>
+ <label className="text-sm text-slate mb-2 block">Owner email</label>
  <input
  type="email"
  value={ownerEmail}
  onChange={(event) => setOwnerEmail(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Scopes</label>
+ <label className="text-sm text-slate mb-2 block">Scopes</label>
  <div className="flex flex-wrap gap-2 mb-4">
  {SCOPE_OPTIONS.map((scope) => (
  <button
@@ -1469,8 +1475,8 @@ function EditApiKeyModal({ apiKey, onClose, onSave }) {
  onClick={() => toggleScope(scope)}
  className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
  scopes.includes(scope)
- ? 'bg-brand text-white border-brand'
- : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+ ? 'bg-indigo text-white border-indigo'
+ : 'border-line text-slate hover:text-indigo'
  }`}
  >
  {scope}
@@ -1478,17 +1484,17 @@ function EditApiKeyModal({ apiKey, onClose, onSave }) {
  ))}
  </div>
 
- <label className="text-sm text-zinc-400 mb-2 block">Rate limit tier</label>
+ <label className="text-sm text-slate mb-2 block">Rate limit tier</label>
  <select
  value={rateLimitTier}
  onChange={(event) => setRateLimitTier(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  >
  <option value="default">Default (30/min)</option>
  <option value="pro">Pro (120/min)</option>
  </select>
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <div className="flex gap-3">
  <button type="button" onClick={onClose} className="btn-outline flex-1">
@@ -1518,7 +1524,7 @@ function ConfirmModal({ title, message, confirmLabel, onCancel, onConfirm }) {
 
  return (
  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
- <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
+ <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={onCancel} />
  <motion.div
  initial={{ opacity: 0, scale: 0.96, y: 8 }}
  animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1526,8 +1532,8 @@ function ConfirmModal({ title, message, confirmLabel, onCancel, onConfirm }) {
  transition={{ duration: 0.2, ease: 'easeOut' }}
  className="card-surface relative w-full max-w-sm p-6"
  >
- <h2 className="text-zinc-50 font-semibold mb-2">{title}</h2>
- <p className="text-zinc-400 text-sm mb-6">{message}</p>
+ <h2 className="text-ink font-semibold mb-2">{title}</h2>
+ <p className="text-slate text-sm mb-6">{message}</p>
  <div className="flex gap-3">
  <button onClick={onCancel} className="btn-outline flex-1">
  Cancel
@@ -1535,7 +1541,7 @@ function ConfirmModal({ title, message, confirmLabel, onCancel, onConfirm }) {
  <button
  onClick={handleConfirm}
  disabled={isConfirming}
- className="flex-1 rounded-xl bg-red-500/90 hover:bg-red-500 text-white font-semibold px-5 py-2.5 transition-colors duration-200"
+ className="flex-1 rounded-xl bg-rust/90 hover:bg-rust text-white font-semibold px-5 py-2.5 transition-colors duration-200"
  >
  {isConfirming ? 'Please wait.' : confirmLabel}
  </button>
@@ -1586,8 +1592,8 @@ function LicenseKeysPanel({ idToken, refreshToken }) {
  onClick={() => setStatusFilter(status)}
  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors duration-200 ${
  statusFilter === status
- ? 'bg-brand text-white'
- : 'border border-zinc-800 text-zinc-400 hover:text-brand-light'
+ ? 'bg-indigo text-white'
+ : 'border border-line text-slate hover:text-indigo'
  }`}
  >
  {status}
@@ -1595,12 +1601,12 @@ function LicenseKeysPanel({ idToken, refreshToken }) {
  ))}
  </div>
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <div className="card-surface overflow-x-auto">
  <table className="w-full text-sm">
  <thead>
- <tr className="text-left text-zinc-400 border-b border-zinc-800">
+ <tr className="text-left text-slate border-b border-line">
  <th className="px-5 py-3">License Key</th>
  <th className="px-5 py-3">Asset</th>
  <th className="px-5 py-3">Buyer</th>
@@ -1618,27 +1624,27 @@ function LicenseKeysPanel({ idToken, refreshToken }) {
  </>
  ) : licenses.length === 0 ? (
  <tr>
- <td colSpan={6} className="px-5 py-8 text-center text-zinc-500">
+ <td colSpan={6} className="px-5 py-8 text-center text-mist">
  No license keys found.
  </td>
  </tr>
  ) : (
  licenses.map((license) => (
- <tr key={license._id} className="border-b border-white/5 last:border-0">
- <td className="px-5 py-3 font-mono-ui text-zinc-100 text-xs">{license.key}</td>
- <td className="px-5 py-3 text-zinc-400">{license.asset?.name}</td>
- <td className="px-5 py-3 text-zinc-400">{license.buyerEmail}</td>
- <td className="px-5 py-3 text-zinc-400">
+ <tr key={license._id} className="border-b border-line last:border-0">
+ <td className="px-5 py-3 font-mono-ui text-ink text-xs">{license.key}</td>
+ <td className="px-5 py-3 text-slate">{license.asset?.name}</td>
+ <td className="px-5 py-3 text-slate">{license.buyerEmail}</td>
+ <td className="px-5 py-3 text-slate">
  {license.activations.length}/{license.maxActivations}
  </td>
  <td className="px-5 py-3">
  <span
  className={`text-xs px-2 py-1 rounded-full ${
  license.status === 'active'
- ? 'bg-brand/15 text-brand-light'
+ ? 'bg-indigo-soft text-indigo'
  : license.status === 'expired'
- ? 'bg-yellow-500/10 text-yellow-400'
- : 'bg-red-500/10 text-red-400'
+ ? 'bg-amber-soft text-amber'
+ : 'bg-rust-soft text-rust'
  }`}
  >
  {license.status}
@@ -1648,7 +1654,7 @@ function LicenseKeysPanel({ idToken, refreshToken }) {
  <div className="flex items-center gap-3">
  <button
  onClick={() => handleResetActivations(license._id)}
- className="text-zinc-400 hover:text-brand-light flex items-center gap-1"
+ className="text-slate hover:text-indigo flex items-center gap-1"
  title="Reset activations"
  >
  <IconRefresh className="w-3.5 h-3.5" />
@@ -1656,7 +1662,7 @@ function LicenseKeysPanel({ idToken, refreshToken }) {
  {license.status !== 'revoked' && (
  <button
  onClick={() => handleRevoke(license._id)}
- className="text-red-400 hover:text-red-300 text-xs font-medium"
+ className="text-rust hover:text-rust/70 text-xs font-medium"
  >
  Revoke
  </button>
@@ -1708,41 +1714,41 @@ function ChangelogPanel({ idToken, refreshToken }) {
  return (
  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
  <form onSubmit={handleSubmit} className="card-surface p-6 lg:col-span-2 h-fit">
- <h2 className="text-zinc-50 font-semibold mb-5">Broadcast Update</h2>
+ <h2 className="text-ink font-semibold mb-5">Broadcast Update</h2>
 
- <label className="text-sm text-zinc-400 mb-2 block">Title</label>
+ <label className="text-sm text-slate mb-2 block">Title</label>
  <input
  required
  value={title}
  onChange={(event) => setTitle(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Description</label>
+ <label className="text-sm text-slate mb-2 block">Description</label>
  <textarea
  required
  rows={3}
  value={description}
  onChange={(event) => setDescription(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Version</label>
+ <label className="text-sm text-slate mb-2 block">Version</label>
  <input
  required
  value={version}
  onChange={(event) => setVersion(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- <label className="text-sm text-zinc-400 mb-2 block">Link URL</label>
+ <label className="text-sm text-slate mb-2 block">Link URL</label>
  <input
  value={linkUrl}
  onChange={(event) => setLinkUrl(event.target.value)}
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-50 mb-4 focus:outline-none focus:ring-2 focus:ring-brand"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink mb-4 focus:outline-none focus:ring-2 focus:ring-indigo"
  />
 
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
 
  <button type="submit" className="btn-primary w-full">Publish update</button>
  </form>
@@ -1751,12 +1757,12 @@ function ChangelogPanel({ idToken, refreshToken }) {
  {entries.map((entry) => (
  <div key={entry._id} className="card-surface p-5">
  <div className="flex items-center justify-between mb-1">
- <p className="text-zinc-50 font-medium">{entry.title}</p>
- <span className="text-xs text-zinc-600">v{entry.version}</span>
+ <p className="text-ink font-medium">{entry.title}</p>
+ <span className="text-xs text-mist">v{entry.version}</span>
  </div>
- <p className="text-zinc-400 text-sm">{entry.description}</p>
+ <p className="text-slate text-sm">{entry.description}</p>
  {entry.linkUrl && (
- <a href={entry.linkUrl} className="text-brand-light text-sm mt-2 inline-block">
+ <a href={entry.linkUrl} className="text-indigo text-sm mt-2 inline-block">
  View details
  </a>
  )}
@@ -1795,16 +1801,16 @@ function OrdersPanel({ idToken, refreshToken }) {
  };
  }, [idToken, refreshToken]);
 
- if (errorMessage) return <p className="text-red-400">{errorMessage}</p>;
+ if (errorMessage) return <p className="text-rust">{errorMessage}</p>;
 
  return (
  <div className="space-y-10">
  <div>
- <h2 className="text-zinc-50 font-semibold mb-4">Orders</h2>
+ <h2 className="text-ink font-semibold mb-4">Orders</h2>
  <div className="card-surface overflow-x-auto">
  <table className="w-full text-sm">
  <thead>
- <tr className="text-left text-zinc-400 border-b border-zinc-800">
+ <tr className="text-left text-slate border-b border-line">
  <th className="px-5 py-3">Order ID</th>
  <th className="px-5 py-3">Email</th>
  <th className="px-5 py-3">Product</th>
@@ -1814,19 +1820,19 @@ function OrdersPanel({ idToken, refreshToken }) {
  </thead>
  <tbody>
  {orders.map((order) => (
- <tr key={order._id} className="border-b border-zinc-800 last:border-0">
- <td className="px-5 py-3 text-zinc-50">{order.orderId}</td>
- <td className="px-5 py-3 text-zinc-400">{order.guestEmail}</td>
- <td className="px-5 py-3 text-zinc-400">{order.product?.name}</td>
- <td className="px-5 py-3 text-zinc-400">Rp {order.grossAmount.toLocaleString('id-ID')}</td>
+ <tr key={order._id} className="border-b border-line last:border-0">
+ <td className="px-5 py-3 text-ink">{order.orderId}</td>
+ <td className="px-5 py-3 text-slate">{order.guestEmail}</td>
+ <td className="px-5 py-3 text-slate">{order.product?.name}</td>
+ <td className="px-5 py-3 text-slate">Rp {order.grossAmount.toLocaleString('id-ID')}</td>
  <td className="px-5 py-3">
  <span
  className={`text-xs px-2 py-1 rounded-full ${
  order.paymentStatus === 'completed'
- ? 'bg-brand/10 text-brand-light'
+ ? 'bg-indigo-soft text-indigo'
  : order.paymentStatus === 'failed'
- ? 'bg-red-500/10 text-red-400'
- : 'bg-yellow-500/10 text-yellow-400'
+ ? 'bg-rust-soft text-rust'
+ : 'bg-amber-soft text-amber'
  }`}
  >
  {order.paymentStatus}
@@ -1840,11 +1846,11 @@ function OrdersPanel({ idToken, refreshToken }) {
  </div>
 
  <div>
- <h2 className="text-zinc-50 font-semibold mb-4">Active Panels</h2>
+ <h2 className="text-ink font-semibold mb-4">Active Panels</h2>
  <div className="card-surface overflow-x-auto">
  <table className="w-full text-sm">
  <thead>
- <tr className="text-left text-zinc-400 border-b border-zinc-800">
+ <tr className="text-left text-slate border-b border-line">
  <th className="px-5 py-3">Email</th>
  <th className="px-5 py-3">Server Identifier</th>
  <th className="px-5 py-3">Product</th>
@@ -1853,14 +1859,14 @@ function OrdersPanel({ idToken, refreshToken }) {
  </thead>
  <tbody>
  {panels.map((panel) => (
- <tr key={panel._id} className="border-b border-zinc-800 last:border-0">
- <td className="px-5 py-3 text-zinc-50">{panel.guestEmail}</td>
- <td className="px-5 py-3 text-zinc-400">{panel.serverIdentifier}</td>
- <td className="px-5 py-3 text-zinc-400">{panel.order?.product?.name}</td>
+ <tr key={panel._id} className="border-b border-line last:border-0">
+ <td className="px-5 py-3 text-ink">{panel.guestEmail}</td>
+ <td className="px-5 py-3 text-slate">{panel.serverIdentifier}</td>
+ <td className="px-5 py-3 text-slate">{panel.order?.product?.name}</td>
  <td className="px-5 py-3">
  <span
  className={`text-xs px-2 py-1 rounded-full ${
- panel.status === 'active' ? 'bg-brand/10 text-brand-light' : 'bg-red-500/10 text-red-400'
+ panel.status === 'active' ? 'bg-indigo-soft text-indigo' : 'bg-rust-soft text-rust'
  }`}
  >
  {panel.status}
@@ -1877,10 +1883,10 @@ function OrdersPanel({ idToken, refreshToken }) {
 }
 
 const TICKET_STATUS_STYLES = {
- open: 'bg-brand/15 text-brand-light',
- in_progress: 'bg-amber-500/15 text-amber-300',
- resolved: 'bg-emerald-500/15 text-emerald-300',
- closed: 'bg-zinc-800 text-zinc-500',
+ open: 'bg-indigo-soft text-indigo',
+ in_progress: 'bg-amber-soft text-amber',
+ resolved: 'bg-clover-soft text-clover',
+ closed: 'bg-paper-soft text-mist',
 };
 
 function SupportTicketsPanel({ idToken, refreshToken }) {
@@ -1947,8 +1953,8 @@ function SupportTicketsPanel({ idToken, refreshToken }) {
  onClick={() => setStatusFilter(status)}
  className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
  statusFilter === status
- ? 'bg-brand text-white border-brand'
- : 'border-zinc-800 text-zinc-400 hover:text-brand-light'
+ ? 'bg-indigo text-white border-indigo'
+ : 'border-line text-slate hover:text-indigo'
  }`}
  >
  {status.replace('_', ' ')}
@@ -1957,24 +1963,24 @@ function SupportTicketsPanel({ idToken, refreshToken }) {
  </div>
 
  {isLoading ? (
- <p className="text-zinc-500 text-sm">Loading.</p>
+ <p className="text-mist text-sm">Loading.</p>
  ) : tickets.length === 0 ? (
- <p className="text-zinc-500 text-sm">No tickets.</p>
+ <p className="text-mist text-sm">No tickets.</p>
  ) : (
  <div className="space-y-2">
  {tickets.map((item) => (
  <button
  key={item._id}
  onClick={() => openTicket(item._id)}
- className={`w-full text-left card-surface p-4 ${selectedId === item._id ? 'border-brand/40' : ''}`}
+ className={`w-full text-left card-surface p-4 ${selectedId === item._id ? 'border-indigo/40' : ''}`}
  >
  <div className="flex items-center justify-between gap-3 mb-1">
- <p className="text-zinc-50 text-sm font-medium truncate">{item.subject}</p>
+ <p className="text-ink text-sm font-medium truncate">{item.subject}</p>
  <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${TICKET_STATUS_STYLES[item.status]}`}>
  {item.status.replace('_', ' ')}
  </span>
  </div>
- <p className="text-zinc-600 text-xs font-mono-ui">{item.ticketNumber} - {item.ownerEmail}</p>
+ <p className="text-mist text-xs font-mono-ui">{item.ticketNumber} - {item.ownerEmail}</p>
  </button>
  ))}
  </div>
@@ -1982,31 +1988,31 @@ function SupportTicketsPanel({ idToken, refreshToken }) {
  </div>
 
  <div className="lg:col-span-3">
- {errorMessage && <p className="text-red-400 text-sm mb-4">{errorMessage}</p>}
+ {errorMessage && <p className="text-rust text-sm mb-4">{errorMessage}</p>}
  {!ticket ? (
- <p className="text-zinc-500 text-sm">Select a ticket to view the conversation.</p>
+ <p className="text-mist text-sm">Select a ticket to view the conversation.</p>
  ) : (
  <>
  <div className="flex items-center justify-between gap-4 mb-1">
- <h2 className="text-zinc-50 font-semibold">{ticket.subject}</h2>
+ <h2 className="text-ink font-semibold">{ticket.subject}</h2>
  <span className={`text-xs px-2.5 py-1 rounded-full shrink-0 ${TICKET_STATUS_STYLES[ticket.status]}`}>
  {ticket.status.replace('_', ' ')}
  </span>
  </div>
- <p className="text-zinc-600 text-xs mb-5 font-mono-ui">
+ <p className="text-mist text-xs mb-5 font-mono-ui">
  {ticket.ticketNumber} - {ticket.ownerEmail} - {ticket.category}
  </p>
 
  <div className="space-y-3 mb-5 max-h-[50vh] overflow-y-auto">
  {ticket.replies.map((entry, index) => (
- <div key={index} className={`card-surface p-4 ${entry.authorType === 'admin' ? 'border-brand/30' : ''}`}>
+ <div key={index} className={`card-surface p-4 ${entry.authorType === 'admin' ? 'border-indigo/30' : ''}`}>
  <div className="flex items-center justify-between gap-3 mb-1.5">
- <span className={`text-xs font-medium ${entry.authorType === 'admin' ? 'text-brand-light' : 'text-zinc-300'}`}>
+ <span className={`text-xs font-medium ${entry.authorType === 'admin' ? 'text-indigo' : 'text-slate'}`}>
  {entry.authorLabel}
  </span>
- <span className="text-[10px] text-zinc-600">{new Date(entry.createdAt).toLocaleString('en-US')}</span>
+ <span className="text-[10px] text-mist">{new Date(entry.createdAt).toLocaleString('en-US')}</span>
  </div>
- <p className="text-zinc-200 text-sm whitespace-pre-wrap">{entry.message}</p>
+ <p className="text-ink text-sm whitespace-pre-wrap">{entry.message}</p>
  </div>
  ))}
  </div>
@@ -2018,13 +2024,13 @@ function SupportTicketsPanel({ idToken, refreshToken }) {
  value={reply}
  onChange={(event) => setReply(event.target.value)}
  placeholder="Write a reply."
- className="w-full rounded-xl border border-zinc-800 bg-transparent px-4 py-2.5 text-zinc-100 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+ className="w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-ink text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo resize-none"
  />
  <div className="flex items-center gap-3">
  <select
  value={replyStatus}
  onChange={(event) => setReplyStatus(event.target.value)}
- className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+ className="rounded-xl border border-line bg-white px-3 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-indigo"
  >
  <option value="in_progress">In progress</option>
  <option value="resolved">Resolved</option>

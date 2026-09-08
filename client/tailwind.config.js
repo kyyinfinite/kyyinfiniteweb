@@ -29,9 +29,11 @@ export default {
           DEFAULT: '#C1543D',
           soft: '#FBEBE6',
         },
-        // --- Legacy tokens: kept only so pages not yet migrated to the new
-        // light system (Admin, Marketplace, Snippets, Profile, auth, modals)
-        // keep rendering correctly. Remove once every page has been redesigned. ---
+        // --- Legacy tokens: every routed page is now migrated to the light
+        // system above. These remain only because a couple of orphaned,
+        // unrouted files (components/AssetDetail.jsx, components/NetworkLoader.jsx,
+        // pages/RequestApiKey.jsx — none imported anywhere) still reference them.
+        // Safe to delete once those files are removed or migrated. ---
         brand: {
           DEFAULT: '#3B82F6',
           light: '#60A5FA',

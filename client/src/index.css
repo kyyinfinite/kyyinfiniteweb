@@ -7,14 +7,14 @@ html {
 }
 
 /*
-  This app is mid-redesign: pages migrated to the new light "soft modern
-  digital studio" system are wrapped in .theme-light (see LegacyDarkShell in
-  App.jsx for the pages that are NOT yet migrated). Shared class names like
-  .card-surface and .btn-primary keep their original dark styling as the
-  default so unmigrated pages keep working, and .theme-light overrides them
-  scoped to migrated subtrees only. Once every page is migrated, delete the
-  "legacy" block below, drop the .theme-light prefix from the "new" block,
-  and remove the LegacyDarkShell wrapper in App.jsx.
+  Every routed page now uses the new light "soft modern digital studio"
+  system via the .theme-light class (LegacyDarkShell in App.jsx has been
+  removed). The "legacy" dark defaults below are kept only because three
+  orphaned, unrouted files still reference them directly (components/AssetDetail.jsx,
+  components/NetworkLoader.jsx, pages/RequestApiKey.jsx — none imported anywhere).
+  Once those are deleted or migrated, this whole file can drop the "legacy"
+  block, drop the .theme-light prefix from the "new" block, and this comment
+  can go too.
 */
 
 body {
