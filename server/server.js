@@ -8,6 +8,7 @@ const productRoutes = require('./routes/productRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const changelogRoutes = require('./routes/changelogRoutes');
 const snippetRoutes = require('./routes/snippetRoutes');
+const Snippet = require('./models/Snippet');
 const licenseRoutes = require('./routes/licenseRoutes');
 const proxyRoutes = require('./routes/proxyRoutes');
 const apiKeyRoutes = require('./routes/apiKeyRoutes');
@@ -44,6 +45,22 @@ app.use(async (req, res, next) => {
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'kyyinfinite-api' });
+});
+
+// Clean, shareable "raw" link for a snippet's code — plain text, no HTML
+// wrapper, no JSON envelope. Mirrors a Pastebin-style /raw/<id> link.
+// Needs a matching rewrite in vercel.json since only /api/* is routed here
+// by default.
+app.get('/raw/:id', async (req, res) => {
+  try {
+    const snippet = await Snippet.findById(req.params.id).select('code isPublished').lean();
+    if (!snippet || !snippet.isPublished) {
+      return res.status(404).type('text/plain').send('Not found');
+    }
+    return res.status(200).type('text/plain; charset=utf-8').send(snippet.code);
+  } catch (error) {
+    return res.status(404).type('text/plain').send('Not found');
+  }
 });
 
 app.use('/api/assets', assetRoutes);

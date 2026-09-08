@@ -6,6 +6,7 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api } from '../lib/api.js';
 import { IconScript, IconArrowRight } from '../lib/icons.jsx';
 import { SkeletonGrid, EmptyState } from './Skeleton.jsx';
+import { languageBadgeClass, fileNameFor } from '../lib/languageMeta.js';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -17,29 +18,12 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-const LANGUAGE_STYLE = {
-  javascript: 'bg-amber-soft text-amber border-amber/30',
-  typescript: 'bg-indigo-soft text-indigo-dark border-indigo/30',
-  python: 'bg-clover-soft text-clover border-clover/30',
-  bash: 'bg-paper-soft text-slate border-line',
-  json: 'bg-rust-soft text-rust border-rust/30',
-};
-
-const LANGUAGE_EXT = {
-  javascript: 'js',
-  typescript: 'ts',
-  python: 'py',
-  bash: 'sh',
-  json: 'json',
-};
-
 function badgeClass(language) {
-  return LANGUAGE_STYLE[language] || 'bg-indigo-soft text-indigo-dark border-indigo/30';
+  return languageBadgeClass(language);
 }
 
 function fileName(snippet) {
-  const slug = snippet.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  return `${slug}.${LANGUAGE_EXT[snippet.language] || 'txt'}`;
+  return fileNameFor(snippet.title, snippet.language);
 }
 
 export default function SnippetsHub() {

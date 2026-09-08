@@ -174,3 +174,13 @@ export function cancelActiveUpload() {
     uploadWithProgress.activeXhr.abort();
   }
 }
+
+// Absolute link to a snippet's plain-text raw code (mirrors a Pastebin-style
+// /raw/<id> link). Derived from API_BASE so it still resolves correctly if
+// the API is ever hosted on a different origin than the client.
+export function rawUrlFor(id) {
+  const origin = API_BASE.startsWith('http')
+    ? API_BASE.replace(/\/api\/?$/, '')
+    : window.location.origin;
+  return `${origin}/raw/${id}`;
+}

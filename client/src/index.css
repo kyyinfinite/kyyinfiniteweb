@@ -81,6 +81,10 @@ body {
   @apply border border-brand/50 text-brand-light hover:bg-brand/10 font-medium px-5 py-2.5 rounded-xl transition-all duration-300 ease-spring;
 }
 
+.icon-btn-outline {
+  @apply w-10 h-10 shrink-0 flex items-center justify-center border border-brand/50 text-brand-light hover:bg-brand/10 rounded-xl transition-all duration-300 ease-spring;
+}
+
 .grid-overlay {
   background-image: linear-gradient(rgba(59,130,246,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(59,130,246,0.07) 1px, transparent 1px);
@@ -290,6 +294,15 @@ body {
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .theme-light .btn-outline:hover { background: #FBFAF7; border-color: #6B6D64; }
+
+.theme-light .icon-btn-outline {
+  background: #FFFFFF;
+  border: 1px solid #D8D4C6;
+  color: #1D1F1A;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.theme-light .icon-btn-outline:hover { background: #FBFAF7; border-color: #6B6D64; color: #5850E6; }
 
 .theme-light .btn-ghost {
   color: #6B6D64;
