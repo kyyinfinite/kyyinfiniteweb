@@ -20,6 +20,7 @@ import {
  IconRefresh,
  IconLock,
  IconClose,
+ IconCheck,
 } from '../lib/icons.jsx';
 
 const TABS = [
@@ -32,6 +33,7 @@ const TABS = [
  { key: 'changelog', label: 'Changelog', icon: IconUpload },
  { key: 'orders', label: 'Orders and Tickets', icon: IconTicket },
  { key: 'support', label: 'Support Tickets', icon: IconTicket },
+ { key: 'incidents', label: 'Status Incidents', icon: IconCheck },
 ];
 
 export default function AdminDashboard() {
@@ -132,6 +134,7 @@ export default function AdminDashboard() {
  {activeTab === 'changelog' && <ChangelogPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'orders' && <OrdersPanel idToken={idToken} refreshToken={refreshToken} />}
  {activeTab === 'support' && <SupportTicketsPanel idToken={idToken} refreshToken={refreshToken} />}
+ {activeTab === 'incidents' && <IncidentsPanel idToken={idToken} refreshToken={refreshToken} />}
  </main>
  </div>
  );
@@ -2097,6 +2100,135 @@ function SupportTicketsPanel({ idToken, refreshToken }) {
  </form>
  </>
  )}
+ </div>
+ </div>
+ );
+}
+
+const SEVERITY_OPTIONS = ['minor', 'major', 'critical'];
+const STATUS_OPTIONS = ['investigating', 'identified', 'monitoring', 'resolved'];
+
+function IncidentsPanel({ idToken, refreshToken }) {
+ const [incidents, setIncidents] = useState([]);
+ const [isLoading, setIsLoading] = useState(true);
+ const [title, setTitle] = useState('');
+ const [description, setDescription] = useState('');
+ const [severity, setSeverity] = useState('minor');
+ const [isSaving, setIsSaving] = useState(false);
+ const [errorMessage, setErrorMessage] = useState('');
+
+ async function loadIncidents() {
+ const data = await api.listIncidents();
+ setIncidents(data);
+ }
+
+ useEffect(() => {
+ loadIncidents().finally(() => setIsLoading(false));
+ }, []);
+
+ async function handleCreate(event) {
+ event.preventDefault();
+ setIsSaving(true);
+ setErrorMessage('');
+ try {
+ const token = (await refreshToken()) || idToken;
+ await api.createIncident(token, { title, description, severity });
+ setTitle('');
+ setDescription('');
+ setSeverity('minor');
+ await loadIncidents();
+ } catch (error) {
+ setErrorMessage(error.message);
+ } finally {
+ setIsSaving(false);
+ }
+ }
+
+ async function handleStatusChange(id, status) {
+ const token = (await refreshToken()) || idToken;
+ await api.updateIncident(token, id, { status });
+ await loadIncidents();
+ }
+
+ async function handleDelete(id) {
+ const token = (await refreshToken()) || idToken;
+ await api.deleteIncident(token, id);
+ await loadIncidents();
+ }
+
+ return (
+ <div>
+ <div className="flex items-center justify-between mb-6">
+ <h1 className="font-display text-2xl font-semibold text-ink">Status Incidents</h1>
+ </div>
+
+ <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+ <form onSubmit={handleCreate} className="lg:col-span-1 card-surface p-5 h-fit space-y-3">
+ <input
+ required
+ value={title}
+ onChange={(event) => setTitle(event.target.value)}
+ placeholder="Incident title"
+ className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-indigo"
+ />
+ <textarea
+ rows={3}
+ value={description}
+ onChange={(event) => setDescription(event.target.value)}
+ placeholder="What's happening?"
+ className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-ink text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo"
+ />
+ <select
+ value={severity}
+ onChange={(event) => setSeverity(event.target.value)}
+ className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-indigo"
+ >
+ {SEVERITY_OPTIONS.map((option) => (
+ <option key={option} value={option}>{option}</option>
+ ))}
+ </select>
+ {errorMessage && <p className="text-rust text-xs">{errorMessage}</p>}
+ <button type="submit" disabled={isSaving} className="btn-primary w-full text-sm">
+ {isSaving ? 'Posting…' : 'Post incident'}
+ </button>
+ </form>
+
+ <div className="lg:col-span-3 space-y-3">
+ {isLoading ? (
+ <SkeletonRow />
+ ) : incidents.length === 0 ? (
+ <p className="text-slate text-sm">No incidents logged.</p>
+ ) : (
+ incidents.map((incident) => (
+ <div key={incident._id} className="card-surface p-5">
+ <div className="flex items-start justify-between gap-4">
+ <div className="min-w-0">
+ <p className="text-ink font-medium">{incident.title}</p>
+ {incident.description && <p className="text-mist text-xs mt-1">{incident.description}</p>}
+ <p className="text-mist text-[10px] mt-1 uppercase">{incident.severity}</p>
+ </div>
+ <div className="flex items-center gap-2 shrink-0">
+ <select
+ value={incident.status}
+ onChange={(event) => handleStatusChange(incident._id, event.target.value)}
+ className="rounded-lg border border-line bg-white px-2.5 py-1.5 text-ink text-xs focus:outline-none focus:ring-2 focus:ring-indigo"
+ >
+ {STATUS_OPTIONS.map((option) => (
+ <option key={option} value={option}>{option}</option>
+ ))}
+ </select>
+ <button
+ onClick={() => handleDelete(incident._id)}
+ className="text-rust hover:text-rust/70 text-sm font-medium"
+ >
+ Delete
+ </button>
+ </div>
+ </div>
+ </div>
+ ))
+ )}
+ </div>
  </div>
  </div>
  );

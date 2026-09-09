@@ -16,6 +16,8 @@ const userApiKeyRoutes = require('./routes/userApiKeyRoutes');
 const userApiKeyOrderRoutes = require('./routes/userApiKeyOrderRoutes');
 const userTicketRoutes = require('./routes/userTicketRoutes');
 const userSnippetRoutes = require('./routes/userSnippetRoutes');
+const statusRoutes = require('./routes/statusRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
@@ -78,6 +80,8 @@ app.use('/api/user/api-keys', userApiKeyRoutes);
 app.use('/api/user/api-key-orders', userApiKeyOrderRoutes);
 app.use('/api/user/tickets', userTicketRoutes);
 app.use('/api/user/snippets', userSnippetRoutes);
+app.use('/api/status', statusRoutes);
+app.use('/api/public', publicRoutes);
 app.use('/api/user', userRoutes);
 
 app.use((req, res) => {

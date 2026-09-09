@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { IconKey, IconScript, IconServer, IconTicket, IconArrowRight, IconBook } from '../lib/icons.jsx';
+import { IconKey, IconScript, IconServer, IconTicket, IconArrowRight, IconBook, IconCheck } from '../lib/icons.jsx';
 
 const SECTIONS = [
   { id: 'getting-started', label: 'Getting Started' },
@@ -162,6 +162,7 @@ export default function DocsPage() {
             { to: '/snippets', label: 'Browse Snippets', icon: IconScript },
             { to: '/marketplace', label: 'Hosting', icon: IconServer },
             { to: '/support', label: 'Support', icon: IconTicket },
+            { to: '/status', label: 'System Status', icon: IconCheck },
           ].map((item) => (
             <Link key={item.to} to={item.to} className="card-surface p-4 flex items-center justify-between gap-3 hover:border-indigo/30">
               <span className="flex items-center gap-3">

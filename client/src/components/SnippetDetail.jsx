@@ -121,9 +121,12 @@ export default function SnippetDetail() {
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h1 className="font-display text-2xl font-semibold text-ink">{snippet.title}</h1>
                 {snippet.source === 'community' && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-clover-soft text-clover font-medium">
+                  <Link
+                    to={`/u/${snippet.ownerUid}`}
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-clover-soft text-clover font-medium hover:bg-clover/20 transition-colors duration-200"
+                  >
                     Community{snippet.ownerLabel ? ` · ${snippet.ownerLabel}` : ''}
-                  </span>
+                  </Link>
                 )}
               </div>
               {snippet.description && (

@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api.js';
-import { IconDownload, IconWhatsapp, IconPlugin } from '../lib/icons.jsx';
+import { IconDownload, IconWhatsapp, IconPlugin, IconSearch } from '../lib/icons.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { SkeletonGrid, EmptyState } from './Skeleton.jsx';
 import AssetPurchaseModal from './AssetPurchaseModal.jsx';
+import { useDebouncedValue } from '../lib/useDebouncedValue.js';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -55,6 +56,8 @@ export default function ShowcaseHub() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [purchaseAsset, setPurchaseAsset] = useState(null);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const showToast = useToast();
 
   const filter = searchParams.get('category') || 'all';
@@ -62,8 +65,11 @@ export default function ShowcaseHub() {
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
+    const params = {};
+    if (filter !== 'all') params.category = filter;
+    if (debouncedSearch) params.search = debouncedSearch;
     api
-      .listAssets(filter !== 'all' ? { category: filter } : {})
+      .listAssets(params)
       .then((data) => {
         if (isMounted) setAssets(data);
       })
@@ -76,7 +82,7 @@ export default function ShowcaseHub() {
     return () => {
       isMounted = false;
     };
-  }, [filter]);
+  }, [filter, debouncedSearch]);
 
   function setFilter(item) {
     if (item.external) {
@@ -121,7 +127,7 @@ export default function ShowcaseHub() {
 
   return (
     <main className="theme-light max-w-6xl mx-auto px-6 py-16 min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
         <div>
           <h1 className="font-display text-3xl font-semibold text-ink">Products</h1>
           <p className="text-slate mt-2">WhatsApp bots, libraries, and reusable plugins, ready to download.</p>
@@ -143,14 +149,24 @@ export default function ShowcaseHub() {
         </div>
       </div>
 
+      <div className="relative mb-10 max-w-md">
+        <IconSearch className="w-4 h-4 text-mist absolute left-4 top-1/2 -translate-y-1/2" />
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search products by name, description, or tag…"
+          className="w-full rounded-xl border border-line bg-white pl-11 pr-4 py-2.5 text-ink text-sm placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 transition-colors duration-200"
+        />
+      </div>
+
       {errorMessage && <p className="text-rust mb-6 font-mono-ui text-sm">{errorMessage}</p>}
 
       {isLoading ? (
         <SkeletonGrid count={6} />
       ) : assets.length === 0 ? (
         <EmptyState
-          title="Belum ada produk di kategori ini"
-          description="Coba pilih kategori lain atau kembali lagi nanti."
+          title={debouncedSearch ? `No products match "${debouncedSearch}"` : 'Belum ada produk di kategori ini'}
+          description={debouncedSearch ? 'Try a different search term.' : 'Coba pilih kategori lain atau kembali lagi nanti.'}
         />
       ) : (
         <motion.div

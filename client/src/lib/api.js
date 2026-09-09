@@ -113,6 +113,15 @@ export const api = {
   listMySnippets: (token) => request('/user/snippets', { token }),
   withdrawMySnippet: (token, id) => request(`/user/snippets/${id}`, { method: 'DELETE', token }),
 
+  listIncidents: () => request('/status/incidents'),
+  createIncident: (token, body) => request('/status/incidents', { method: 'POST', body, token }),
+  updateIncident: (token, id, body) => request(`/status/incidents/${id}`, { method: 'PUT', body, token }),
+  deleteIncident: (token, id) => request(`/status/incidents/${id}`, { method: 'DELETE', token }),
+
+  getContributor: (uid) => request(`/public/contributors/${uid}`),
+
+  checkHealth: () => request('/health'),
+
   listApiKeys: (token) => request('/admin/api-keys', { token }),
   createApiKey: (token, body) => request('/admin/api-keys', { method: 'POST', body, token }),
   revokeApiKey: (token, id) => request(`/admin/api-keys/${id}/revoke`, { method: 'PATCH', token }),

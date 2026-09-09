@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { api } from '../lib/api.js';
-import { IconScript, IconArrowRight } from '../lib/icons.jsx';
+import { IconScript, IconArrowRight, IconSearch } from '../lib/icons.jsx';
 import { SkeletonGrid, EmptyState } from './Skeleton.jsx';
 import { languageBadgeClass, fileNameFor } from '../lib/languageMeta.js';
+import { useDebouncedValue } from '../lib/useDebouncedValue.js';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,18 +31,21 @@ export default function SnippetsHub() {
   const [snippets, setSnippets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
 
   useEffect(() => {
+    setIsLoading(true);
     api
-      .listSnippets()
+      .listSnippets(debouncedSearch ? { search: debouncedSearch } : {})
       .then(setSnippets)
       .catch((error) => setErrorMessage(error.message))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [debouncedSearch]);
 
   return (
     <main className="theme-light max-w-6xl mx-auto px-6 py-16">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="font-display text-3xl font-semibold text-ink">Code Snippets</h1>
           <p className="text-slate mt-2">Reusable pieces of code from the KyyInfinite ecosystem — including submissions from the community.</p>
@@ -51,12 +55,24 @@ export default function SnippetsHub() {
         </Link>
       </div>
 
+      <div className="relative mb-10 max-w-md">
+        <IconSearch className="w-4 h-4 text-mist absolute left-4 top-1/2 -translate-y-1/2" />
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search snippets by title, description, or tag…"
+          className="w-full rounded-xl border border-line bg-white pl-11 pr-4 py-2.5 text-ink text-sm placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 transition-colors duration-200"
+        />
+      </div>
+
       {errorMessage && <p className="text-rust mb-6">{errorMessage}</p>}
 
       {isLoading ? (
         <SkeletonGrid count={4} columns="lg:grid-cols-2" />
       ) : snippets.length === 0 ? (
-        <EmptyState title="Belum ada snippet dipublikasikan" />
+        <EmptyState
+          title={debouncedSearch ? `No snippets match "${debouncedSearch}"` : 'Belum ada snippet dipublikasikan'}
+        />
       ) : (
         <motion.div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -79,10 +95,14 @@ export default function SnippetsHub() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="text-ink font-semibold truncate">{snippet.title}</h3>
-                      {snippet.source === 'community' && (
-                        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-clover-soft text-clover font-medium">
+                      {snippet.source === 'community' && snippet.ownerUid && (
+                        <Link
+                          to={`/u/${snippet.ownerUid}`}
+                          onClick={(event) => event.stopPropagation()}
+                          className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-clover-soft text-clover font-medium hover:bg-clover/20 transition-colors duration-200"
+                        >
                           Community
-                        </span>
+                        </Link>
                       )}
                     </div>
                     <p className="text-slate text-xs mt-0.5 truncate">{snippet.description}</p>

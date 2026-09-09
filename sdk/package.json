@@ -1,0 +1,23 @@
+{
+  "name": "@kyyinfinite/sdk",
+  "version": "0.1.0",
+  "description": "Official JS SDK and CLI for KyyInfinite — call the API, browse/submit snippets, and manage API keys from a script or terminal instead of only the website.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "kyyinfinite": "bin/kyyinfinite.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "keywords": ["kyyinfinite", "sdk", "cli", "api-client"],
+  "license": "MIT"
+}
