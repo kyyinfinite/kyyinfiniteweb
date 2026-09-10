@@ -15,6 +15,7 @@ import {
   IconFile,
   IconCode,
   IconShare,
+  IconFork,
 } from '../lib/icons.jsx';
 import { languageBadgeClass, fileNameFor } from '../lib/languageMeta.js';
 import ShareSnippetModal from './ShareSnippetModal.jsx';
@@ -132,6 +133,14 @@ export default function SnippetDetail() {
               {snippet.description && (
                 <p className="text-slate mt-2 leading-relaxed">{snippet.description}</p>
               )}
+              {snippet.forkedFrom && (
+                <Link
+                  to={`/snippets/${snippet.forkedFrom._id}`}
+                  className="inline-flex items-center gap-1.5 text-xs text-mist hover:text-indigo mt-2 transition-colors duration-200"
+                >
+                  <IconFork className="w-3.5 h-3.5" /> Forked from {snippet.forkedFrom.title}
+                </Link>
+              )}
             </div>
             <span
               className={`shrink-0 px-2.5 py-1 rounded-md text-[11px] font-mono-ui font-medium uppercase border ${languageBadgeClass(
@@ -178,6 +187,9 @@ export default function SnippetDetail() {
             >
               <IconCode className="w-4 h-4" /> Raw
             </a>
+            <Link to={`/snippets/new?fork=${snippet._id}`} className="btn-outline text-sm flex items-center gap-2">
+              <IconFork className="w-4 h-4" /> Fork
+            </Link>
             <button onClick={handleDownload} className="icon-btn-outline" title="Download">
               <IconDownload className="w-4 h-4" />
             </button>

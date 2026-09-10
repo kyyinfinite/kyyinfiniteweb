@@ -143,6 +143,24 @@ async function updateProduct(req, res) {
   }
 }
 
+async function setContributorVerified(req, res) {
+  try {
+    const UserAccount = require('../models/UserAccount');
+    const isVerifiedContributor = req.body?.isVerifiedContributor !== false;
+    const account = await UserAccount.findOneAndUpdate(
+      { uid: req.params.uid },
+      { isVerifiedContributor },
+      { new: true }
+    ).select('uid username displayName isVerifiedContributor');
+    if (!account) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    return res.status(200).json(account);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to update contributor', error: error.message });
+  }
+}
+
 module.exports = {
   getMetrics,
   getMetricsTimeseries,
@@ -151,4 +169,5 @@ module.exports = {
   listProductsAdmin,
   createProduct,
   updateProduct,
+  setContributorVerified,
 };

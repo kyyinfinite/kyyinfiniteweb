@@ -13,6 +13,9 @@ const UserAccountSchema = new mongoose.Schema(
       enum: ['google.com', 'github.com', 'password', 'phone', 'other'],
       default: 'other',
     },
+    // Verified contributors' snippet submissions skip the moderation queue
+    // and go live immediately — set by an admin from the snippet panel.
+    isVerifiedContributor: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -12,6 +12,7 @@ import SubmitSnippet from './pages/SubmitSnippet.jsx';
 import DocsPage from './pages/DocsPage.jsx';
 import StatusPage from './pages/StatusPage.jsx';
 import ContributorProfile from './pages/ContributorProfile.jsx';
+import PlatformChangelogPage from './pages/PlatformChangelogPage.jsx';
 import Marketplace from './components/Marketplace.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/docs" element={<PageTransition><DocsPage /></PageTransition>} />
           <Route path="/status" element={<PageTransition><StatusPage /></PageTransition>} />
           <Route path="/u/:uid" element={<PageTransition><ContributorProfile /></PageTransition>} />
+          <Route path="/changelog" element={<PageTransition><PlatformChangelogPage /></PageTransition>} />
           <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
           <Route path="/developers" element={<PageTransition><DevelopersPage /></PageTransition>} />
           <Route path="/developers/request-key" element={<Navigate to="/profile" replace />} />

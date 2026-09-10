@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Navigate, useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Navigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useUser } from '../context/UserContext.jsx';
 import { api } from '../lib/api.js';
-import { IconScript, IconCheck, IconArrowRight } from '../lib/icons.jsx';
+import { IconScript, IconCheck, IconArrowRight, IconFork } from '../lib/icons.jsx';
 import { languageBadgeClass } from '../lib/languageMeta.js';
 
 const LANGUAGES = ['javascript', 'typescript', 'python', 'bash', 'json'];
@@ -12,6 +12,8 @@ const LANGUAGES = ['javascript', 'typescript', 'python', 'bash', 'json'];
 export default function SubmitSnippet() {
   const { user, idToken, isLoading, refreshToken } = useUser();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const forkId = searchParams.get('fork');
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -21,6 +23,22 @@ export default function SubmitSnippet() {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [submitted, setSubmitted] = useState(null);
+  const [forkSource, setForkSource] = useState(null);
+
+  useEffect(() => {
+    if (!forkId) return;
+    api
+      .getSnippet(forkId)
+      .then((original) => {
+        setForkSource(original);
+        setTitle(`Fork of ${original.title}`);
+        setDescription(original.description || '');
+        setLanguage(original.language);
+        setCode(original.code);
+        setTags((original.tags || []).join(', '));
+      })
+      .catch(() => setErrorMessage('Could not load the snippet you tried to fork.'));
+  }, [forkId]);
 
   if (!isLoading && !user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
@@ -38,6 +56,7 @@ export default function SubmitSnippet() {
         language,
         code,
         tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+        forkedFrom: forkSource?._id || null,
       });
       setSubmitted(result);
     } catch (error) {
@@ -82,6 +101,13 @@ export default function SubmitSnippet() {
         Share something reusable with the community. New submissions are reviewed before they go public —
         you'll be able to see the status from your profile.
       </p>
+
+      {forkSource && (
+        <div className="flex items-center gap-2.5 rounded-xl border border-indigo/25 bg-indigo-soft text-indigo-dark text-sm px-4 py-3 mb-6">
+          <IconFork className="w-4 h-4 shrink-0" />
+          Forking from <span className="font-medium">{forkSource.title}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <form onSubmit={handleSubmit} className="card-surface p-6">

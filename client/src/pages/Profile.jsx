@@ -4,7 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useUser } from '../context/UserContext.jsx';
 import { api } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
-import { IconKey, IconCopy, IconQr, IconTicket, IconScript } from '../lib/icons.jsx';
+import { IconKey, IconCopy, IconQr, IconTicket, IconScript, IconWebhook } from '../lib/icons.jsx';
 import ApiKeyPurchaseModal from '../components/ApiKeyPurchaseModal.jsx';
 import Badge from '../components/ui/Badge.jsx';
 import ProgressBar from '../components/ui/ProgressBar.jsx';
@@ -54,6 +54,13 @@ function snippetStatusTone(status) {
   return 'warning';
 }
 
+const WEBHOOK_EVENTS = [
+  { id: 'snippet.approved', label: 'Snippet approved' },
+  { id: 'snippet.rejected', label: 'Snippet rejected' },
+  { id: 'apikey.quota_warning', label: 'API key near quota' },
+  { id: 'incident.created', label: 'New status incident' },
+];
+
 export default function Profile() {
   const { user, idToken, isLoading, refreshToken, logout } = useUser();
   const location = useLocation();
@@ -63,6 +70,7 @@ export default function Profile() {
   const [usage, setUsage] = useState(null);
   const [keys, setKeys] = useState([]);
   const [mySnippets, setMySnippets] = useState([]);
+  const [webhooks, setWebhooks] = useState([]);
   const [limit, setLimit] = useState(2);
   const [freePlanRequestLimit, setFreePlanRequestLimit] = useState(40);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -74,13 +82,20 @@ export default function Profile() {
   const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
   const [showPurchase, setShowPurchase] = useState(false);
 
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [webhookEvents, setWebhookEvents] = useState([]);
+  const [isSavingWebhook, setIsSavingWebhook] = useState(false);
+  const [newlyCreatedWebhook, setNewlyCreatedWebhook] = useState(null);
+  const [webhookError, setWebhookError] = useState('');
+
   async function loadAll() {
     const token = (await refreshToken()) || idToken;
-    const [profileData, usageData, keysData, snippetsData] = await Promise.all([
+    const [profileData, usageData, keysData, snippetsData, webhooksData] = await Promise.all([
       api.getMyProfile(token),
       api.getMyUsage(token),
       api.listMyApiKeys(token),
       api.listMySnippets(token),
+      api.listMyWebhooks(token),
     ]);
     setProfile(profileData);
     setUsage(usageData);
@@ -88,6 +103,7 @@ export default function Profile() {
     setLimit(keysData.limit);
     setFreePlanRequestLimit(keysData.freePlanRequestLimit);
     setMySnippets(snippetsData.snippets);
+    setWebhooks(webhooksData.webhooks);
   }
 
   useEffect(() => {
@@ -144,6 +160,46 @@ export default function Profile() {
   async function handleWithdrawSnippet(id) {
     const token = (await refreshToken()) || idToken;
     await api.withdrawMySnippet(token, id);
+    await loadAll();
+  }
+
+  function toggleWebhookEvent(eventId) {
+    setWebhookEvents((current) =>
+      current.includes(eventId) ? current.filter((id) => id !== eventId) : [...current, eventId]
+    );
+  }
+
+  async function handleCreateWebhook(event) {
+    event.preventDefault();
+    if (webhookEvents.length === 0) {
+      setWebhookError('Select at least one event');
+      return;
+    }
+    setIsSavingWebhook(true);
+    setWebhookError('');
+    try {
+      const token = (await refreshToken()) || idToken;
+      const result = await api.createWebhook(token, { url: webhookUrl, events: webhookEvents });
+      setNewlyCreatedWebhook(result.webhook);
+      setWebhookUrl('');
+      setWebhookEvents([]);
+      await loadAll();
+    } catch (error) {
+      setWebhookError(error.message);
+    } finally {
+      setIsSavingWebhook(false);
+    }
+  }
+
+  async function handleToggleWebhook(id, isActive) {
+    const token = (await refreshToken()) || idToken;
+    await api.toggleWebhook(token, id, isActive);
+    await loadAll();
+  }
+
+  async function handleDeleteWebhook(id) {
+    const token = (await refreshToken()) || idToken;
+    await api.deleteWebhook(token, id);
     await loadAll();
   }
 
@@ -395,6 +451,98 @@ export default function Profile() {
                       className="text-rust hover:text-rust/80 text-sm font-medium transition-colors duration-200"
                     >
                       Withdraw
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Webhooks */}
+          <div className="flex items-center gap-2 mb-4 mt-8">
+            <IconWebhook className="w-4 h-4 text-indigo" />
+            <h2 className="font-display text-ink font-semibold">Webhooks</h2>
+          </div>
+
+          {webhooks.length < 5 && (
+            <form onSubmit={handleCreateWebhook} className="card-surface p-5 mb-5">
+              <input
+                required
+                type="url"
+                value={webhookUrl}
+                onChange={(event) => setWebhookUrl(event.target.value)}
+                placeholder="https://your-server.com/webhooks/kyyinfinite"
+                className="w-full rounded-xl border border-line bg-white px-4 py-2.5 text-ink text-sm mb-3 placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-indigo/40 focus:border-indigo/60 transition-colors duration-200"
+              />
+              <div className="flex flex-wrap gap-2 mb-4">
+                {WEBHOOK_EVENTS.map((event) => (
+                  <button
+                    key={event.id}
+                    type="button"
+                    onClick={() => toggleWebhookEvent(event.id)}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 ${
+                      webhookEvents.includes(event.id)
+                        ? 'bg-indigo text-white border-indigo'
+                        : 'border-line text-slate hover:text-indigo'
+                    }`}
+                  >
+                    {event.label}
+                  </button>
+                ))}
+              </div>
+              {webhookError && <p className="text-rust text-sm mb-3">{webhookError}</p>}
+              <button type="submit" disabled={isSavingWebhook} className="btn-primary w-full text-sm">
+                {isSavingWebhook ? 'Adding…' : 'Add webhook'}
+              </button>
+
+              {newlyCreatedWebhook && (
+                <div className="mt-4 pt-4 border-t border-line">
+                  <p className="text-xs text-amber mb-2">
+                    Signing secret — copy this now, it won't be shown again:
+                  </p>
+                  <p className="font-mono-ui text-indigo-dark text-xs tracking-wide bg-indigo-soft border border-indigo/20 rounded-xl py-3 px-3 break-all">
+                    {newlyCreatedWebhook.secret}
+                  </p>
+                </div>
+              )}
+            </form>
+          )}
+
+          {webhooks.length === 0 ? (
+            <p className="text-slate text-sm">No webhooks registered yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {webhooks.map((webhook) => (
+                <div key={webhook._id} className="card-surface p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-ink font-medium text-sm truncate font-mono-ui">{webhook.url}</p>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {webhook.events.map((eventId) => (
+                          <span key={eventId} className="text-[10px] px-2 py-0.5 rounded-full bg-paper-soft text-slate">
+                            {eventId}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <Badge tone={webhook.isActive ? 'indigo' : 'neutral'}>
+                        {webhook.isActive ? 'Active' : 'Paused'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-line">
+                    <button
+                      onClick={() => handleToggleWebhook(webhook._id, !webhook.isActive)}
+                      className="text-indigo hover:text-indigo-dark text-xs font-medium transition-colors duration-200"
+                    >
+                      {webhook.isActive ? 'Pause' : 'Resume'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteWebhook(webhook._id)}
+                      className="text-rust hover:text-rust/80 text-xs font-medium transition-colors duration-200"
+                    >
+                      Delete
                     </button>
                   </div>
                 </div>

@@ -328,3 +328,28 @@ export function IconMore({ className = 'w-5 h-5' }) {
     </svg>
   );
 }
+
+export function IconWebhook({ className = 'w-5 h-5' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M9 13a4.5 4.5 0 1 1 3.5-7.4" />
+      <circle cx="17" cy="7" r="2.2" />
+      <circle cx="6" cy="17" r="2.2" />
+      <circle cx="17" cy="17" r="2.2" />
+      <path d="M9 13l6.2 3" />
+      <path d="M13 8.2L16 15" />
+    </svg>
+  );
+}
+
+export function IconFork({ className = 'w-4 h-4' }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <circle cx="7" cy="6" r="2.2" />
+      <circle cx="17" cy="6" r="2.2" />
+      <circle cx="12" cy="18" r="2.2" />
+      <path d="M7 8.2V11a4 4 0 0 0 4 4" />
+      <path d="M17 8.2V11a4 4 0 0 1-4 4v1" />
+    </svg>
+  );
+}

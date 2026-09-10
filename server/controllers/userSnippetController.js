@@ -1,13 +1,17 @@
 const Snippet = require('../models/Snippet');
+const UserAccount = require('../models/UserAccount');
+const { dispatchEvent } = require('../services/webhookDispatcher');
 
 const ALLOWED_LANGUAGES = ['javascript', 'typescript', 'python', 'bash', 'json'];
 const MAX_SUBMISSIONS_PER_USER = 20;
 const MAX_CODE_LENGTH = 20000; // ~20 KB, generous for a snippet
 
-/** POST /api/user/snippets — submit a snippet for review; goes live once an admin approves it. */
+/** POST /api/user/snippets — submit a snippet for review; goes live once an admin approves it
+ *  (or immediately, if the submitter is a verified contributor). Pass `forkedFrom` to fork
+ *  an existing approved snippet. */
 async function submitSnippet(req, res) {
   try {
-    const { title, description = '', language, code, tags = [] } = req.body || {};
+    const { title, description = '', language, code, tags = [], forkedFrom = null } = req.body || {};
 
     if (!title || typeof title !== 'string' || !title.trim()) {
       return res.status(400).json({ message: 'title is required' });
@@ -31,6 +35,15 @@ async function submitSnippet(req, res) {
       return res.status(400).json({ message: 'tags must be an array of strings' });
     }
 
+    let forkedFromId = null;
+    if (forkedFrom) {
+      const original = await Snippet.findOne({ _id: forkedFrom, status: 'approved', isPublished: true }).select('_id').lean();
+      if (!original) {
+        return res.status(400).json({ message: 'The snippet you tried to fork from was not found' });
+      }
+      forkedFromId = original._id;
+    }
+
     const totalEverSubmitted = await Snippet.countDocuments({ ownerUid: req.user.uid, source: 'community' });
     if (totalEverSubmitted >= MAX_SUBMISSIONS_PER_USER) {
       return res.status(429).json({
@@ -39,6 +52,9 @@ async function submitSnippet(req, res) {
       });
     }
 
+    const account = await UserAccount.findOne({ uid: req.user.uid }).select('isVerifiedContributor').lean();
+    const autoApproved = Boolean(account?.isVerifiedContributor);
+
     const snippet = await Snippet.create({
       title: title.trim(),
       description: description.trim(),
@@ -46,13 +62,23 @@ async function submitSnippet(req, res) {
       code,
       tags: tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean).slice(0, 8),
       source: 'community',
-      status: 'pending',
+      status: autoApproved ? 'approved' : 'pending',
       isPublished: true,
       ownerUid: req.user.uid,
       ownerLabel: req.user.displayName || req.user.username || req.user.email || 'anonymous',
+      forkedFrom: forkedFromId,
     });
 
-    return res.status(201).json({ snippet, message: 'Submitted — it will appear once an admin reviews it.' });
+    if (autoApproved) {
+      dispatchEvent('snippet.approved', { snippetId: snippet._id, title: snippet.title }, { ownerUid: req.user.uid });
+    }
+
+    return res.status(201).json({
+      snippet,
+      message: autoApproved
+        ? "You're a verified contributor — this is live now."
+        : 'Submitted — it will appear once an admin reviews it.',
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to submit snippet', error: error.message });
   }

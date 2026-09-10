@@ -17,6 +17,7 @@ const SnippetSchema = new mongoose.Schema(
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'approved', index: true },
     ownerUid: { type: String, default: null, index: true },
     ownerLabel: { type: String, default: null },
+    forkedFrom: { type: mongoose.Schema.Types.ObjectId, ref: 'Snippet', default: null },
   },
   { timestamps: true }
 );

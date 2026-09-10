@@ -122,6 +122,14 @@ export const api = {
 
   checkHealth: () => request('/health'),
 
+  listMyWebhooks: (token) => request('/user/webhooks', { token }),
+  createWebhook: (token, body) => request('/user/webhooks', { method: 'POST', body, token }),
+  toggleWebhook: (token, id, isActive) => request(`/user/webhooks/${id}`, { method: 'PATCH', body: { isActive }, token }),
+  deleteWebhook: (token, id) => request(`/user/webhooks/${id}`, { method: 'DELETE', token }),
+
+  setContributorVerified: (token, uid, isVerifiedContributor) =>
+    request(`/admin/users/${uid}/verify`, { method: 'PATCH', body: { isVerifiedContributor }, token }),
+
   listApiKeys: (token) => request('/admin/api-keys', { token }),
   createApiKey: (token, body) => request('/admin/api-keys', { method: 'POST', body, token }),
   revokeApiKey: (token, id) => request(`/admin/api-keys/${id}/revoke`, { method: 'PATCH', token }),

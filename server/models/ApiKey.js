@@ -14,6 +14,7 @@ const ApiKeySchema = new mongoose.Schema(
     plan: { type: String, enum: ['free', '1000', '10000', 'unlimited'], default: 'free' },
     requestLimit: { type: Number, default: 40 }, // batas seumur hidup; null = unlimited
     requestCount: { type: Number, default: 0 },
+    quotaWarningSent: { type: Boolean, default: false },
     lastUsedAt: { type: Date },
     lastUsedIp: { type: String },
     expiresAt: { type: Date, default: null },

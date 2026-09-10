@@ -881,6 +881,12 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  await loadSnippets();
  }
 
+ async function handleVerifyContributor(uid) {
+ const token = (await refreshToken()) || idToken;
+ await api.setContributorVerified(token, uid, true);
+ await loadSnippets();
+ }
+
  const pendingCount = snippets.filter((snippet) => snippet.status === 'pending').length;
 
  return (
@@ -994,6 +1000,15 @@ function SnippetManagerPanel({ idToken, refreshToken }) {
  >
  Reject
  </button>
+ {snippet.ownerUid && (
+ <button
+ onClick={() => handleVerifyContributor(snippet.ownerUid)}
+ className="text-indigo hover:text-indigo-dark text-sm font-medium"
+ title="Future submissions from this contributor skip review"
+ >
+ Verify contributor
+ </button>
+ )}
  </>
  )}
  <button

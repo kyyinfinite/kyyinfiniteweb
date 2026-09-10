@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IconWhatsapp, IconServer, IconKey, IconBook, IconScript, IconTicket, IconMore, IconClose, IconCheck } from '../lib/icons.jsx';
+import { IconWhatsapp, IconServer, IconKey, IconBook, IconScript, IconTicket, IconMore, IconClose, IconCheck, IconClock } from '../lib/icons.jsx';
 import { useUser } from '../context/UserContext.jsx';
 
 function IconHome({ className = 'w-5 h-5' }) {
@@ -38,6 +38,7 @@ const MORE_LINKS = [
   { to: '/marketplace', label: 'Hosting', description: 'Deploy a Pterodactyl panel server', icon: IconServer },
   { to: '/support', label: 'Support', description: 'Open a ticket or check on one', icon: IconTicket },
   { to: '/status', label: 'System Status', description: 'API uptime and recent incidents', icon: IconCheck },
+  { to: '/changelog', label: 'Changelog', description: "What's new across the platform", icon: IconClock },
 ];
 
 export default function BottomNav() {

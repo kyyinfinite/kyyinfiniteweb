@@ -3,6 +3,7 @@ const ApiKey = require('../models/ApiKey');
 const ApiKeyUsageEvent = require('../models/ApiKeyUsageEvent');
 const { consumeRateLimit } = require('../utils/rateLimit');
 const { KEY_PREFIX, KEY_ID_LENGTH } = require('../utils/apiKeyGenerator');
+const { dispatchEvent } = require('../services/webhookDispatcher');
 
 function parseApiKey(rawKey) {
   if (!rawKey || !rawKey.startsWith(KEY_PREFIX)) return null;
@@ -83,6 +84,22 @@ function requireApiKey(scope) {
       apiKey.requestCount += 1;
       apiKey.lastUsedAt = new Date();
       apiKey.lastUsedIp = clientIp(req);
+
+      if (
+        apiKey.ownerUid &&
+        !apiKey.quotaWarningSent &&
+        apiKey.requestLimit !== null &&
+        apiKey.requestLimit !== undefined &&
+        apiKey.requestCount / apiKey.requestLimit >= 0.8
+      ) {
+        apiKey.quotaWarningSent = true;
+        dispatchEvent(
+          'apikey.quota_warning',
+          { keyId: apiKey.keyId, requestCount: apiKey.requestCount, requestLimit: apiKey.requestLimit },
+          { ownerUid: apiKey.ownerUid }
+        );
+      }
+
       apiKey.save().catch(() => null); // fire-and-forget, jangan blocking response
 
       ApiKeyUsageEvent.create({ keyId: apiKey.keyId, ownerUid: apiKey.ownerUid || null, scope }).catch(() => null);

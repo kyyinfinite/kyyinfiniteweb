@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { IconKey, IconScript, IconServer, IconTicket, IconArrowRight, IconBook, IconCheck } from '../lib/icons.jsx';
+import { IconKey, IconScript, IconServer, IconTicket, IconArrowRight, IconBook, IconCheck, IconClock } from '../lib/icons.jsx';
 
 const SECTIONS = [
   { id: 'getting-started', label: 'Getting Started' },
@@ -10,6 +10,7 @@ const SECTIONS = [
   { id: 'quotas', label: 'Quotas & Rate Limits' },
   { id: 'snippets', label: 'Snippets & Raw URLs' },
   { id: 'submitting', label: 'Submitting a Snippet' },
+  { id: 'webhooks', label: 'Webhooks' },
   { id: 'hosting', label: 'Hosting' },
   { id: 'support', label: 'Support' },
 ];
@@ -136,9 +137,30 @@ export default function DocsPage() {
         <Section id="submitting" title="Submitting a Snippet">
           <p>
             KyyInfinite isn't just admin-curated anymore — anyone signed in can submit a snippet from{' '}
-            <Link to="/snippets/new" className="text-indigo hover:underline">Snippets → Submit a snippet</Link>.
-            New submissions are reviewed before they go public, so there may be a short wait between
-            submitting and seeing it listed. You can track the status of your submissions from your profile.
+            <Link to="/snippets/new" className="text-indigo hover:underline">Snippets → Submit a snippet</Link>,
+            including forks of existing snippets. New submissions are reviewed before they go public, so
+            there may be a short wait between submitting and seeing it listed — unless you're a{' '}
+            <strong className="text-ink">verified contributor</strong>, in which case submissions go live
+            immediately. You can track the status of your submissions from your profile.
+          </p>
+        </Section>
+
+        <Section id="webhooks" title="Webhooks">
+          <p>
+            Register a URL from your{' '}
+            <Link to="/profile" className="text-indigo hover:underline">profile</Link> to get notified when
+            something happens, instead of polling the API:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5">
+            <li><code className="text-indigo-dark">snippet.approved</code> / <code className="text-indigo-dark">snippet.rejected</code> — one of your submissions was reviewed</li>
+            <li><code className="text-indigo-dark">apikey.quota_warning</code> — one of your keys crossed 80% of its lifetime quota</li>
+            <li><code className="text-indigo-dark">incident.created</code> — a new status incident was opened</li>
+          </ul>
+          <p>
+            Each delivery is a POST with a JSON body (<code className="text-indigo-dark">{'{ event, data, timestamp }'}</code>) and an{' '}
+            <code className="text-indigo-dark">X-KyyInfinite-Signature</code> header — an HMAC-SHA256 of the
+            raw body, signed with the secret shown once when you create the webhook. Verify it before
+            trusting the payload.
           </p>
         </Section>
 
@@ -163,6 +185,7 @@ export default function DocsPage() {
             { to: '/marketplace', label: 'Hosting', icon: IconServer },
             { to: '/support', label: 'Support', icon: IconTicket },
             { to: '/status', label: 'System Status', icon: IconCheck },
+            { to: '/changelog', label: 'Changelog', icon: IconClock },
           ].map((item) => (
             <Link key={item.to} to={item.to} className="card-surface p-4 flex items-center justify-between gap-3 hover:border-indigo/30">
               <span className="flex items-center gap-3">

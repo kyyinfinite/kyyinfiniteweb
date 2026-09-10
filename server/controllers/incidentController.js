@@ -1,4 +1,5 @@
 const Incident = require('../models/Incident');
+const { dispatchEvent } = require('../services/webhookDispatcher');
 
 async function listIncidents(req, res) {
   try {
@@ -16,6 +17,7 @@ async function createIncident(req, res) {
       return res.status(400).json({ message: 'title is required' });
     }
     const incident = await Incident.create({ title: title.trim(), description, severity, status });
+    dispatchEvent('incident.created', { incidentId: incident._id, title: incident.title, severity: incident.severity });
     return res.status(201).json(incident);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to create incident', error: error.message });
