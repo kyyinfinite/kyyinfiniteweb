@@ -69,9 +69,22 @@ export class KyyInfinite {
         if (!response.ok) throw new KyyInfiniteError('Snippet not found', response.status);
         return response.text();
       },
-      submit: (data) => this._request('/user/snippets', { method: 'POST', body: data, auth: 'user' }),
-      listMine: () => this._request('/user/snippets', { auth: 'user' }),
-      withdraw: (id) => this._request(`/user/snippets/${id}`, { method: 'DELETE', auth: 'user' }),
+      // Prefers a Firebase user session when you have one; otherwise falls
+      // back to the API key. Either way, the key needs the `snippets:write`
+      // scope — this is the path a bot/script/CLI is meant to use, no
+      // Firebase login required.
+      submit: (data) =>
+        this._idToken
+          ? this._request('/user/snippets', { method: 'POST', body: data, auth: 'user' })
+          : this._request('/v1/account/snippets', { method: 'POST', body: data, auth: 'apiKey' }),
+      listMine: () =>
+        this._idToken
+          ? this._request('/user/snippets', { auth: 'user' })
+          : this._request('/v1/account/snippets', { auth: 'apiKey' }),
+      withdraw: (id) =>
+        this._idToken
+          ? this._request(`/user/snippets/${id}`, { method: 'DELETE', auth: 'user' })
+          : this._request(`/v1/account/snippets/${id}`, { method: 'DELETE', auth: 'apiKey' }),
     };
 
     this.apiKeys = {

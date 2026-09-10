@@ -19,6 +19,7 @@ const ALLOWED_USER_SCOPES = [
   'tools:primbon',
   'tools:random',
   'tools:stalker',
+  'snippets:write',
 ];
 
 const SCOPE_INFO = {
@@ -31,6 +32,7 @@ const SCOPE_INFO = {
   'tools:primbon': { label: 'Primbon', description: 'Name meaning, lucky numbers, dream readings' },
   'tools:random': { label: 'Random', description: 'Random anime and Blue Archive images' },
   'tools:stalker': { label: 'Profile Lookup', description: 'Public profile info from TikTok, YouTube, GitHub, and more' },
+  'snippets:write': { label: 'Remote Snippet Upload', description: 'Upload/list/withdraw your snippets from a bot, script, or CLI' },
 };
 
 function initialsOf(username, email) {

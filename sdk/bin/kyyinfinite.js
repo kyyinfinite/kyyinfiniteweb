@@ -44,12 +44,14 @@ async function loadClient({ requireAuth = false } = {}) {
   });
 
   if (requireAuth) {
-    if (!config?.refreshToken) {
-      console.error('Not logged in. Run `kyyinfinite login` first.');
+    if (!config?.refreshToken && !config?.apiKey) {
+      console.error('Not logged in and no API key set. Run `kyyinfinite login` or `kyyinfinite use-key <key>`.');
       process.exit(1);
     }
-    await client.auth.refresh();
-    await writeConfig({ ...config, idToken: client.auth.idToken, refreshToken: client._refreshToken });
+    if (config?.refreshToken) {
+      await client.auth.refresh();
+      await writeConfig({ ...config, idToken: client.auth.idToken, refreshToken: client._refreshToken });
+    }
   }
 
   return client;
@@ -82,13 +84,27 @@ async function cmdLogout() {
   console.log('Logged out.');
 }
 
+async function cmdUseKey(apiKey) {
+  if (!apiKey) {
+    console.error('Usage: kyyinfinite use-key <kyy_xxxxxxxx...>');
+    process.exit(1);
+  }
+  const existing = await readConfig();
+  await writeConfig({ ...existing, apiKey });
+  console.log(`API key saved to ${configPath()}. No Firebase login needed — this is the bot/script path.`);
+}
+
 async function cmdWhoami() {
   const config = await readConfig();
-  if (!config?.refreshToken) {
-    console.log('Not logged in.');
+  if (config?.refreshToken) {
+    console.log(`${config.email || '(unknown email)'} — uid: ${config.uid}`);
     return;
   }
-  console.log(`${config.email || '(unknown email)'} — uid: ${config.uid}`);
+  if (config?.apiKey) {
+    console.log(`Using API key ${config.apiKey.slice(0, 12)}… (no Firebase session)`);
+    return;
+  }
+  console.log('Not logged in.');
 }
 
 async function cmdSnippetUpload(filePath) {
@@ -155,6 +171,7 @@ function printHelp() {
 
   login                              Sign in with email/password
   logout                             Clear the local session
+  use-key <apiKey>                   Use an API key instead of logging in (the bot/script path — needs a key with the snippets:write scope)
   whoami                             Show who's currently logged in
   snippet upload <file> [flags]      Submit a snippet for review
     --title, --language, --description, --tags a,b,c
@@ -168,6 +185,7 @@ async function main() {
   try {
     if (command === 'login') return await cmdLogin();
     if (command === 'logout') return await cmdLogout();
+    if (command === 'use-key') return await cmdUseKey(subcommand);
     if (command === 'whoami') return await cmdWhoami();
     if (command === 'status') return await cmdStatus();
     if (command === 'snippet' && subcommand === 'upload') return await cmdSnippetUpload(rest[0]);

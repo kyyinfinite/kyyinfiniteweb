@@ -10,6 +10,7 @@ const SECTIONS = [
   { id: 'quotas', label: 'Quotas & Rate Limits' },
   { id: 'snippets', label: 'Snippets & Raw URLs' },
   { id: 'submitting', label: 'Submitting a Snippet' },
+  { id: 'remote-upload', label: 'Remote Upload (Bot/CLI)' },
   { id: 'webhooks', label: 'Webhooks' },
   { id: 'hosting', label: 'Hosting' },
   { id: 'support', label: 'Support' },
@@ -142,6 +143,41 @@ export default function DocsPage() {
             there may be a short wait between submitting and seeing it listed — unless you're a{' '}
             <strong className="text-ink">verified contributor</strong>, in which case submissions go live
             immediately. You can track the status of your submissions from your profile.
+          </p>
+        </Section>
+
+        <Section id="remote-upload" title="Remote Upload (Bot/CLI)">
+          <p>
+            You don't need to open the website to upload a snippet — a bot, script, or CLI can do it with
+            just an API key. Create one with the <strong className="text-ink">Remote Snippet Upload</strong>{' '}
+            scope from your <Link to="/profile" className="text-indigo hover:underline">profile</Link>, then
+            POST to:
+          </p>
+          <CodeBlock language="bash">
+            {`curl -X POST "https://kyyinfinite.my.id/api/v1/account/snippets" \\\n  -H "Authorization: Bearer kyy_xxxxxxxxxxxxxxxxxxxx" \\\n  -H "Content-Type: application/json" \\\n  -d '{"title":"debounce helper","description":"...","language":"javascript","code":"...","tags":["utility"]}'`}
+          </CodeBlock>
+          <p>Same thing in Python:</p>
+          <CodeBlock language="python">
+            {`import requests\n\nrequests.post(\n    "https://kyyinfinite.my.id/api/v1/account/snippets",\n    headers={"Authorization": "Bearer kyy_xxxxxxxxxxxxxxxxxxxx"},\n    json={\n        "title": "debounce helper",\n        "description": "...",\n        "language": "javascript",\n        "code": "...",\n        "tags": ["utility"],\n    },\n).raise_for_status()`}
+          </CodeBlock>
+          <p>
+            Or from JavaScript using the{' '}
+            <a href="https://www.npmjs.com/package/@kyyinfinite/sdk" target="_blank" rel="noreferrer" className="text-indigo hover:underline">
+              @kyyinfinite/sdk
+            </a>{' '}
+            package — it picks the API-key path automatically when there's no logged-in session:
+          </p>
+          <CodeBlock language="javascript">
+            {`import { KyyInfinite } from '@kyyinfinite/sdk';\n\nconst client = new KyyInfinite({ apiKey: 'kyy_xxxxxxxxxxxxxxxxxxxx' });\nconst { snippet } = await client.snippets.submit({\n  title: 'debounce helper',\n  language: 'javascript',\n  code: '...',\n});`}
+          </CodeBlock>
+          <p>
+            The key's owner is looked up automatically, so the upload lands on your account and goes
+            through the same review flow as submitting from the website — instantly, if you're a{' '}
+            <strong className="text-ink">verified contributor</strong>. Listing (<code className="text-indigo-dark">GET</code>) and
+            withdrawing (<code className="text-indigo-dark">DELETE /api/v1/account/snippets/&lt;id&gt;</code>) your own submissions
+            work the same way. Downloading needs no auth at all — that's what{' '}
+            <Link to="/snippets" className="text-indigo hover:underline">browsing snippets</Link> and their raw
+            links are for.
           </p>
         </Section>
 

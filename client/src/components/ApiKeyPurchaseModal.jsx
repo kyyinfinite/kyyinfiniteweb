@@ -16,6 +16,7 @@ const SCOPE_DESCRIPTIONS = {
   'tools:search': 'Search endpoints',
   'tools:maker': 'Maker endpoints',
   'tools:downloader': 'Downloader endpoints',
+  'snippets:write': 'Remote snippet upload (bot/CLI)',
 };
 const ALLOWED_SCOPES = Object.keys(SCOPE_DESCRIPTIONS);
 

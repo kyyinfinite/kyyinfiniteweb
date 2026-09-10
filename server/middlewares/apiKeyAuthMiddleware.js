@@ -104,7 +104,7 @@ function requireApiKey(scope) {
 
       ApiKeyUsageEvent.create({ keyId: apiKey.keyId, ownerUid: apiKey.ownerUid || null, scope }).catch(() => null);
 
-      req.apiKeyContext = { keyId: apiKey.keyId, scopes: apiKey.scopes };
+      req.apiKeyContext = { keyId: apiKey.keyId, scopes: apiKey.scopes, ownerUid: apiKey.ownerUid || null };
       next();
     } catch (error) {
       return res.status(500).json({ status: false, creator: 'KyyInfinite', message: 'Internal error', error: error.message });

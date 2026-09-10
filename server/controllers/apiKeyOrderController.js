@@ -5,7 +5,7 @@ const ApiKeyOrder = require('../models/ApiKeyOrder');
 const ApiKey = require('../models/ApiKey');
 const { generateApiKey } = require('../utils/apiKeyGenerator');
 
-const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader'];
+const ALLOWED_USER_SCOPES = ['tools:search', 'tools:maker', 'tools:downloader', 'snippets:write'];
 const ORDER_ID_PREFIX = 'KYYKEY-';
 
 /** POST /api/user/api-key-orders — mulai pembelian, langsung generate QRIS. */

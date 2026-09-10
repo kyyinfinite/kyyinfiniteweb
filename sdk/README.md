@@ -34,6 +34,32 @@ const products = await client.products.list({ category: 'plugin' });
 const code = await client.snippets.getRaw('64f...'); // plain text, same as /raw/<id>
 ```
 
+### Uploading from a bot (no Firebase login needed)
+
+If you just want a bot or script to upload snippets without ever logging in
+as a user, create an API key with the **`snippets:write`** scope from your
+profile, then use it directly — the SDK routes snippet actions through the
+API key automatically whenever there's no Firebase session:
+
+```js
+const client = new KyyInfinite({ apiKey: 'kyy_xxxxxxxxxxxxxxxxxxxx' });
+
+const { snippet } = await client.snippets.submit({
+  title: 'debounce helper',
+  description: 'small dependency-free debounce for input handlers',
+  language: 'javascript',
+  code: `export function debounce(fn, delay = 300) { ... }`,
+  tags: ['utility'],
+});
+
+const mine = await client.snippets.listMine();
+await client.snippets.withdraw(snippet._id);
+```
+
+This is the same account attribution as logging in — the key already knows
+which account it belongs to, so uploads land on your profile and go through
+the same review flow (or skip it, if you're a verified contributor).
+
 ### Authenticating as a user
 
 Submitting a snippet or managing your own API keys needs a logged-in user
@@ -69,16 +95,69 @@ expired token and retry once on a 401.
 
 - `client.call(path, params)` — GET a `/v1/...` tool endpoint using `apiKey`
 - `client.snippets.list(params)` / `.get(id)` / `.getRaw(id)`
-- `client.snippets.submit(data)` / `.listMine()` / `.withdraw(id)` — needs a user session
+- `client.snippets.submit(data)` / `.listMine()` / `.withdraw(id)` — needs a user session **or** an API key with `snippets:write`
 - `client.apiKeys.listMine()` / `.createFree({ label, scopes })` / `.revoke(id)` — needs a user session
 - `client.products.list(params)` / `.get(id)` / `.getBySlug(slug)`
 - `client.contributors.get(uid)` — public contributor profile
 - `client.status.health()` / `.incidents()`
 
+## Not using JS? Raw REST (curl / Python)
+
+The SDK is a thin wrapper — you can hit the same endpoint directly from
+anything that can make an HTTPS request. This is the endpoint your bot needs:
+`POST https://kyyinfinite.my.id/api/v1/account/snippets`, authenticated with
+`Authorization: Bearer <your kyy_... key>`. The key needs the
+`snippets:write` scope.
+
+**curl**
+
+```bash
+curl -X POST "https://kyyinfinite.my.id/api/v1/account/snippets" \
+  -H "Authorization: Bearer kyy_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "debounce helper",
+    "description": "small dependency-free debounce for input handlers",
+    "language": "javascript",
+    "code": "export function debounce(fn, delay=300){...}",
+    "tags": ["utility"]
+  }'
+```
+
+**Python**
+
+```python
+import requests
+
+API_KEY = "kyy_xxxxxxxxxxxxxxxxxxxx"
+
+response = requests.post(
+    "https://kyyinfinite.my.id/api/v1/account/snippets",
+    headers={"Authorization": f"Bearer {API_KEY}"},
+    json={
+        "title": "debounce helper",
+        "description": "small dependency-free debounce for input handlers",
+        "language": "javascript",
+        "code": "export function debounce(fn, delay=300):\n    ...",
+        "tags": ["utility"],
+    },
+)
+response.raise_for_status()
+print(response.json())
+```
+
+Same pattern for listing (`GET`) and withdrawing (`DELETE
+/api/v1/account/snippets/<id>`) your own submissions. Downloading doesn't
+need auth at all — `GET /api/snippets/<id>` or the plain-text
+`GET /raw/<id>` both work with no key.
+
 ## Using the CLI
 
 ```bash
-# First time: sign in (asks for your Firebase Web API key once, then caches it)
+# Bot/script path — no login, just a key with the snippets:write scope
+kyyinfinite use-key kyy_xxxxxxxxxxxxxxxxxxxx
+
+# Or: sign in as a user (asks for your Firebase Web API key once, then caches it)
 kyyinfinite login
 
 kyyinfinite whoami
