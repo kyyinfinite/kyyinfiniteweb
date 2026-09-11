@@ -22,6 +22,8 @@ const CATEGORY_LABELS = {
   search: 'Search',
   maker: 'Maker',
   downloader: 'Downloader',
+  ai: 'AI',
+  am: 'Alight Motion',
 };
 
 function categoryOf(endpoint) {
@@ -57,7 +59,7 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
     setIsRunning(true);
     setResult(null);
     try {
-      const response = await runPlaygroundRequest(endpoint.path, values, apiKey);
+      const response = await runPlaygroundRequest(endpoint.path, values, apiKey, endpoint.method);
       setResult(response);
     } catch (error) {
       setResult({ ok: false, kind: 'json', data: { message: error.message } });
@@ -67,11 +69,14 @@ function EndpointTestModal({ endpoint, apiKey, onClose }) {
   }
 
   function copyAsCurl() {
-    const query = Object.entries(values)
-      .filter(([, v]) => v)
-      .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-      .join('&');
-    const curl = `curl "https://kyyinfinite.my.id/api/v1${endpoint.path}${query ? `?${query}` : ''}" \\\n  -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}"`;
+    const cleanValues = Object.fromEntries(Object.entries(values).filter(([, v]) => v));
+    let curl;
+    if (endpoint.method === 'GET') {
+      const query = new URLSearchParams(cleanValues).toString();
+      curl = `curl "https://kyyinfinite.my.id/api/v1${endpoint.path}${query ? `?${query}` : ''}" \\\n  -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}"`;
+    } else {
+      curl = `curl -X ${endpoint.method} "https://kyyinfinite.my.id/api/v1${endpoint.path}" \\\n  -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(cleanValues)}'`;
+    }
     navigator.clipboard.writeText(curl);
     showToast('curl command copied', { type: 'success' });
   }

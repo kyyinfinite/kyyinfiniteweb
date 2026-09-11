@@ -162,15 +162,24 @@ export const api = {
     request(`/admin/tickets/${id}/status`, { method: 'PATCH', body: { status }, token }),
 };
 
-export async function runPlaygroundRequest(path, params, apiKey) {
-  const query = new URLSearchParams(
-    Object.fromEntries(Object.entries(params).filter(([, value]) => value !== '' && value != null))
-  ).toString();
-  const url = `${API_BASE}/v1${path}${query ? `?${query}` : ''}`;
+export async function runPlaygroundRequest(path, params, apiKey, method = 'GET') {
+  const cleanParams = Object.fromEntries(Object.entries(params).filter(([, value]) => value !== '' && value != null));
 
-  const response = await fetch(url, {
+  let url = `${API_BASE}/v1${path}`;
+  const options = {
+    method,
     headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
-  });
+  };
+
+  if (method === 'GET') {
+    const query = new URLSearchParams(cleanParams).toString();
+    url += query ? `?${query}` : '';
+  } else {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(cleanParams);
+  }
+
+  const response = await fetch(url, options);
 
   const rateLimit = {
     limit: response.headers.get('X-RateLimit-Limit'),
