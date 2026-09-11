@@ -17,6 +17,7 @@ const SCOPE_DESCRIPTIONS = {
   'tools:maker': 'Maker endpoints',
   'tools:downloader': 'Downloader endpoints',
   'snippets:write': 'Remote snippet upload (bot/CLI)',
+  'am:premium': 'Alight Motion Pro activation',
 };
 const ALLOWED_SCOPES = Object.keys(SCOPE_DESCRIPTIONS);
 

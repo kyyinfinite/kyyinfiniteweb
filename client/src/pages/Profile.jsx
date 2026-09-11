@@ -19,20 +19,24 @@ const ALLOWED_USER_SCOPES = [
   'tools:primbon',
   'tools:random',
   'tools:stalker',
+  'tools:anime',
   'snippets:write',
+  'am:premium',
 ];
 
 const SCOPE_INFO = {
   'tools:search': { label: 'Search', description: 'Spotify, TikTok, YouTube, Apple Music search' },
   'tools:maker': { label: 'Image Maker', description: 'Brat, lobby fakes, memes, text effects, quote cards' },
   'tools:downloader': { label: 'Downloader', description: 'TikTok, Instagram, YouTube, Spotify, and more' },
-  'tools:utility': { label: 'Utility', description: 'Translate, text-to-speech, image unblur' },
+  'tools:utility': { label: 'Utility', description: 'Translate, text-to-speech, image blur/unblur, postal code & country lookup' },
   'tools:news': { label: 'News', description: 'Kompas, CNN, Tribunnews, and other feeds' },
   'tools:info': { label: 'Info', description: 'Weather, earthquakes, TV schedules' },
   'tools:primbon': { label: 'Primbon', description: 'Name meaning, lucky numbers, dream readings' },
   'tools:random': { label: 'Random', description: 'Random anime and Blue Archive images' },
-  'tools:stalker': { label: 'Profile Lookup', description: 'Public profile info from TikTok, YouTube, GitHub, and more' },
+  'tools:stalker': { label: 'Profile Lookup', description: 'Public profile info from TikTok, YouTube, GitHub, Genshin, and more' },
+  'tools:anime': { label: 'Anime', description: 'Anichin catalog, genres, home feed, and schedule' },
   'snippets:write': { label: 'Remote Snippet Upload', description: 'Upload/list/withdraw your snippets from a bot, script, or CLI' },
+  'am:premium': { label: 'Alight Motion Activation', description: 'Send and verify Alight Motion Pro activation links' },
 };
 
 function initialsOf(username, email) {

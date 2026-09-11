@@ -11,6 +11,7 @@ const SECTIONS = [
   { id: 'snippets', label: 'Snippets & Raw URLs' },
   { id: 'submitting', label: 'Submitting a Snippet' },
   { id: 'remote-upload', label: 'Remote Upload (Bot/CLI)' },
+  { id: 'am-premium', label: 'Alight Motion Activation' },
   { id: 'webhooks', label: 'Webhooks' },
   { id: 'hosting', label: 'Hosting' },
   { id: 'support', label: 'Support' },
@@ -198,6 +199,22 @@ export default function DocsPage() {
             raw body, signed with the secret shown once when you create the webhook. Verify it before
             trusting the payload.
           </p>
+        </Section>
+
+        <Section id="am-premium" title="Alight Motion Activation">
+          <p>
+            Two endpoints for delivering Alight Motion Pro activations, gated behind the{' '}
+            <strong className="text-ink">Alight Motion Activation</strong> scope on your API key. Each key
+            is capped at 10 calls per endpoint per day, separate from its normal request quota — this
+            spends a real, limited upstream balance, not just KyyInfinite's own quota.
+          </p>
+          <CodeBlock language="bash">
+            {`curl -X POST "https://kyyinfinite.my.id/api/v1/am/send" \\\n  -H "Authorization: Bearer kyy_xxxxxxxxxxxxxxxxxxxx" \\\n  -H "Content-Type: application/json" \\\n  -d '{"email":"customer@example.com"}'`}
+          </CodeBlock>
+          <p>Once the customer clicks the link in their email, verify it:</p>
+          <CodeBlock language="bash">
+            {`curl -X POST "https://kyyinfinite.my.id/api/v1/am/verify" \\\n  -H "Authorization: Bearer kyy_xxxxxxxxxxxxxxxxxxxx" \\\n  -H "Content-Type: application/json" \\\n  -d '{"email":"customer@example.com","link":"https://..."}'`}
+          </CodeBlock>
         </Section>
 
         <Section id="hosting" title="Hosting">
