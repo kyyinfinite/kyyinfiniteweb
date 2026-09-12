@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -8,6 +8,12 @@ import { IconScript, IconCheck, IconArrowRight, IconFork } from '../lib/icons.js
 import { languageBadgeClass } from '../lib/languageMeta.js';
 
 const LANGUAGES = ['javascript', 'typescript', 'python', 'bash', 'json'];
+
+function previewOf(code, maxLines = 500) {
+  const lines = code.split('\n');
+  if (lines.length <= maxLines) return { text: code, truncated: false, totalLines: lines.length };
+  return { text: lines.slice(0, maxLines).join('\n'), truncated: true, totalLines: lines.length };
+}
 
 export default function SubmitSnippet() {
   const { user, idToken, isLoading, refreshToken } = useUser();
@@ -24,6 +30,7 @@ export default function SubmitSnippet() {
   const [errorMessage, setErrorMessage] = useState('');
   const [submitted, setSubmitted] = useState(null);
   const [forkSource, setForkSource] = useState(null);
+  const preview = useMemo(() => previewOf(code), [code]);
 
   useEffect(() => {
     if (!forkId) return;
@@ -182,14 +189,21 @@ export default function SubmitSnippet() {
           </div>
           <div className="code-scroll overflow-x-auto max-h-[420px]">
             {code ? (
-              <SyntaxHighlighter
-                language={language}
-                style={oneLight}
-                showLineNumbers
-                customStyle={{ margin: 0, background: '#FBFAF7', fontSize: 12.5, padding: 18 }}
-              >
-                {code}
-              </SyntaxHighlighter>
+              <>
+                <SyntaxHighlighter
+                  language={language}
+                  style={oneLight}
+                  showLineNumbers
+                  customStyle={{ margin: 0, background: '#FBFAF7', fontSize: 12.5, padding: 18 }}
+                >
+                  {preview.text}
+                </SyntaxHighlighter>
+                {preview.truncated && (
+                  <p className="text-mist text-xs px-4 py-3 border-t border-line">
+                    Showing first 500 of {preview.totalLines} lines — the full file is still submitted.
+                  </p>
+                )}
+              </>
             ) : (
               <p className="text-mist text-sm p-6">Your code will preview here as you type.</p>
             )}

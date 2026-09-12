@@ -3,6 +3,7 @@ const ProjectAsset = require('../models/ProjectAsset');
 const LicenseKey = require('../models/LicenseKey');
 const DownloadEvent = require('../models/DownloadEvent');
 const { uploadFileToGithub, deleteFileFromGithub } = require('../services/githubStorageService');
+const { buildSearchFilter } = require('../utils/searchQuery');
 
 function buildStoragePath(category, originalName) {
   const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -61,7 +62,8 @@ async function listAssets(req, res) {
     const query = { isPublished: true };
 
     if (category) query.category = category;
-    if (search) query.$text = { $search: search };
+    const searchFilter = buildSearchFilter(['name', 'description', 'tags'], search);
+    if (searchFilter) Object.assign(query, searchFilter);
 
     const assets = await ProjectAsset.find(query).sort({ createdAt: -1 }).lean();
     return res.status(200).json(assets);

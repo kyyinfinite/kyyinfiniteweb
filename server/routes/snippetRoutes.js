@@ -2,6 +2,7 @@ const express = require('express');
 const Snippet = require('../models/Snippet');
 const { adminAuthMiddleware } = require('../middlewares/adminAuthMiddleware');
 const { dispatchEvent } = require('../services/webhookDispatcher');
+const { buildSearchFilter } = require('../utils/searchQuery');
 
 const router = express.Router();
 
@@ -10,7 +11,8 @@ router.get('/', async (req, res) => {
     const { language, search } = req.query;
     const query = { isPublished: true, status: 'approved' };
     if (language) query.language = language;
-    if (search) query.$text = { $search: search };
+    const searchFilter = buildSearchFilter(['title', 'description', 'tags'], search);
+    if (searchFilter) Object.assign(query, searchFilter);
 
     const snippets = await Snippet.find(query).sort({ createdAt: -1 }).lean();
     return res.status(200).json(snippets);

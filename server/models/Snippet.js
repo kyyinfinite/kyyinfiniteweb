@@ -22,9 +22,8 @@ const SnippetSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-SnippetSchema.index(
-  { title: 'text', description: 'text', tags: 'text' },
-  { language_override: 'textIndexLanguage' }
-);
+// Search no longer uses MongoDB text indexes (see utils/searchQuery.js) —
+// a missing/stale text index turned every search request into a 500, so we
+// switched to a plain regex search that needs no index at all.
 
 module.exports = mongoose.models.Snippet || mongoose.model('Snippet', SnippetSchema);

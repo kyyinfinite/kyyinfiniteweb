@@ -37,7 +37,9 @@ const ProjectAssetSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ProjectAssetSchema.index({ name: 'text', description: 'text', tags: 'text' });
+// Search no longer uses MongoDB text indexes (see utils/searchQuery.js) —
+// a missing/stale text index turned every search request into a 500, so we
+// switched to a plain regex search that needs no index at all.
 
 ProjectAssetSchema.pre('validate', function assignSlug(next) {
   if (!this.slug && this.name) {

@@ -4,7 +4,7 @@ const { dispatchEvent } = require('../services/webhookDispatcher');
 
 const ALLOWED_LANGUAGES = ['javascript', 'typescript', 'python', 'bash', 'json'];
 const MAX_SUBMISSIONS_PER_USER = 20;
-const MAX_CODE_LENGTH = 20000; // ~20 KB, generous for a snippet
+const MAX_CODE_LENGTH = 300000; // ~300 KB — generous enough for a large real-world file, not just a short snippet
 
 /** POST /api/user/snippets — submit a snippet for review; goes live once an admin approves it
  *  (or immediately, if the submitter is a verified contributor). Pass `forkedFrom` to fork

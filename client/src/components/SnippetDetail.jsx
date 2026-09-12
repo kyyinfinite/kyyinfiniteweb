@@ -209,7 +209,7 @@ export default function SnippetDetail() {
               view raw
             </a>
           </div>
-          <div className="code-scroll overflow-x-auto">
+          <div className="code-scroll overflow-x-auto overflow-y-auto max-h-[70vh]">
             <CodeView language={snippet.language} code={snippet.code} />
           </div>
         </div>
